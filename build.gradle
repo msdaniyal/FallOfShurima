@@ -1,0 +1,99 @@
+plugins {
+    id 'application'
+    id 'java'
+    id "org.openjfx.javafxplugin" version "0.1.0"
+    id 'jacoco'
+}
+
+base {
+    archivesName = 'seng201_team0'
+}
+group = 'seng201.team0'
+version = '1.0-SNAPSHOT'
+
+def mainAppClass = 'seng201.team0.App'
+def javaVersion = '25'
+def javafxVersion = '25.0.2'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(javaVersion)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // https://mvnrepository.com/artifact/org.openjfx/javafx-controls
+    implementation "org.openjfx:javafx-controls:${javafxVersion}"
+
+    // https://mvnrepository.com/artifact/org.openjfx/javafx-fxml
+    implementation "org.openjfx:javafx-fxml:${javafxVersion}"
+
+    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:6.0.3'
+
+    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter
+    testImplementation 'org.junit.jupiter:junit-jupiter:6.0.3'
+
+    // https://mvnrepository.com/artifact/org.junit.platform/junit-platform-launcher
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:6.0.3'
+
+}
+
+application {
+    // Define the main class for the application.
+    mainClass = mainAppClass
+}
+
+javafx {
+    version = "${javafxVersion}"
+    modules = [ 'javafx.controls', 'javafx.fxml']
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+    }
+    finalizedBy jacocoTestReport
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    manifest {
+        attributes 'Main-Class': mainAppClass
+    }
+    from {
+        configurations.runtimeClasspath.collect {it.isDirectory()?it:zipTree(it)}
+    }
+}
+
+// Jacoco test coverage config
+jacoco {
+    toolVersion = "0.8.14"
+}
+
+jacocoTestReport {
+    // Ensure tests run before generating the report
+    dependsOn test
+
+    // Build a lazy FileTree under the build directory
+    def execTrees = layout.buildDirectory
+            .dir("jacoco")
+            .map { dir ->
+                dir.asFileTree.matching {
+                    include("**/*.exec")
+                }
+            }
+
+    // Provide the FileTree lazily to the executionData property
+    executionData.setFrom(execTrees)
+
+    reports {
+        html.outputLocation = layout.buildDirectory.dir("reports/tests/coverage")
+    }
+}
