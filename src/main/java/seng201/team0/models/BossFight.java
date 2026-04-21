@@ -15,20 +15,19 @@ public class BossFight {
     private Boss boss;
     private int sequence;
     private boolean playerWon;
-    private Adventurer mcAdventurer;
+    private Adventurer Adventurer;
     private boolean mcIsBlocking;
-    private Random random;
+    private Random random; //for dice
 
     /**
      * Constructs a BossFight.
      * @param boss The boss to fight
      * @param sequence The order this fight occurs within the quest (1, 2, 3...)
-     * @param mcAdventurer The main character adventurer who can choose to block
+     * @param Adventurer The main character adventurer who can choose to block
      * TODO: Assign all fields
-     * TODO: Initialise random
      * TODO: Set mcIsBlocking to false by default
      */
-    public BossFight(Boss boss, int sequence, Adventurer mcAdventurer) {
+    public BossFight(Boss boss, int sequence, Adventurer Adventurer) {
         // TODO: Implement constructor
     }
 
