@@ -229,6 +229,15 @@ public class Guild {
     }
 
     /**
+     * Removes all dead adventurers from the guild.
+     * Called in combat loops.
+     */
+    public void removeDeadAdventurers() {
+        mainParty.removeIf(Adventurer::isDead);
+        reserves.removeIf(Adventurer::isDead);
+    }
+
+    /**
      * Collapses loyalty of all adventurers belonging to the opposing faction to 0.
      * Called at the end of Quest 5 (Faction War).
      * Triggers their abandoned flag and removes them from the guild.
