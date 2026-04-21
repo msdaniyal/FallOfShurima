@@ -2,6 +2,7 @@ package seng201.team0.models;
 
 import java.util.List;
 import java.util.Random;
+import java.util.ArrayList;
 
 /**
  * Represents a single boss fight within a quest.
@@ -11,7 +12,9 @@ import java.util.Random;
  * @author Mohammed, Xinyi
  */
 public class BossFight {
-
+    /**
+     * TODO:create picture list, address string, create function MemoryPicture
+     */
     private Boss boss;
     private int sequence;
     private boolean playerWon;
@@ -30,6 +33,7 @@ public class BossFight {
     public BossFight(Boss boss, int sequence, Adventurer Adventurer) {
         // TODO: Implement constructor
     }
+
 
     /**
      * Calculates damage one adventurer deals to the boss.
