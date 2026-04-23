@@ -1,16 +1,16 @@
-package seng201.team0.models;
+package seng201.team0.unittests.models;
 
+import seng201.team0.models.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for BossFight
+ * Tests for BossFight class.
+ * @author Mohammed, Xinyi
  */
+
 public class BossFightTest {
 
     private Boss boss;
@@ -22,12 +22,17 @@ public class BossFightTest {
 
     @BeforeEach
     void setUp() {
-        // ====== 这里按你的实际构造器改 ======
         boss = createBoss();
+
         mainAdventurer = createMainAdventurer();
         weakAdventurer = createWeakAdventurer();
         strongAdventurer = createStrongAdventurer();
-        guild = createGuild(mainAdventurer, weakAdventurer, strongAdventurer);
+
+        guild = new Guild("Test Guild", 100, Faction.AATROX);
+        guild.addToMainParty(mainAdventurer);
+        guild.addToMainParty(weakAdventurer);
+        guild.addToMainParty(strongAdventurer);
+
         bossFight = new BossFight(boss, 1, mainAdventurer);
     }
 
@@ -41,18 +46,12 @@ public class BossFightTest {
 
     @Test
     void calcAdventurerDamageShouldApplyHighLoyaltyBonus() {
-        // attack = 10, loyalty > 70 gives +2, madness <= 75 gives no penalty
-        // boss defense = 3
-        // expected = 10 + 2 - 3 = 9
         int damage = bossFight.calcAdventurerDamage(strongAdventurer);
         assertEquals(9, damage);
     }
 
     @Test
     void calcAdventurerDamageShouldApplyLowLoyaltyPenalty() {
-        // attack = 8, loyalty < 30 gives -2, madness <= 75 no penalty
-        // boss defense = 3
-        // expected = 8 - 2 - 3 = 3
         int damage = bossFight.calcAdventurerDamage(weakAdventurer);
         assertEquals(3, damage);
     }
@@ -60,9 +59,6 @@ public class BossFightTest {
     @Test
     void calcAdventurerDamageShouldApplyMadnessPenalty() {
         Adventurer crazy = createMadAdventurer();
-        // attack = 10, loyalty normal no bonus/penalty, madness > 75 gives -2
-        // boss defense = 3
-        // expected = 10 - 2 - 3 = 5
         int damage = bossFight.calcAdventurerDamage(crazy);
         assertEquals(5, damage);
     }
@@ -76,8 +72,6 @@ public class BossFightTest {
 
     @Test
     void calcBossDamageShouldUseBossAttackMinusTargetDefense() {
-        // boss attack = 12, strongAdventurer defense = 5
-        // expected = 7
         int damage = bossFight.calcBossDamage(strongAdventurer);
         assertEquals(7, damage);
     }
@@ -101,6 +95,15 @@ public class BossFightTest {
 
         Adventurer target = bossFight.findWeakestTarget(guild.getMainParty());
         assertEquals(mainAdventurer, target);
+    }
+
+    @Test
+    void setMcBlockingShouldUpdateBlockingState() {
+        bossFight.setMcBlocking(true);
+        assertTrue(bossFight.isMcBlocking());
+
+        bossFight.setMcBlocking(false);
+        assertFalse(bossFight.isMcBlocking());
     }
 
     @Test
@@ -154,7 +157,10 @@ public class BossFightTest {
         Adventurer attacked = bossFight.bossTurn(guild);
 
         assertEquals(weakAdventurer, attacked);
-        assertEquals(weakHealthBefore - bossFight.calcBossDamage(weakAdventurer), weakAdventurer.getCurrentHealth());
+        assertEquals(
+                weakHealthBefore - bossFight.calcBossDamage(weakAdventurer),
+                weakAdventurer.getCurrentHealth()
+        );
         assertFalse(bossFight.isMcBlocking());
     }
 
@@ -166,7 +172,10 @@ public class BossFightTest {
         Adventurer attacked = bossFight.bossTurn(guild);
 
         assertEquals(mainAdventurer, attacked);
-        assertEquals(mainHealthBefore - bossFight.calcBossDamage(mainAdventurer), mainAdventurer.getCurrentHealth());
+        assertEquals(
+                mainHealthBefore - bossFight.calcBossDamage(mainAdventurer),
+                mainAdventurer.getCurrentHealth()
+        );
         assertFalse(bossFight.isMcBlocking());
     }
 
@@ -193,15 +202,27 @@ public class BossFightTest {
 
     @Test
     void bossTurnShouldReturnNullWhenGuildIsWiped() {
-        for (Adventurer adventurer : guild.getMainParty()) {
-            adventurer.setCurrentHealth(0);
-        }
-        bossFight.setMcBlocking(true);
+        mainAdventurer.setCurrentHealth(0);
+        weakAdventurer.setCurrentHealth(0);
+        strongAdventurer.setCurrentHealth(0);
+        guild.removeDeadAdventurers();
 
+        bossFight.setMcBlocking(true);
         Adventurer attacked = bossFight.bossTurn(guild);
 
         assertNull(attacked);
         assertFalse(bossFight.isMcBlocking());
+    }
+
+    @Test
+    void bossTurnShouldRemoveDeadAdventurersFromGuild() {
+        weakAdventurer.setCurrentHealth(1);
+
+        Adventurer attacked = bossFight.bossTurn(guild);
+
+        assertEquals(weakAdventurer, attacked);
+        assertTrue(weakAdventurer.isDead());
+        assertFalse(guild.getMainParty().contains(weakAdventurer));
     }
 
     @Test
@@ -212,9 +233,11 @@ public class BossFightTest {
 
     @Test
     void isFightOverShouldReturnTrueWhenGuildIsWiped() {
-        for (Adventurer adventurer : guild.getMainParty()) {
-            adventurer.setCurrentHealth(0);
-        }
+        mainAdventurer.setCurrentHealth(0);
+        weakAdventurer.setCurrentHealth(0);
+        strongAdventurer.setCurrentHealth(0);
+        guild.removeDeadAdventurers();
+
         assertTrue(bossFight.isFightOver(guild));
     }
 
@@ -236,16 +259,26 @@ public class BossFightTest {
 
         assertTrue(bossFight.isPlayerWon());
         assertEquals(goldBefore + boss.getGoldDrop(), guild.getGold());
-        assertEquals(loyaltyBefore1 + boss.getLoyaltyEffectOnWin(), mainAdventurer.getLoyalty());
-        assertEquals(loyaltyBefore2 + boss.getLoyaltyEffectOnWin(), weakAdventurer.getLoyalty());
-        assertEquals(loyaltyBefore3 + boss.getLoyaltyEffectOnWin(), strongAdventurer.getLoyalty());
+        assertEquals(
+                Math.min(100, loyaltyBefore1 + boss.getLoyaltyEffectOnWin()),
+                mainAdventurer.getLoyalty()
+        );
+        assertEquals(
+                Math.min(100, loyaltyBefore2 + boss.getLoyaltyEffectOnWin()),
+                weakAdventurer.getLoyalty()
+        );
+        assertEquals(
+                Math.min(100, loyaltyBefore3 + boss.getLoyaltyEffectOnWin()),
+                strongAdventurer.getLoyalty()
+        );
     }
 
     @Test
     void finishFightIfOverShouldApplyLossPenalty() {
-        for (Adventurer adventurer : guild.getMainParty()) {
-            adventurer.setCurrentHealth(0);
-        }
+        mainAdventurer.setCurrentHealth(0);
+        weakAdventurer.setCurrentHealth(0);
+        strongAdventurer.setCurrentHealth(0);
+        guild.removeDeadAdventurers();
 
         int goldBefore = guild.getGold();
         int loyaltyBefore1 = mainAdventurer.getLoyalty();
@@ -256,9 +289,9 @@ public class BossFightTest {
 
         assertFalse(bossFight.isPlayerWon());
         assertEquals(goldBefore, guild.getGold());
-        assertEquals(loyaltyBefore1 + boss.getLoyaltyEffectOnLoss(), mainAdventurer.getLoyalty());
-        assertEquals(loyaltyBefore2 + boss.getLoyaltyEffectOnLoss(), weakAdventurer.getLoyalty());
-        assertEquals(loyaltyBefore3 + boss.getLoyaltyEffectOnLoss(), strongAdventurer.getLoyalty());
+        assertEquals(loyaltyBefore1, mainAdventurer.getLoyalty());
+        assertEquals(loyaltyBefore2, weakAdventurer.getLoyalty());
+        assertEquals(loyaltyBefore3, strongAdventurer.getLoyalty());
     }
 
     @Test
@@ -289,51 +322,105 @@ public class BossFightTest {
         assertEquals(loyaltyBefore, mainAdventurer.getLoyalty());
     }
 
-    // =========================================================
-    // Helper methods
-    // 把下面这些构造器替换成你项目里真实的构造器
-    // =========================================================
-
     private Boss createBoss() {
-        Boss boss = new Boss("Dragon", 12, 3, 50, 100, 20, -10);
-        boss.setCurrentHealth(50);
-        return boss;
+        return new Boss(
+                "Dragon",
+                50,
+                12,
+                3,
+                20,
+                5,
+                -5,
+                "Test boss"
+        );
     }
 
     private Adventurer createMainAdventurer() {
-        Adventurer adventurer = new Adventurer("MC", 9, 4, 40, 20, 100);
-        adventurer.setCurrentHealth(40);
-        return adventurer;
+        return new Adventurer(
+                "MC",
+                40,
+                9,
+                4,
+                10,
+                Faction.AATROX,
+                Faction.AATROX,
+                "Main adventurer"
+        );
     }
 
     private Adventurer createWeakAdventurer() {
-        Adventurer adventurer = new Adventurer("Weak", 8, 2, 20, 20, 100);
-        adventurer.setCurrentHealth(30);
+        Adventurer adventurer = new Adventurer(
+                "Weak",
+                30,
+                8,
+                2,
+                10,
+                Faction.XOLAANI,
+                Faction.AATROX,
+                "Low defense adventurer"
+        );
+        adventurer.adjustLoyalty(-100);
+        adventurer.adjustLoyalty(20);
         return adventurer;
     }
 
     private Adventurer createStrongAdventurer() {
-        Adventurer adventurer = new Adventurer("Strong", 10, 5, 80, 20, 100);
-        adventurer.setCurrentHealth(35);
+        Adventurer adventurer = new Adventurer(
+                "Strong",
+                35,
+                10,
+                5,
+                10,
+                Faction.AATROX,
+                Faction.AATROX,
+                "High loyalty adventurer"
+        );
+        adventurer.adjustLoyalty(100);
         return adventurer;
     }
 
     private Adventurer createMadAdventurer() {
-        Adventurer adventurer = new Adventurer("Mad", 10, 4, 50, 80, 100);
-        adventurer.setCurrentHealth(35);
+        Adventurer adventurer = new Adventurer(
+                "Mad",
+                35,
+                10,
+                4,
+                10,
+                Faction.NEUTRAL,
+                Faction.AATROX,
+                "Mad adventurer"
+        );
+        adventurer.increaseMadness(80);
         return adventurer;
     }
 
     private Adventurer createVeryWeakAdventurer() {
-        Adventurer adventurer = new Adventurer("VeryWeak", 2, 1, 20, 90, 100);
-        adventurer.setCurrentHealth(20);
+        Adventurer adventurer = new Adventurer(
+                "VeryWeak",
+                20,
+                2,
+                1,
+                10,
+                Faction.XOLAANI,
+                Faction.AATROX,
+                "Very weak adventurer"
+        );
+        adventurer.adjustLoyalty(-100);
+        adventurer.adjustLoyalty(20);
+        adventurer.increaseMadness(80);
         return adventurer;
     }
 
     private Adventurer createTankAdventurer() {
-        Adventurer adventurer = new Adventurer("Tank", 6, 50, 50, 10, 100);
-        adventurer.setCurrentHealth(60);
-        return adventurer;
+        return new Adventurer(
+                "Tank",
+                60,
+                6,
+                50,
+                10,
+                Faction.NEUTRAL,
+                Faction.AATROX,
+                "Tank adventurer"
+        );
     }
-
 }
