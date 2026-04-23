@@ -12,14 +12,14 @@ import java.util.Random;
  */
 public class BossFight {
     /**
-     * TODO:create picture list, address string, create function MemoryPicture
+     *
      */
     private Boss boss;
     private int sequence;
     private boolean playerWon;
     private Adventurer mainAdventurer;
     private boolean mcIsBlocking;
-    private Random random; //for dice
+    private boolean rewardsApplied;
 
     /**
      * Constructs a BossFight.
@@ -31,7 +31,9 @@ public class BossFight {
         this.boss = boss;
         this.sequence = sequence;
         this.mainAdventurer = mainAdventurer;
-        mcIsBlocking = false;
+        this.mcIsBlocking = false;
+        this.playerWon = false;
+        this.rewardsApplied = false;
     }
 
 
@@ -42,19 +44,20 @@ public class BossFight {
      * Adds a random modifier of 1-10.
      * @param adventurer The attacking adventurer
      * @return Damage dealt, minimum 1
-     * TODO: Add random.nextInt(10) + 1
      */
     public int calcAdventurerDamage(Adventurer adventurer) {
-        int damage;
-        damage = adventurer.getAttack();
+        int damage = adventurer.getAttack();
+
         if (adventurer.getLoyalty() < 30) {
             damage -= 2;
         } else if (adventurer.getLoyalty() > 70) {
             damage += 2;
         }
+
         if (adventurer.getMadness() > 75) {
             damage -= 2;
         }
+
         damage -= boss.getDefense();
         return Math.max(1, damage);
     }
@@ -64,11 +67,9 @@ public class BossFight {
      * Adds a random modifier of 1-10.
      * @param target The adventurer being attacked
      * @return Damage dealt, minimum 1
-     * TODO: Add random.nextInt(10) + 1
      */
     public int calcBossDamage(Adventurer target) {
-        int damage;
-        damage = boss.getAttack() - target.getDefense();
+        int damage = boss.getAttack() - target.getDefense();
         return Math.max(1, damage);
     }
 
@@ -85,7 +86,6 @@ public class BossFight {
                 if (weakest == null || adventurer.getDefense() < weakest.getDefense()) {
                     weakest = adventurer;
                 }
-
             }
         }
         return weakest;
@@ -100,34 +100,53 @@ public class BossFight {
         mcIsBlocking = blocking;
     }
 
-    /**
-     * Runs the full combat loop to completion.
-     * Each round: all living adventurers attack in sequence, then boss attacks weakest target.
-     * MC can block for the weakest target, taking the hit instead.
-     * Fight ends when boss is dead (player wins) or all adventurers are dead (player loses).
-     * After resolution applies gold and loyalty effects.
-     * @param guild The player's guild
-     */
-    public void resolveOutcome(Guild guild) {
-        while (!boss.isDead() && !guild.isWiped()) {
-            for (Adventurer adventurer: guild.getMainParty()) {
-                if (!adventurer.isDead()) {
-                    boss.setCurrentHealth(boss.getCurrentHealth() - calcAdventurerDamage(adventurer));
-                }
-            }
-            if (boss.isDead()) {break;}
-            Adventurer target = findWeakestTarget(guild.getMainParty());
-            if (target == null) {
-                break;
-            }
-            if (mcIsBlocking && mainAdventurer!= null && !mainAdventurer.isDead()) {
-                target =  mainAdventurer;
-            }
-            target.setCurrentHealth(target.getCurrentHealth() - calcBossDamage(target));
-            guild.removeDeadAdventurers();
-            mcIsBlocking = false;
+    public int playerAttack(Adventurer adventurer, boolean success) {
+        if (boss.isDead() || adventurer == null || adventurer.isDead()) {
+            return 0;
         }
+
+        int damage = success ? calcAdventurerDamage(adventurer) : 0;
+        boss.setCurrentHealth(boss.getCurrentHealth() - damage);
+        return damage;
+    }
+
+    public Adventurer bossTurn(Guild guild) {
+        if (boss.isDead() || guild == null || guild.isWiped()) {
+            mcIsBlocking = false;
+            return null;
+        }
+
+        Adventurer target = findWeakestTarget(guild.getMainParty());
+        if (target == null) {
+            mcIsBlocking = false;
+            return null;
+        }
+
+        if (mcIsBlocking && mainAdventurer != null && !mainAdventurer.isDead()) {
+            target = mainAdventurer;
+        }
+
+        target.setCurrentHealth(target.getCurrentHealth() - calcBossDamage(target));
+        guild.removeDeadAdventurers();
+        mcIsBlocking = false;
+        return target;
+    }
+
+    public boolean isFightOver(Guild guild) {
+        return boss.isDead() || guild.isWiped();
+    }
+
+    public void finishFightIfOver(Guild guild) {
+        if (rewardsApplied || guild == null) {
+            return;
+        }
+
+        if (!isFightOver(guild)) {
+            return;
+        }
+
         playerWon = boss.isDead() && !guild.isWiped();
+
         if (playerWon) {
             for (Adventurer adventurer : guild.getMainParty()) {
                 adventurer.adjustLoyalty(boss.getLoyaltyEffectOnWin());
@@ -138,6 +157,8 @@ public class BossFight {
                 adventurer.adjustLoyalty(boss.getLoyaltyEffectOnLoss());
             }
         }
+
+        rewardsApplied = true;
     }
 
     /**
@@ -168,3 +189,4 @@ public class BossFight {
         return mcIsBlocking;
     }
 }
+

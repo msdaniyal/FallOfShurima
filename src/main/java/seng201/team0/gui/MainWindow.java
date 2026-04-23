@@ -21,7 +21,40 @@ public class MainWindow extends Application {
      */
     @Override
     public void start(Stage primaryStage) throws IOException {
-        // None
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"));
+        Parent root = loader.load();
+
+        seng201.team0.controller.BossFightController controller = loader.getController();
+
+        seng201.team0.models.Guild guild =
+                new seng201.team0.models.Guild("Test Guild", 100, seng201.team0.models.Faction.AATROX);
+
+        seng201.team0.models.Adventurer mainAdventurer =
+                new seng201.team0.models.Adventurer(
+                        "MC", 30, 12, 6, 10,
+                        seng201.team0.models.Faction.AATROX,
+                        seng201.team0.models.Faction.AATROX,
+                        "Main character"
+                );
+
+        seng201.team0.models.Boss boss =
+                new seng201.team0.models.Boss(
+                        "Jax", 50, 20, 5,
+                        100, 10, -15, "Boss"
+                );
+
+        seng201.team0.models.BossFight bossFight =
+                new seng201.team0.models.BossFight(boss, 1, mainAdventurer);
+
+        guild.addToMainParty(mainAdventurer);
+
+        controller.setFightData(bossFight, guild, mainAdventurer);
+
+        Scene scene = new Scene(root, 800, 500);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Boss Fight");
+        primaryStage.show();
     }
 
     /**
@@ -32,5 +65,7 @@ public class MainWindow extends Application {
     public static void launchWrapper(String [] args) {
         launch(args);
     }
+
+
 
 }
