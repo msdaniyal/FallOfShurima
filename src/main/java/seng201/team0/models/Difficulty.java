@@ -7,49 +7,39 @@ package seng201.team0.models;
  */
 public enum Difficulty {
 
-    /**
-     * TODO: Set starting gold (higher value, e.g. 300)
-     * TODO: Set loyalty threshold (lower value, e.g. 40)
-     */
+    /** Easy: more gold, lower loyalty threshold. */
     EASY(300, 40),
 
-    /**
-     * TODO: Set starting gold (medium value, e.g. 200)
-     * TODO: Set loyalty threshold (medium value, e.g. 60)
-     */
+    /** Normal: balanced starting conditions. */
     NORMAL(200, 60),
 
-    /**
-     * TODO: Set starting gold (lower value, e.g. 100)
-     * TODO: Set loyalty threshold (higher value, e.g. 75)
-     */
+    /** Hard: less gold, higher loyalty threshold. */
     HARD(100, 75);
 
-    private final int startingGold = 0; // TODO: NEED TO FIGURE
-    private final int loyaltyThreshold = 0; // TODO: NEED TO FIGURE
+    private final int startingGold;
+    private final int loyaltyThreshold;
 
     /**
-     * TODO: Assign startingGold and loyaltyThreshold
+     * Constructs a Difficulty with starting gold and loyalty threshold.
+     * @param startingGold Gold the guild begins with
+     * @param loyaltyThreshold Min loyalty required to avoid Quest 6
      */
     Difficulty(int startingGold, int loyaltyThreshold) {
-        // TODO: Implement
+        this.startingGold = startingGold;
+        this.loyaltyThreshold = loyaltyThreshold;
     }
 
     /**
      * @return The starting gold for this difficulty
-     * TODO: Return startingGold
      */
     public int getStartingGold() {
-        // TODO: Implement
-        return 0;
+        return startingGold;
     }
 
     /**
      * @return The loyalty threshold required to avoid facing Zoe
-     * TODO: Return loyaltyThreshold
      */
     public int getLoyaltyThreshold() {
-        // TODO: Implement
-        return 0;
+        return loyaltyThreshold;
     }
 }
