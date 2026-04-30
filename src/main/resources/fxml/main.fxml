@@ -1,12 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng201.team0.gui.MainController">
+<AnchorPane prefHeight="500.0" prefWidth="800.0"
+            xmlns="http://javafx.com/javafx/17.0.2-ea"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="seng201.team0.controller.BossFightController">
+
    <children>
-      <Label layoutX="234.0" layoutY="92.0" text="Welcome To JavaFX!" />
-      <Label fx:id="defaultLabel" alignment="CENTER" layoutX="264.0" layoutY="122.0" prefHeight="16.0" prefWidth="73.0" AnchorPane.leftAnchor="264.0" AnchorPane.topAnchor="122.0" />
-      <Button fx:id="defaultButton" layoutX="264.0" layoutY="153.0" onMouseClicked="#onButtonClicked" text="Click Me" AnchorPane.leftAnchor="264.0" AnchorPane.topAnchor="153.0" />
+      <Label fx:id="statusLabel"
+             layoutX="260.0"
+             layoutY="30.0"
+             prefWidth="300.0"
+             text="Press Start to begin memory attack!" />
+
+      <Label fx:id="timerLabel"
+             layoutX="330.0"
+             layoutY="60.0"
+             prefWidth="200.0"
+             text="" />
+
+      <Button layoutX="330.0"
+              layoutY="100.0"
+              text="Start Memory Attack"
+              onAction="#startMemoryAttack" />
+
+      <ImageView fx:id="image0"
+                 fitHeight="100.0"
+                 fitWidth="100.0"
+                 layoutX="180.0"
+                 layoutY="180.0"
+                 onMouseClicked="#onImage0Clicked"
+                 pickOnBounds="true"
+                 preserveRatio="true" />
+
+      <ImageView fx:id="image1"
+                 fitHeight="100.0"
+                 fitWidth="100.0"
+                 layoutX="320.0"
+                 layoutY="180.0"
+                 onMouseClicked="#onImage1Clicked"
+                 pickOnBounds="true"
+                 preserveRatio="true" />
+
+      <ImageView fx:id="image2"
+                 fitHeight="100.0"
+                 fitWidth="100.0"
+                 layoutX="460.0"
+                 layoutY="180.0"
+                 onMouseClicked="#onImage2Clicked"
+                 pickOnBounds="true"
+                 preserveRatio="true" />
+
+      <ImageView fx:id="image3"
+                 fitHeight="100.0"
+                 fitWidth="100.0"
+                 layoutX="320.0"
+                 layoutY="320.0"
+                 onMouseClicked="#onImage3Clicked"
+                 pickOnBounds="true"
+                 preserveRatio="true" />
    </children>
 </AnchorPane>
