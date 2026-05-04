@@ -14,7 +14,6 @@ import java.util.Random;
  */
 public class MemoryGame {
 
-    private static final int TOTAL_IMAGES = 12;
     private Difficulty difficulty;
     private List<Integer> correctSequence;
     private int sequenceLength;
@@ -39,18 +38,18 @@ public class MemoryGame {
 
     /**
      * Generates a new random sequence of image indices without repeats.
-     * Creates a list of all indices 0 to TOTAL_IMAGES-1, shuffles it,
-     * then takes the first sequenceLength elements.
+     * Indices are in range [0, sequenceLength) so they map directly to
+     * the ImageViews shown in the controller.
      * Stores result in correctSequence for later comparison.
      * @return The generated sequence as a list of image indices
      */
     public List<Integer> generateSequence() {
         List<Integer> allIndices = new ArrayList<>();
-        for (int i = 0; i < TOTAL_IMAGES; i++) {
+        for (int i = 0; i < sequenceLength; i++) {
             allIndices.add(i);
         }
         Collections.shuffle(allIndices, random);
-        correctSequence = new ArrayList<>(allIndices.subList(0, sequenceLength));
+        correctSequence = new ArrayList<>(allIndices);
         return new ArrayList<>(correctSequence);
     }
 
@@ -75,12 +74,5 @@ public class MemoryGame {
      */
     public int getSequenceLength() {
         return sequenceLength;
-    }
-
-    /**
-     * @return The total number of images in the pool
-     */
-    public int getTotalImages() {
-        return TOTAL_IMAGES;
     }
 }

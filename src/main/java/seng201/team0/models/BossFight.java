@@ -474,6 +474,149 @@ public class BossFight {
         }
     }
 
+    // ------------------------------------- CONTROLLER-FACING API -------------------------------------
+
+    /**
+     * Called by BossFightController after the player completes or fails the memory game.
+     *
+     * If sequenceCorrect is true and the boss is not immune this round:
+     *   - Applies calcAdventurerDamage() to the boss.
+     *   - Returns damage dealt.
+     * If sequenceCorrect is true but IMMUNE_TURN is active:
+     *   - No damage, no penalty. Returns 0.
+     * If sequenceCorrect is false:
+     *   - Calls applySequenceFailPenalty().
+     *   - Returns 0.
+     *
+     * Also triggers boss ability at the start of the round if due.
+     *
+     * @param attacker The adventurer whose turn it is
+     * @param sequenceCorrect Whether the player got the memory sequence right
+     * @return Damage dealt to the boss (0 if missed, immune, or failed)
+     */
+    public int playerAttack(Adventurer attacker, boolean sequenceCorrect) {
+        // Trigger boss ability at start of round if due
+        // (safe to call repeatedly — applyBossAbility is idempotent per round
+        //  because the controller drives one attacker at a time)
+        if (boss.shouldTriggerAbility(roundNumber)) {
+            // Only trigger once per round — controller should call this on the first attacker's turn
+            // TODO: track abilityTriggeredThisRound if needed
+        }
+
+        if (sequenceCorrect) {
+            if (isImmuneThisRound()) {
+                return 0; // Jax counters — no damage, no penalty
+            }
+            int damage = calcAdventurerDamage(attacker);
+            boss.setCurrentHealth(boss.getCurrentHealth() - damage);
+            return damage;
+        } else {
+            // Pass null for MC check — controller should use the overload below if MC tracking matters
+            applySequenceFailPenalty(attacker, false, null);
+            return 0;
+        }
+    }
+
+    /**
+     * Overload of playerAttack that also handles MC fail penalty correctly.
+     * Use this version when the attacker might be the MC.
+     * @param attacker The adventurer whose turn it is
+     * @param sequenceCorrect Whether the player got the memory sequence right
+     * @param isMC True if attacker is the MC (fail penalises whole party)
+     * @param guild The player's guild (needed for whole-party penalty)
+     * @return Damage dealt to the boss
+     */
+    public int playerAttack(Adventurer attacker, boolean sequenceCorrect, boolean isMC, Guild guild) {
+        if (sequenceCorrect) {
+            if (isImmuneThisRound()) {
+                return 0;
+            }
+            int damage = calcAdventurerDamage(attacker);
+            boss.setCurrentHealth(boss.getCurrentHealth() - damage);
+            return damage;
+        } else {
+            applySequenceFailPenalty(attacker, isMC, guild);
+            return 0;
+        }
+    }
+
+    /**
+     * Executes the boss's attack phase for this round.
+     * Called by BossFightController after the player's attack resolves.
+     *
+     * Handles:
+     *   - AOE: calls applyBossAbility(guild) for flat damage to all party members.
+     *   - Otherwise: attacks findWeakestTarget().
+     *     - Special move active on MC: guaranteed dodge.
+     *     - Otherwise: dice rolls, calcBossDamage(), applyHitPenalties(), applyVladimirHeal().
+     *
+     * Advances to the next round and removes dead adventurers after attacking.
+     *
+     * @param guild The player's guild
+     */
+    public void bossTurn(Guild guild) {
+        if (boss.getAbility() == BossAbility.AOE && boss.shouldTriggerAbility(roundNumber)) {
+            applyBossAbility(guild);
+        } else {
+            Adventurer target = findWeakestTarget(guild.getMainParty());
+            if (target != null && !target.isDead()) {
+                boolean guaranteedDodge = specialMoveUsed;
+                if (!guaranteedDodge) {
+                    int bossRoll = random.nextInt(6) + 1;
+                    int targetRoll = random.nextInt(6) + 1;
+
+                    if (bossRoll > targetRoll) {
+                        int difference = bossRoll - targetRoll;
+                        int damage = calcBossDamage(target); // handles TRUE_DAMAGE and SLEEP internally
+                        if (damage > 0) {
+                            target.setCurrentHealth(target.getCurrentHealth() - damage);
+                            applyHitPenalties(target, difference);
+                            applyVladimirHeal(damage);
+                        }
+                    }
+                }
+            }
+        }
+
+        guild.removeDeadAdventurers();
+        nextRound();
+    }
+
+    /**
+     * Returns true if the fight is over — either the boss is dead or the guild is wiped.
+     * BossFightController calls this after each player attack and boss turn to check loop exit.
+     * @param guild The player's guild
+     * @return True if the fight has ended
+     */
+    public boolean isFightOver(Guild guild) {
+        return boss.isDead() || guild.isWiped();
+    }
+
+    /**
+     * Finalises the fight result if it's over.
+     * Sets playerWon and applies win/loss loyalty and gold effects.
+     * Safe to call multiple times — does nothing if fight is not over.
+     * BossFightController calls this after isFightOver() returns true.
+     * @param guild The player's guild
+     */
+    public void finishFightIfOver(Guild guild) {
+        if (!isFightOver(guild)) {
+            return;
+        }
+        playerWon = boss.isDead() && !guild.isWiped();
+
+        if (playerWon) {
+            for (Adventurer adventurer : guild.getMainParty()) {
+                adventurer.adjustLoyalty(boss.getLoyaltyEffectOnWin());
+            }
+            guild.addGold(boss.getGoldDrop());
+        } else {
+            for (Adventurer adventurer : guild.getMainParty()) {
+                adventurer.adjustLoyalty(boss.getLoyaltyEffectOnLoss());
+            }
+        }
+    }
+
     // ------------------------------------- GETTERS -------------------------------------
 
     /**

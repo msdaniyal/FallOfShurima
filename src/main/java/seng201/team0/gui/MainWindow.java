@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import seng201.team0.controller.MemoryGameController;
 
 import java.io.IOException;
 
@@ -22,13 +23,16 @@ public class MainWindow extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MemoryGame.fxml"));
         Parent root = loader.load();
 
-        seng201.team0.controller.BossFightController controller = loader.getController();
+        MemoryGameController controller = loader.getController();
+
+        // FIX 1: Difficulty is now required by BossFight
+        seng201.team0.models.Difficulty difficulty = seng201.team0.models.Difficulty.HARD;
 
         seng201.team0.models.Guild guild =
-                new seng201.team0.models.Guild("Test Guild", 100, seng201.team0.models.Faction.AATROX);
+                new seng201.team0.models.Guild("Test Guild", difficulty.getStartingGold(), seng201.team0.models.Faction.AATROX);
 
         seng201.team0.models.Adventurer mainAdventurer =
                 new seng201.team0.models.Adventurer(
@@ -38,34 +42,37 @@ public class MainWindow extends Application {
                         "Main character"
                 );
 
+        // FIX 2: Boss constructor now requires BossAbility and abilityFrequency
         seng201.team0.models.Boss boss =
                 new seng201.team0.models.Boss(
                         "Jax", 50, 20, 5,
-                        100, 10, -15, "Boss"
+                        100, 10, -15,
+                        "The Grandmaster fights alone.",
+                        seng201.team0.models.BossAbility.IMMUNE_TURN,
+                        2
                 );
 
+        // FIX 3: BossFight constructor takes (boss, sequence, difficulty) — not an adventurer
         seng201.team0.models.BossFight bossFight =
-                new seng201.team0.models.BossFight(boss, 1, mainAdventurer);
+                new seng201.team0.models.BossFight(boss, 1, difficulty);
 
         guild.addToMainParty(mainAdventurer);
 
+        // FIX 4: "BossFight" (capital B) is the class name — "bossFight" (lowercase) is the instance
         controller.setFightData(bossFight, guild, mainAdventurer);
 
-        Scene scene = new Scene(root, 800, 500);
+        Scene scene = new Scene(root, 900, 600);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Boss Fight");
         primaryStage.show();
     }
 
     /**
-     * Launches the FXML application, this must be called from another class (in this cass App.java) otherwise JavaFX
-     * errors out and does not run
+     * Launches the FXML application, this must be called from another class (in this case App.java)
+     * otherwise JavaFX errors out and does not run.
      * @param args command line arguments
      */
-    public static void launchWrapper(String [] args) {
+    public static void launchWrapper(String[] args) {
         launch(args);
     }
-
-
-
 }

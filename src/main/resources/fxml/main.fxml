@@ -8,7 +8,7 @@
 <AnchorPane prefHeight="500.0" prefWidth="800.0"
             xmlns="http://javafx.com/javafx/17.0.2-ea"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="seng201.team0.controller.BossFightController">
+            fx:controller="seng201.team0.controller.MemoryGameController">
 
    <children>
       <Label fx:id="statusLabel"
