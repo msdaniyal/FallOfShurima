@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="600.0" prefWidth="900.0"
+            xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="seng201.team0.controller.LoreController1">
+    <children>
+
+        <!-- Dark background -->
+        <Rectangle layoutX="0" layoutY="0" width="900" height="600" fill="black"/>
+
+        <!-- Sunburst canvas — controller draws the golden explosion here -->
+        <javafx.scene.canvas.Canvas fx:id="burstCanvas"
+                                    layoutX="0" layoutY="0"
+                                    width="900" height="600"/>
+
+        <!-- Lore text — types out letter by letter -->
+        <Label fx:id="loreLabel"
+               layoutX="100.0" layoutY="200.0"
+               prefWidth="700.0"
+               wrapText="true"
+               alignment="CENTER"
+               textFill="#C9A84C"
+               opacity="0.0"
+               style="-fx-font-family:Georgia;
+                      -fx-font-size:28px;
+                      -fx-font-style:italic;"/>
+
+        <!-- Click to continue — appears after typing finishes -->
+        <Label fx:id="continueLabel"
+               layoutX="0.0" layoutY="520.0"
+               prefWidth="900.0"
+               alignment="CENTER"
+               text="Click anywhere to continue..."
+               textFill="#aaaaaa"
+               opacity="0.0"
+               style="-fx-font-family:Georgia; -fx-font-size:14px;"/>
+
+        <!-- Invisible click-catcher — only active after typing finishes -->
+        <Rectangle fx:id="clickCatcher"
+                   layoutX="0" layoutY="0"
+                   width="900" height="600"
+                   fill="transparent"
+                   mouseTransparent="true"
+                   onMouseClicked="#onContinue"/>
+
+        <!-- Black overlay for fade transitions -->
+        <Rectangle fx:id="transitionOverlay"
+                   layoutX="0" layoutY="0"
+                   width="900" height="600"
+                   fill="black"
+                   opacity="1.0"
+                   mouseTransparent="true"/>
+
+    </children>
+</AnchorPane>

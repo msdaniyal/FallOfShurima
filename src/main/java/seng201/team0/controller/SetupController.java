@@ -54,11 +54,17 @@ public class SetupController {
     // ── Aatrox and Xolaani lore/stats shown on hover ──────────────────────────
     private static final String AATROX_INFO =
             "Faction: AATROX\n\n" +
-                    "The World Ender. A darkin warrior\n";
+                    "The World Ender. A darkin warrior\n" +
+                    "bound to a cursed blade.\n\n" +
+                    "Allied adventurers start at 80 loyalty.\n" +
+                    "Opposing adventurers start at 30 loyalty.";
 
     private static final String XOLAANI_INFO =
             "Faction: XOLAANI\n\n" +
-                    "The Blood Weaver. A darkin priestess\n";
+                    "The Blood Weaver. A darkin priestess\n" +
+                    "who commands life itself.\n\n" +
+                    "Allied adventurers start at 80 loyalty.\n" +
+                    "Opposing adventurers start at 30 loyalty.";
 
     @FXML
     public void initialize() {

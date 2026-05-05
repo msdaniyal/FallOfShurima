@@ -23,17 +23,18 @@ public class MainWindow extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
 
-        /**
-         * Opens the setup screen. All further navigation is handled by the controllers.
-         * @param primaryStage The current fxml stage, handled by JavaFX Application class
-         * @throws IOException if there is an issue loading fxml file
-         */
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/setup.fxml"));
-            Parent root = loader.load();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/start.fxml"));
+        Parent root = loader.load();
 
-            primaryStage.setScene(new Scene(root, 900, 600));
-            primaryStage.setTitle("The Fall of Shurima");
-            primaryStage.show();
+        primaryStage.setScene(new Scene(root, 900, 600));
+        primaryStage.setTitle("The Fall of Shurima");
+        primaryStage.show();
+//            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/setup.fxml"));
+//            Parent root = loader.load();
+//
+//            primaryStage.setScene(new Scene(root, 900, 600));
+//            primaryStage.setTitle("The Fall of Shurima");
+//            primaryStage.show();
 
 //        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MemoryGame.fxml"));
 //        Parent root = loader.load();
