@@ -3,57 +3,81 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.paint.*?>
 <?import javafx.scene.shape.*?>
-<?import javafx.scene.text.*?>
 
 <AnchorPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng201.team0.controller.SetupController">
-
     <children>
 
-        <!-- Background image -->
+        <!-- ═══════════════════ BACKGROUND ═══════════════════ -->
         <ImageView fitHeight="600.0" fitWidth="900.0" layoutX="0.0" layoutY="0.0" pickOnBounds="true" preserveRatio="false">
             <image><Image url="@../images/setup_bg.png" /></image>
         </ImageView>
 
-        <!-- Dark overlay for readability -->
-        <Rectangle height="600.0" layoutX="0.0" layoutY="0.0" width="900.0">
-            <fill>
-                <javafx.scene.paint.Color fx:value="#00000066" />
-            </fill>
-        </Rectangle>
+        <!-- ═══════════════════ GUILD NAME ROW ═══════════════════ -->
+        <Label layoutX="40.0" layoutY="40.0" style="-fx-font-family:Georgia; -fx-font-size:22px; -fx-font-weight:bold;" text="GUILD NAME:" textFill="#C9A84C" />
 
-        <!-- Guild Name row -->
-        <Label layoutX="40.0" layoutY="40.0" style="-fx-font-family: 'Georgia'; -fx-font-size: 22px; -fx-font-weight: bold;" text="GUILD NAME:" textFill="#C9A84C" />
+        <TextField fx:id="guildNameField" layoutX="240.0" layoutY="35.0" prefHeight="36.0" prefWidth="220.0" promptText="9–12 characters" style="-fx-background-color:#C9A84C33;                           -fx-border-color:#C9A84C; -fx-border-width:1.5;                           -fx-text-fill:white; -fx-font-family:Georgia;                           -fx-font-size:14px; -fx-prompt-text-fill:#aaaaaa;" />
 
-        <TextField fx:id="guildNameField" layoutX="240.0" layoutY="35.0" prefHeight="36.0" prefWidth="220.0" promptText="9–12 characters" style="-fx-background-color: #C9A84C33;                           -fx-border-color: #C9A84C;                           -fx-border-width: 1.5;                           -fx-text-fill: white;                           -fx-font-family: Georgia;                           -fx-font-size: 14px;                           -fx-prompt-text-fill: #aaaaaa;" />
+        <!-- ═══════════════════ HEADING ═══════════════════ -->
+        <Label layoutX="40.0" layoutY="100.0" style="-fx-font-family:Georgia; -fx-font-size:26px; -fx-font-weight:bold;" text="WHICH GOD WARRIOR ARE YOU?" textFill="#C9A84C" />
 
-        <!-- "Which God Warrior are you?" heading -->
-        <Label layoutX="40.0" layoutY="110.0" style="-fx-font-family: 'Georgia'; -fx-font-size: 26px; -fx-font-weight: bold;" text="WHICH GOD WARRIOR ARE YOU?" textFill="#C9A84C" />
+        <!-- ═══════════════════ AATROX ═══════════════════ -->
+        <ImageView fx:id="aatroxImage" fitHeight="280.0" fitWidth="220.0" layoutX="97.0" layoutY="248.0" onMouseClicked="#onAatroxSelected" onMouseEntered="#onAatroxHover" onMouseExited="#onHoverExit" pickOnBounds="true" preserveRatio="true" />
 
-        <!-- Aatrox image — clicking selects Faction.AATROX -->
-        <ImageView fx:id="aatroxImage" fitHeight="280.0" fitWidth="220.0" layoutX="130.0" layoutY="230.0" onMouseClicked="#onAatroxSelected" pickOnBounds="true" preserveRatio="true">
-            <image><Image url="@../images/Aatrox.png" /></image>
-        </ImageView>
+        <Label layoutX="155.0" layoutY="550.0" style="-fx-font-family:Georgia; -fx-font-size:18px; -fx-font-weight:bold;" text="AATROX" textFill="#C9A84C" />
 
-        <!-- Xolaani image — clicking selects Faction.XOLAANI -->
-        <ImageView fitHeight="280.0" fitWidth="220.0" layoutX="530.0" layoutY="230.0" onMouseClicked="#onXolaaniSelected" pickOnBounds="true" preserveRatio="true" fx:id="xolaaniImage">
-            <image><Image url="@../images/Xolaani.png" /></image>
-        </ImageView>
+        <!-- Aatrox stat tooltip panel — hidden until hover -->
+        <VBox fx:id="aatroxStats" layoutX="60.0" layoutY="160.0" mouseTransparent="true" prefHeight="200.0" prefWidth="210.0" style="-fx-background-color:#000000cc;                      -fx-border-color:#C9A84C; -fx-border-width:1.5;                      -fx-padding:12;" visible="false">
+            <children>
+                <Label style="-fx-font-family:Georgia; -fx-font-size:15px; -fx-font-weight:bold;" text="⚔ AATROX" textFill="#C9A84C" />
+                <Label fx:id="aatroxStatText" style="-fx-font-family:Georgia; -fx-font-size:12px;" textFill="white" wrapText="true" />
+            </children>
+        </VBox>
 
-        <!-- Faction name labels under each warrior -->
-        <Label layoutX="210.0" layoutY="480.0" style="-fx-font-family: Georgia; -fx-font-size: 18px; -fx-font-weight: bold;" text="AATROX" textFill="#C9A84C" />
+        <!-- ═══════════════════ XOLAANI ═══════════════════ -->
+        <ImageView fitHeight="280.0" fitWidth="220.0" layoutX="554.0" layoutY="260.0" onMouseClicked="#onXolaaniSelected" onMouseEntered="#onXolaaniHover" onMouseExited="#onHoverExit" pickOnBounds="true" preserveRatio="true" fx:id="xolaaniImage" />
 
-        <Label layoutX="610.0" layoutY="480.0" style="-fx-font-family: Georgia; -fx-font-size: 18px; -fx-font-weight: bold;" text="XOLAANI" textFill="#C9A84C" />
+        <Label layoutX="618.0" layoutY="550.0" style="-fx-font-family:Georgia; -fx-font-size:18px; -fx-font-weight:bold;" text="XOLAANI" textFill="#C9A84C" />
 
-        <!-- Validation message -->
-        <Label fx:id="validationLabel" alignment="CENTER" layoutX="310.0" layoutY="510.0" prefWidth="300.0" style="-fx-font-family: Georgia; -fx-font-size: 14px;" text="" textFill="red" />
+        <!-- Xolaani stat tooltip panel — hidden until hover -->
+        <VBox layoutX="620.0" layoutY="160.0" mouseTransparent="true" prefHeight="200.0" prefWidth="210.0" style="-fx-background-color:#000000cc;                      -fx-border-color:#C9A84C; -fx-border-width:1.5;                      -fx-padding:12;" visible="false" fx:id="xolaaniStats">
+            <children>
+                <Label style="-fx-font-family:Georgia; -fx-font-size:15px; -fx-font-weight:bold;" text="⚔ XOLAANI" textFill="#C9A84C" />
+                <Label style="-fx-font-family:Georgia; -fx-font-size:12px;" textFill="white" wrapText="true" fx:id="xolaaniStatText" />
+            </children>
+        </VBox>
 
-        <!-- Confirm button -->
-        <Button layoutX="375.0" layoutY="550.0" onAction="#onConfirm" prefHeight="38.0" prefWidth="150.0" style="-fx-background-color: #C9A84C;                        -fx-text-fill: #1a0a00;                        -fx-font-family: Georgia;                        -fx-font-size: 15px;                        -fx-font-weight: bold;                        -fx-cursor: hand;" text="READY">
-         <font>
-            <Font name="JetBrains Mono ExtraLight" size="12.0" />
-         </font></Button>
+        <!-- ═══════════════════ VALIDATION + CONFIRM ═══════════════════ -->
+        <Label fx:id="validationLabel" alignment="CENTER" layoutX="300.0" layoutY="510.0" prefWidth="300.0" style="-fx-font-family:Georgia; -fx-font-size:14px;" text="" textFill="red" />
+
+        <Button layoutX="375.0" layoutY="550.0" onAction="#onConfirm" prefHeight="38.0" prefWidth="150.0" style="-fx-background-color:#C9A84C; -fx-text-fill:#1a0a00;                        -fx-font-family:Georgia; -fx-font-size:15px;                        -fx-font-weight:bold; -fx-cursor:hand;" text="CONFIRM" />
+
+        <!-- ═══════════════════ DIFFICULTY POPUP OVERLAY ═══════════════════ -->
+        <!-- Dim background behind popup -->
+        <Rectangle fx:id="popupOverlay" height="600.0" layoutX="0.0" layoutY="0.0" style="-fx-fill:#000000aa;" visible="false" width="900.0" />
+
+        <!-- Popup panel styled like the screenshot -->
+        <VBox fx:id="difficultyPopup" layoutX="275.0" layoutY="150.0" prefWidth="350.0" style="-fx-background-color:#1a1a2e;                      -fx-border-color:#5599ff; -fx-border-width:2;                      -fx-border-radius:8; -fx-background-radius:8;" visible="false">
+            <children>
+
+                <!-- Title bar -->
+                <HBox alignment="CENTER_LEFT" style="-fx-background-color:#2244aa;                              -fx-background-radius:6 6 0 0;                              -fx-padding:8 12;">
+                    <children>
+                        <Label style="-fx-font-family:Georgia; -fx-font-size:15px; -fx-font-weight:bold;" text="⚔  Select Combat Difficulty" textFill="white" />
+                    </children>
+                </HBox>
+
+                <!-- Easy -->
+                <Button fx:id="easyBtn" maxWidth="Infinity" onAction="#onEasySelected" prefHeight="52.0" style="-fx-background-color:#888899;                                -fx-text-fill:white; -fx-font-family:Georgia;                                -fx-font-size:20px; -fx-font-weight:bold;                                -fx-cursor:hand; -fx-border-color:#aaaacc;                                -fx-border-width:0 0 1 0;" text="Easy" />
+
+                <!-- Normal -->
+                <Button fx:id="normalBtn" maxWidth="Infinity" onAction="#onNormalSelected" prefHeight="52.0" style="-fx-background-color:#888899;                                -fx-text-fill:white; -fx-font-family:Georgia;                                -fx-font-size:20px; -fx-font-weight:bold;                                -fx-cursor:hand; -fx-border-color:#aaaacc;                                -fx-border-width:0 0 1 0;" text="Normal" />
+
+                <!-- Hard -->
+                <Button fx:id="hardBtn" maxWidth="Infinity" onAction="#onHardSelected" prefHeight="52.0" style="-fx-background-color:#888899;                                -fx-text-fill:white; -fx-font-family:Georgia;                                -fx-font-size:20px; -fx-font-weight:bold;                                -fx-cursor:hand;" text="Hard" />
+
+            </children>
+        </VBox>
 
     </children>
 </AnchorPane>
