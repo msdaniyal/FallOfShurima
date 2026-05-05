@@ -9,7 +9,7 @@ import java.util.Random;
  * Manages the memory picture game used during boss fights.
  * A sequence of images is shown to the player who must recall them in order.
  * Sequence length depends on difficulty:
- * Easy = 4, Normal = 7, Hard = 10.
+ * Easy = 3, Normal = 6, Hard = 9.
  * @author Mohammed, Xinyi
  */
 public class MemoryGame {
@@ -28,11 +28,11 @@ public class MemoryGame {
         this.random = new Random();
         this.correctSequence = new ArrayList<>();
         if (difficulty.equals(Difficulty.EASY)) {
-            this.sequenceLength = 4;
+            this.sequenceLength = 3;
         } else if (difficulty.equals(Difficulty.NORMAL)) {
-            this.sequenceLength = 7;
+            this.sequenceLength = 6;
         } else if (difficulty.equals(Difficulty.HARD)) {
-            this.sequenceLength = 10;
+            this.sequenceLength = 9;
         }
     }
 

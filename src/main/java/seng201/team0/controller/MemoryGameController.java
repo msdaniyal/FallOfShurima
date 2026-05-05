@@ -24,8 +24,6 @@ import java.util.List;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Color;
 
-import static javafx.application.Platform.exit;
-
 public class MemoryGameController {
 
     @FXML private GridPane imageContainer;
@@ -63,10 +61,10 @@ public class MemoryGameController {
     }
 
     /**
-     * Builds the grid layout based on sequence length / difficulty:
-     *   Easy   (4)  → 2×2
-     *   Normal (7)  → 3×3 + 7th centred below
-     *   Hard   (10) → 2×5
+     * Builds a 3-column grid for all difficulties:
+     *   Easy   (3) → 3×1
+     *   Normal (6) → 3×2
+     *   Hard   (9) → 3×3
      */
     private void buildImageViews(int count) {
         images.clear();
@@ -74,8 +72,8 @@ public class MemoryGameController {
         imageContainer.getColumnConstraints().clear();
         imageContainer.getRowConstraints().clear();
 
-        int cols = columnsFor(count);
-        for (int c = 0; c < cols; c++) {
+        // Always 3 columns — works cleanly for 3, 6, and 9
+        for (int c = 0; c < 3; c++) {
             ColumnConstraints cc = new ColumnConstraints(120);
             imageContainer.getColumnConstraints().add(cc);
         }
@@ -92,26 +90,8 @@ public class MemoryGameController {
             final int index = i;
             iv.setOnMouseClicked(e -> handlePlayerClick(index));
 
-            int col = i % cols;
-            int row = i / cols;
-
-            if (count == 7 && i == 6) {
-                GridPane.setColumnSpan(iv, 3);
-                GridPane.setHalignment(iv, HPos.CENTER);
-                col = 0;
-            }
-
-            imageContainer.add(iv, col, row);
+            imageContainer.add(iv, i % 3, i / 3);
             images.add(iv);
-        }
-    }
-
-    private int columnsFor(int count) {
-        switch (count) {
-            case 4:  return 2;
-            case 7:  return 3;
-            case 10: return 2;
-            default: return 2;
         }
     }
 
@@ -124,7 +104,6 @@ public class MemoryGameController {
      */
     @FXML
     public void startMemoryAttack() {
-        // Hide and disable the button so it can't be clicked a second time
         startButton.setDisable(true);
 
         playerInput.clear();
@@ -164,7 +143,8 @@ public class MemoryGameController {
     }
 
     private void startTimer() {
-        timeRemaining = 50;
+        // Timer scales with difficulty: Easy=15s, Normal=30s, Hard=45s
+        timeRemaining = bossFight.getMemoryGame().getSequenceLength() * 5;
         timerLabel.setText("Time Remaining: " + timeRemaining);
 
         countdownTimeline = new Timeline(
@@ -177,7 +157,7 @@ public class MemoryGameController {
                     }
                 })
         );
-        countdownTimeline.setCycleCount(5);
+        countdownTimeline.setCycleCount(timeRemaining);
         countdownTimeline.play();
     }
 
@@ -288,13 +268,13 @@ public class MemoryGameController {
     private void showFightResultIfOver() {
         if (bossFight != null && guild != null && bossFight.isFightOver(guild)) {
             String result = bossFight.isPlayerWon() ? "\nYou won!" : "\nYou lost!";
-
             statusLabel.setText(statusLabel.getText() + result);
         }
     }
 
     // ----------------------------- End attack move --------------------------
 
+    @FXML
     public void endGame() {
         // Close the memory game window
         Stage stage = (Stage) statusLabel.getScene().getWindow();
