@@ -22,12 +22,17 @@ public class Game {
      * Constructs a Game.
      * @param guild The player's guild created during setup
      * @param difficulty The chosen difficulty
-     * TODO: Initialise all 6 quest subclasses and add to quests list
      */
     public Game(Guild guild, Difficulty difficulty) {
         this.guild = guild;
         this.difficulty = difficulty;
         this.quests = new ArrayList<>();
+        quests.add(new Quest1(difficulty));
+        quests.add(new Quest2(difficulty));
+        quests.add(new Quest3(difficulty));
+        quests.add(new Quest4(difficulty));
+        quests.add(new Quest5(difficulty));
+        quests.add(new Quest6(difficulty));
         this.currentQuestIndex = 0;
         this.gameOver = false;
         this.playerWon = false;
@@ -41,20 +46,18 @@ public class Game {
 
     /**
      * Advances to the next quest after the current one is completed.
-     * TODO: Unlock the next quest by calling quest.unlock()
-     * TODO: If currentQuestIndex >= 5 (all required quests done), check loyalty threshold
-     * TODO: If loyalty below threshold, unlock Quest 6 (Zoe) instead
      */
     public void advanceToNextQuest() {
         currentQuestIndex++;
-
         if (currentQuestIndex >= 5) {
             if (getCurrentLoyalty() >= getLoyaltyThreshold()) {
                 playerWon = true;
                 gameOver = true;
             } else {
-
+                quests.get(5).unlock();
             }
+        } else {
+            quests.get(currentQuestIndex).unlock();
         }
     }
 
