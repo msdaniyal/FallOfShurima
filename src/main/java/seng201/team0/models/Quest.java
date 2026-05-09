@@ -132,7 +132,5 @@ public abstract class Quest {
     /**
      * @return The ordered list of boss fights for this quest
      */
-    public List<BossFight> getBossFights() {
-        return bossFights;
-    }
+    public List<BossFight> getBossFights() { return bossFights; }
 }

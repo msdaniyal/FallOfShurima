@@ -71,11 +71,13 @@ public class Game {
             gameOver = true;
             playerWon = false;
         }
+        if (getCurrentLoyalty() >= getLoyaltyThreshold() && currentQuestIndex >= 5) {
+            gameOver = true;
+            playerWon = true;
+        }
         if () {
-            if () {
-                gameOver = true;
-                playerWon = false;
-            }
+            gameOver = true;
+            playerWon = false;
         }
 
     }
@@ -110,5 +112,8 @@ public class Game {
      */
     public int getLoyaltyThreshold() { return difficulty.getLoyaltyThreshold(); }
 
+    /**
+     * @return The current loyalty points of the adventurer
+     */
     public int getCurrentLoyalty() { return adventurer.getLoyalty(); }
 }
