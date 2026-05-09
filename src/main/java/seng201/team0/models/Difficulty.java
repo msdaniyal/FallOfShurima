@@ -39,7 +39,5 @@ public enum Difficulty {
     /**
      * @return The loyalty threshold required to avoid facing Zoe
      */
-    public int getLoyaltyThreshold() {
-        return loyaltyThreshold;
-    }
+    public int getLoyaltyThreshold() { return loyaltyThreshold; }
 }
