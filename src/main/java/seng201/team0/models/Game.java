@@ -63,23 +63,22 @@ public class Game {
 
     /**
      * Checks all end conditions and updates gameOver and playerWon flags.
-     * TODO: Check if all 5 required quests done and loyalty threshold met
-     * TODO: Check if Quest 6 was lost (Zoe fight) — gameOver = true, playerWon = false
      */
     public void checkEndCondition() {
         if (guild.isWiped()) {
             gameOver = true;
             playerWon = false;
-        }
-        if (getCurrentLoyalty() >= getLoyaltyThreshold() && currentQuestIndex >= 5) {
+        } else if (getCurrentLoyalty() >= getLoyaltyThreshold() && currentQuestIndex == 5) {
             gameOver = true;
             playerWon = true;
+        } else if (currentQuestIndex == 5) {
+            Quest quest6 = quests.get(5);
+            BossFight zoeFight = quest6.getBossFights().get(0);
+            if (zoeFight.isFightOver(guild) && !zoeFight.isPlayerWon()) {
+                gameOver = true;
+                playerWon = false;
+            }
         }
-        if () {
-            gameOver = true;
-            playerWon = false;
-        }
-
     }
 
     /**
