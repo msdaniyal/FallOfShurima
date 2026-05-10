@@ -45,8 +45,10 @@ public class MemoryGameController {
     private Adventurer currentAttacker;
 
     /**
-     * Injects fight data. Must be called before startMemoryAttack().
-     * Builds the GridPane layout for the correct difficulty.
+     * Controller for the fight screen.
+     * Shows several random pictures in the fight and let the player choose the pictures shown by order.
+     * Only if the player's choices are right, the attack is successful.
+     * @author Mohammed, Xinyi
      */
     public void setFightData(BossFight bossFight, Guild guild, Adventurer currentAttacker) {
         this.bossFight = bossFight;
