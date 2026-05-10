@@ -136,8 +136,8 @@ public class SetupController {
     public void onConfirm() {
         String name = guildNameField.getText().trim();
 
-        if (name.length() < 9 || name.length() > 12) {
-            validationLabel.setText("Guild name must be 9–12 characters.");
+        if (name.length() < 2 || name.length() > 12) {
+            validationLabel.setText("Guild name must be 2–12 characters.");
             validationLabel.setTextFill(Color.RED);
             return;
         }
@@ -196,16 +196,16 @@ public class SetupController {
                     getClass().getResource("/fxml/mainmenu.fxml"));
             Parent root = loader.load();
 
-            // Uncomment once MainMenuController exists and accepts game data:
-            // MainMenuController mainMenu = loader.getController();
-            // mainMenu.setGameData(pendingGuild, difficulty);
+            MainMenuController mainMenuController = loader.getController();
+            mainMenuController.setGameData(pendingGuild, difficulty);
 
             Stage stage = (Stage) guildNameField.getScene().getWindow();
             stage.setScene(new Scene(root, 900, 600));
-            stage.setTitle("The Fall of Shurima");
+            stage.setTitle("The Fall of Shurima — Choose Warriors");
+
         } catch (Exception e) {
             e.printStackTrace();
-            validationLabel.setText("Error loading game screen.");
+            validationLabel.setText("Error loading character selection screen.");
             validationLabel.setTextFill(Color.RED);
         }
     }
