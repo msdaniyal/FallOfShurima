@@ -294,11 +294,6 @@ public class MainMenuController {
 
         warningLabel.setTextFill(Color.LIGHTGREEN);
         warningLabel.setText("Party confirmed! Game created.");
-
-        // TODO:
-        // Later, navigate to your actual game screen here.
-        // Example:
-        // navigateToQuestScreen();
     }
 
     /**
