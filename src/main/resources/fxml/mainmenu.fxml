@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="600.0" prefWidth="900.0"
+            xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="seng201.team0.controller.MainMenuController"
+            style="-fx-background-color: #111111;">
+
+    <VBox spacing="10"
+          layoutX="55"
+          layoutY="10"
+          prefWidth="790"
+          alignment="CENTER">
+
+        <Label fx:id="titleLabel"
+               text="Choose Your Warriors"
+               textFill="GOLD"
+               style="-fx-font-size: 30px; -fx-font-weight: bold;" />
+
+        <Label fx:id="instructionLabel"
+               text="Choose up to 5 warriors to join your guild."
+               textFill="WHITE"
+               style="-fx-font-size: 15px;" />
+
+        <Label fx:id="selectedCountLabel"
+               text="Selected: 0 / 5"
+               textFill="WHITE"
+               style="-fx-font-size: 14px;" />
+
+        <GridPane fx:id="characterGrid"
+                  hgap="10"
+                  vgap="8"
+                  alignment="CENTER" />
+
+        <Label fx:id="warningLabel"
+               textFill="RED"
+               style="-fx-font-size: 13px;" />
+
+        <HBox spacing="15" alignment="CENTER">
+            <Button text="Back"
+                    onAction="#onBack"
+                    prefWidth="100"
+                    prefHeight="28"
+                    style="-fx-font-size: 13px;" />
+
+            <Button text="Confirm Party"
+                    onAction="#onConfirmSelection"
+                    prefWidth="140"
+                    prefHeight="28"
+                    style="-fx-font-size: 13px; -fx-background-color: gold;" />
+        </HBox>
+
+    </VBox>
+
+</AnchorPane>
