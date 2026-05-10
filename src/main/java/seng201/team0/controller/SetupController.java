@@ -193,11 +193,11 @@ public class SetupController {
     private void navigateToGame(Difficulty difficulty) {
         try {
             FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/fxml/mainmenu.fxml"));
+                    getClass().getResource("/fxml/characterselect.fxml"));
             Parent root = loader.load();
 
-            MainMenuController mainMenuController = loader.getController();
-            mainMenuController.setGameData(pendingGuild, difficulty);
+            CharacterSelectController characterSelectController = loader.getController();
+            characterSelectController.setGameData(pendingGuild, difficulty);
 
             Stage stage = (Stage) guildNameField.getScene().getWindow();
             stage.setScene(new Scene(root, 900, 600));
