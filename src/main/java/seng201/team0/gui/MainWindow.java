@@ -29,6 +29,10 @@ public class MainWindow extends Application {
         primaryStage.setScene(new Scene(root, 900, 600));
         primaryStage.setTitle("The Fall of Shurima");
         primaryStage.setResizable(true);
+        primaryStage.setFullScreen(true);
+
+        primaryStage.setFullScreenExitHint("");
+
         primaryStage.show();
         primaryStage.maximizedProperty().addListener((obs, wasMaximized, isNowMaximized) -> {
             if (isNowMaximized) {
