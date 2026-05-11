@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="600.0" prefWidth="900.0"
+            xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="seng201.team0.controller.ShopController"
+            style="-fx-background-color: #111111;">
+
+    <!-- Optional background image. Delete this ImageView if you do not want a background. -->
+    <ImageView fitWidth="900"
+               fitHeight="600"
+               preserveRatio="false"
+               mouseTransparent="true">
+        <image>
+            <Image url="@../images/mainmenu.png" />
+        </image>
+    </ImageView>
+
+    <Label text="Shop"
+           layoutX="400"
+           layoutY="45"
+           textFill="GOLD"
+           style="-fx-font-size: 38px; -fx-font-weight: bold;" />
+
+    <Label fx:id="goldLabel"
+           layoutX="390"
+           layoutY="105"
+           text="Gold:"
+           textFill="WHITE"
+           style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+
+    <!-- Small Potion -->
+    <Label fx:id="smallPotionLabel"
+           layoutX="210"
+           layoutY="190"
+           prefWidth="330"
+           textFill="WHITE"
+           style="-fx-font-size: 15px; -fx-background-color: rgba(0,0,0,0.55); -fx-padding: 10;" />
+
+    <Button text="Buy"
+            layoutX="590"
+            layoutY="245"
+            prefWidth="100"
+            onAction="#onBuySmallPotion"
+            style="-fx-font-size: 14px; -fx-background-color: gold;" />
+
+    <!-- Party Potion -->
+    <Label fx:id="partyPotionLabel"
+           layoutX="210"
+           layoutY="290"
+           prefWidth="330"
+           textFill="WHITE"
+           style="-fx-font-size: 15px; -fx-background-color: rgba(0,0,0,0.55); -fx-padding: 10;" />
+
+    <Button text="Buy"
+            layoutX="590"
+            layoutY="335"
+            prefWidth="100"
+            onAction="#onBuyPartyPotion"
+            style="-fx-font-size: 14px; -fx-background-color: gold;" />
+
+    <!-- Full Restore -->
+    <Label fx:id="fullRestoreLabel"
+           layoutX="210"
+           layoutY="390"
+           prefWidth="330"
+           textFill="WHITE"
+           style="-fx-font-size: 15px; -fx-background-color: rgba(0,0,0,0.55); -fx-padding: 10;" />
+
+    <Button text="Buy"
+            layoutX="590"
+            layoutY="425"
+            prefWidth="100"
+            onAction="#onBuyFullRestore"
+            style="-fx-font-size: 14px; -fx-background-color: gold;" />
+
+    <Label fx:id="messageLabel"
+           layoutX="250"
+           layoutY="510"
+           prefWidth="400"
+           textAlignment="CENTER"
+           textFill="LIGHTGREEN"
+           style="-fx-font-size: 15px; -fx-font-weight: bold;" />
+
+    <Button text="Back"
+            layoutX="390"
+            layoutY="545"
+            prefWidth="120"
+            prefHeight="32"
+            onAction="#onBack"
+            style="-fx-font-size: 14px;" />
+
+</AnchorPane>
