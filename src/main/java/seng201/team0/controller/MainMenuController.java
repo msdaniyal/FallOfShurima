@@ -8,7 +8,10 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import seng201.team0.models.Game;
 import seng201.team0.models.Guild;
-
+import javafx.scene.paint.Color;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 
 /**
  * Controller for the real main menu screen.
@@ -25,7 +28,16 @@ public class MainMenuController {
     @FXML private Label partyCountLabel;
     @FXML private Label messageLabel;
 
+    @FXML private javafx.scene.layout.AnchorPane rootPane;
+    @FXML private javafx.scene.image.ImageView backgroundImage;
+    @FXML private Pane contentPane;
+
     private Game game;
+
+    @FXML
+    public void initialize() {
+        ScreenUtil.setupStretch(rootPane, backgroundImage, contentPane);
+    }
 
     public void setGameData(Game game) {
         this.game = game;
@@ -59,7 +71,7 @@ public class MainMenuController {
             controller.setGameData(game);
 
             Stage stage = (Stage) guildNameLabel.getScene().getWindow();
-            stage.setScene(new Scene(root, 900, 600));
+            ScreenUtil.switchScene(stage, root);
             stage.setTitle("The Fall of Shurima — My Party");
 
         } catch (Exception e) {
@@ -78,7 +90,7 @@ public class MainMenuController {
             controller.setGameData(game);
 
             Stage stage = (Stage) guildNameLabel.getScene().getWindow();
-            stage.setScene(new Scene(root, 900, 600));
+            ScreenUtil.switchScene(stage, root);
             stage.setTitle("The Fall of Shurima — Shop");
 
         } catch (Exception e) {

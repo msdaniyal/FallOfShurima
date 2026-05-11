@@ -4,8 +4,10 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.Node?>
 
-<AnchorPane prefHeight="500.0" prefWidth="800.0"
+<AnchorPane fx:id="rootPane"
+            prefHeight="500.0" prefWidth="800.0"
             xmlns="http://javafx.com/javafx/17.0.2-ea"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="seng201.team0.controller.MemoryGameController">
@@ -28,7 +30,7 @@
               text="Start Memory Attack"
               onAction="#startMemoryAttack" />
 
-      <ImageView fx:id="image0"
+      <ImageView fx:id="backgroundImage"
                  fitHeight="100.0"
                  fitWidth="100.0"
                  layoutX="180.0"

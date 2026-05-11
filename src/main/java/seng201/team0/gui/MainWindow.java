@@ -28,7 +28,13 @@ public class MainWindow extends Application {
 
         primaryStage.setScene(new Scene(root, 900, 600));
         primaryStage.setTitle("The Fall of Shurima");
+        primaryStage.setResizable(true);
         primaryStage.show();
+        primaryStage.maximizedProperty().addListener((obs, wasMaximized, isNowMaximized) -> {
+            if (isNowMaximized) {
+                primaryStage.setFullScreen(true);
+            }
+        });
 //            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/setup.fxml"));
 //            Parent root = loader.load();
 //

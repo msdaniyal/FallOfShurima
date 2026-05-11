@@ -1,58 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.shape.Rectangle?>
 
-<AnchorPane prefHeight="600.0" prefWidth="900.0"
-            xmlns="http://javafx.com/javafx/17.0.12"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="seng201.team0.controller.StartController">
-    <children>
+<AnchorPane fx:id="rootPane"
+            prefHeight="600.0"
+            prefWidth="900.0"
+            xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="seng201.team0.controller.StartController"
+            style="-fx-background-color: black;">
 
-        <!-- Background -->
-        <ImageView layoutX="0.0" layoutY="0.0"
-                   fitWidth="900.0" fitHeight="600.0"
-                   preserveRatio="false" pickOnBounds="false">
-            <image><Image url="@../images/shurima.png"/></image>
+    <Pane fx:id="contentPane"
+          prefWidth="900"
+          prefHeight="600">
+
+        <ImageView fx:id="backgroundImage"
+                   preserveRatio="false"
+                   mouseTransparent="true">
+            <image>
+                <Image url="@../images/shurima.png" />
+            </image>
         </ImageView>
 
-        <!-- Title — fades in on load -->
         <Label fx:id="titleLabel"
+               layoutX="145"
+               layoutY="185"
                text="THE FALL OF SHURIMA"
-               layoutX="0.0" layoutY="180.0"
-               prefWidth="900.0"
-               alignment="CENTER"
-               opacity="0.0"
-               textFill="#C9A84C"
-               style="-fx-font-family:Georgia;
-                      -fx-font-size:48px;
-                      -fx-font-weight:bold;"/>
+               textFill="#d6b63f"
+               style="-fx-font-size: 56px; -fx-font-weight: bold;" />
 
-        <!-- START button — fades in after title, pulses glow -->
         <Button fx:id="startButton"
+                layoutX="365"
+                layoutY="410"
+                prefWidth="170"
+                prefHeight="48"
                 text="START"
-                layoutX="375.0" layoutY="430.0"
-                prefWidth="150.0" prefHeight="48.0"
-                opacity="0.0"
+                textFill="#d6b63f"
                 onAction="#onStart"
-                style="-fx-background-color:transparent;
-                       -fx-border-color:#C9A84C;
-                       -fx-border-width:2;
-                       -fx-text-fill:#C9A84C;
-                       -fx-font-family:Georgia;
-                       -fx-font-size:22px;
-                       -fx-font-weight:bold;
-                       -fx-cursor:hand;"/>
+                style="-fx-background-color: rgba(0,0,0,0.25);
+                       -fx-border-color: #d6b63f;
+                       -fx-border-width: 2;
+                       -fx-font-size: 26px;
+                       -fx-font-weight: bold;" />
 
-        <!-- Black overlay used for the transition wipe — starts fully transparent -->
         <Rectangle fx:id="transitionOverlay"
-                   layoutX="0.0" layoutY="0.0"
-                   width="900.0" height="600.0"
-                   opacity="0.0"
-                   mouseTransparent="true"
-                   fill="black"/>
+                   width="900"
+                   height="600"
+                   fill="BLACK"
+                   opacity="0"
+                   mouseTransparent="true" />
 
-    </children>
+    </Pane>
+
 </AnchorPane>

@@ -17,6 +17,9 @@ import seng201.team0.models.Difficulty;
 import seng201.team0.models.Faction;
 import seng201.team0.models.Game;
 import seng201.team0.models.Guild;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +38,9 @@ public class CharacterSelectController {
     @FXML private Label instructionLabel;
     @FXML private Label selectedCountLabel;
     @FXML private Label warningLabel;
+    @FXML private AnchorPane rootPane;
+    @FXML private ImageView backgroundImage;
+    @FXML private Pane contentPane;
 
     // ── State ─────────────────────────────────────────────────────────────────
     private Guild guild;
@@ -46,11 +52,14 @@ public class CharacterSelectController {
     private final List<Adventurer> selectedCharacters = new ArrayList<>();
     private final List<VBox> characterCards = new ArrayList<>();
 
-    // ── Display maximum selecting number  ─────────────────────────────────────
+
+    // ── Display ───────────────────────────────────────────────────────────────
     private static final int MAX_SELECTED = 5;
 
     @FXML
     public void initialize() {
+        ScreenUtil.setupStretch(rootPane, backgroundImage, contentPane);
+
         selectedCountLabel.setText("Selected: 0 / " + MAX_SELECTED);
         warningLabel.setText("");
     }
@@ -329,7 +338,7 @@ public class CharacterSelectController {
             mainMenuController.setGameData(game);
 
             Stage stage = (Stage) characterGrid.getScene().getWindow();
-            stage.setScene(new Scene(root, 900, 600));
+            ScreenUtil.switchScene(stage, root);
             stage.setTitle("The Fall of Shurima — Main Menu");
 
         } catch (Exception e) {
@@ -345,7 +354,7 @@ public class CharacterSelectController {
             Parent root = loader.load();
 
             Stage stage = (Stage) characterGrid.getScene().getWindow();
-            stage.setScene(new Scene(root, 900, 600));
+            ScreenUtil.switchScene(stage, root);
             stage.setTitle("The Fall of Shurima — Setup");
 
         } catch (Exception e) {

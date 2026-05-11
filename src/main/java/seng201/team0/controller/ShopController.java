@@ -15,6 +15,9 @@ import seng201.team0.models.Guild;
 import seng201.team0.models.Item;
 import seng201.team0.models.ItemType;
 import javafx.scene.control.ChoiceDialog;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +39,9 @@ public class ShopController {
     // ── FXML fields ───────────────────────────────────────────────────────────
     @FXML private Label goldLabel;
     @FXML private Label messageLabel;
+    @FXML private AnchorPane rootPane;
+    @FXML private ImageView backgroundImage;
+    @FXML private Pane contentPane;
 
     @FXML private Label smallPotionLabel;
     @FXML private Label partyPotionLabel;
@@ -61,6 +67,7 @@ public class ShopController {
      */
     @FXML
     public void initialize() {
+        ScreenUtil.setupStretch(rootPane, backgroundImage, contentPane);
         messageLabel.setText("");
     }
 
@@ -319,7 +326,7 @@ public class ShopController {
             controller.setGameData(game);
 
             Stage stage = (Stage) goldLabel.getScene().getWindow();
-            stage.setScene(new Scene(root, 900, 600));
+            ScreenUtil.switchScene(stage, root);
             stage.setTitle("The Fall of Shurima — Main Menu");
 
         } catch (Exception e) {

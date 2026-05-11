@@ -4,11 +4,12 @@ import javafx.animation.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.RadialGradient;
 import javafx.scene.paint.CycleMethod;
@@ -21,15 +22,18 @@ import javafx.util.Duration;
  * Controller for the lore screen shown between start and setup.
  *
  * Sequence:
- *   1. Screen fades in from black
- *   2. Golden sunburst explosion animates on the canvas
- *   3. Burst fades out, lore text fades in and types out letter by letter
- *   4. "Click to continue" prompt appears
- *   5. Player clicks → fade to black → setup.fxml loads → fade in
+ * 1. Screen fades in from black
+ * 2. Golden sunburst explosion animates on the canvas
+ * 3. Burst fades out, lore text fades in and types out letter by letter
+ * 4. "Click to continue" prompt appears
+ * 5. Player clicks -> fade to black -> setup.fxml loads
  *
  * @author Mohammed, Xinyi
  */
 public class LoreController1 {
+
+    @FXML private AnchorPane rootPane;
+    @FXML private Pane contentPane;
 
     @FXML private Canvas burstCanvas;
     @FXML private Label loreLabel;
@@ -40,16 +44,13 @@ public class LoreController1 {
     private static final String LORE_TEXT =
             "\"How the empire that once ruled Runeterra fell...\"";
 
-    // Tracks whether clicking is allowed yet
     private boolean readyToContinue = false;
 
     @FXML
     public void initialize() {
-        // Start fully black — fade in first
+        ScreenUtil.setupStretch(rootPane, null, contentPane);
         fadeInFromBlack();
     }
-
-    // ── Step 1: Fade in from black ────────────────────────────────────────────
 
     private void fadeInFromBlack() {
         FadeTransition fadeIn = new FadeTransition(Duration.millis(600), transitionOverlay);
@@ -59,32 +60,28 @@ public class LoreController1 {
         fadeIn.play();
     }
 
-    // ── Step 2: Golden sunburst ───────────────────────────────────────────────
-
-    /**
-     * Draws an expanding golden radial burst on the canvas.
-     * The burst grows from radius 0 to ~600 over 1.2s using an AnimationTimer,
-     * then fades out and hands off to the typewriter.
-     */
     private void playBurst() {
         GraphicsContext gc = burstCanvas.getGraphicsContext2D();
-        double cx = 450, cy = 300; // centre of screen
+        double cx = 450;
+        double cy = 300;
 
-        // Animate burst radius expanding
         final long[] startTime = {-1};
-        final double burstDuration = 1200; // ms
+        final double burstDuration = 1200;
 
         AnimationTimer burst = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                if (startTime[0] < 0) startTime[0] = now;
-                double elapsed = (now - startTime[0]) / 1_000_000.0; // ms
+                if (startTime[0] < 0) {
+                    startTime[0] = now;
+                }
+
+                double elapsed = (now - startTime[0]) / 1_000_000.0;
                 double progress = Math.min(elapsed / burstDuration, 1.0);
 
                 gc.clearRect(0, 0, 900, 600);
 
-                // Draw rays first (behind the radial glow)
                 int numRays = 24;
+
                 for (int i = 0; i < numRays; i++) {
                     double angle = Math.toRadians(i * (360.0 / numRays));
                     double rayLen = progress * 600;
@@ -93,30 +90,36 @@ public class LoreController1 {
                     gc.setStroke(Color.color(1.0, 0.85, 0.2, rayAlpha));
                     gc.setLineWidth(2 + (1.0 - progress) * 6);
                     gc.strokeLine(
-                            cx, cy,
+                            cx,
+                            cy,
                             cx + Math.cos(angle) * rayLen,
                             cy + Math.sin(angle) * rayLen
                     );
                 }
 
-                // Radial glow — inner bright gold fading to transparent
                 double radius = progress * 500;
                 double alpha = (1.0 - progress) * 0.9;
+
                 RadialGradient glow = new RadialGradient(
-                        0, 0, cx, cy, radius,
-                        false, CycleMethod.NO_CYCLE,
+                        0,
+                        0,
+                        cx,
+                        cy,
+                        radius,
+                        false,
+                        CycleMethod.NO_CYCLE,
                         new Stop(0.0, Color.color(1.0, 0.95, 0.4, alpha)),
                         new Stop(0.3, Color.color(1.0, 0.75, 0.1, alpha * 0.6)),
                         new Stop(1.0, Color.color(1.0, 0.6, 0.0, 0.0))
                 );
+
                 gc.setFill(glow);
                 gc.fillOval(cx - radius, cy - radius, radius * 2, radius * 2);
 
                 if (progress >= 1.0) {
                     stop();
-                    // Fade out the canvas then start typewriter
-                    FadeTransition canvasFade = new FadeTransition(
-                            Duration.millis(400), burstCanvas);
+
+                    FadeTransition canvasFade = new FadeTransition(Duration.millis(400), burstCanvas);
                     canvasFade.setFromValue(1.0);
                     canvasFade.setToValue(0.0);
                     canvasFade.setOnFinished(ev -> startTypewriter());
@@ -124,18 +127,13 @@ public class LoreController1 {
                 }
             }
         };
+
         burst.start();
     }
 
-    // ── Step 3: Typewriter ────────────────────────────────────────────────────
-
-    /**
-     * Fades in the label then types out LORE_TEXT one character at a time,
-     * each character appearing every 50ms.
-     */
     private void startTypewriter() {
-        // Fade label in
         loreLabel.setText("");
+
         FadeTransition labelFade = new FadeTransition(Duration.millis(400), loreLabel);
         labelFade.setFromValue(0.0);
         labelFade.setToValue(1.0);
@@ -145,10 +143,10 @@ public class LoreController1 {
 
     private void typeNextChar(int index) {
         if (index >= LORE_TEXT.length()) {
-            // Typing done — show continue prompt
             showContinuePrompt();
             return;
         }
+
         loreLabel.setText(LORE_TEXT.substring(0, index + 1));
 
         PauseTransition pause = new PauseTransition(Duration.millis(50));
@@ -156,29 +154,26 @@ public class LoreController1 {
         pause.play();
     }
 
-    // ── Step 4: Continue prompt ───────────────────────────────────────────────
-
     private void showContinuePrompt() {
         FadeTransition promptFade = new FadeTransition(Duration.millis(600), continueLabel);
         promptFade.setFromValue(0.0);
         promptFade.setToValue(1.0);
         promptFade.setOnFinished(e -> {
-            // Now allow clicks
             readyToContinue = true;
             clickCatcher.setMouseTransparent(false);
         });
         promptFade.play();
     }
 
-    // ── Step 5: Navigate to setup ─────────────────────────────────────────────
-
     @FXML
     public void onContinue() {
-        if (!readyToContinue) return;
+        if (!readyToContinue) {
+            return;
+        }
+
         readyToContinue = false;
         clickCatcher.setMouseTransparent(true);
 
-        // Fade to black then load setup
         FadeTransition fadeOut = new FadeTransition(Duration.millis(600), transitionOverlay);
         fadeOut.setFromValue(0.0);
         fadeOut.setToValue(1.0);
@@ -188,25 +183,12 @@ public class LoreController1 {
 
     private void loadSetup() {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/fxml/setup.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/setup.fxml"));
             Parent root = loader.load();
 
             Stage stage = (Stage) loreLabel.getScene().getWindow();
-            stage.setScene(new Scene(root, 900, 600));
+            ScreenUtil.switchScene(stage, root);
             stage.setTitle("The Fall of Shurima — Setup");
-
-            // Fade in from black on setup scene
-            AnchorPane setupRoot = (AnchorPane) root;
-            Rectangle fadeInRect = new Rectangle(900, 600, Color.BLACK);
-            fadeInRect.setMouseTransparent(true);
-            setupRoot.getChildren().add(fadeInRect);
-
-            FadeTransition fadeIn = new FadeTransition(Duration.millis(600), fadeInRect);
-            fadeIn.setFromValue(1.0);
-            fadeIn.setToValue(0.0);
-            fadeIn.setOnFinished(ev -> setupRoot.getChildren().remove(fadeInRect));
-            fadeIn.play();
 
         } catch (Exception e) {
             e.printStackTrace();

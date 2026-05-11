@@ -18,6 +18,9 @@ import javafx.stage.Stage;
 import seng201.team0.models.Difficulty;
 import seng201.team0.models.Faction;
 import seng201.team0.models.Guild;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 
 /**
  * Controller for the setup screen.
@@ -33,6 +36,9 @@ public class SetupController {
     @FXML private Label validationLabel;
     @FXML private ImageView aatroxImage;
     @FXML private ImageView xolaaniImage;
+    @FXML private AnchorPane rootPane;
+    @FXML private ImageView backgroundImage;
+    @FXML private Pane contentPane;
 
     // ── Hover stat panels ─────────────────────────────────────────────────────
     @FXML private VBox aatroxStats;
@@ -68,10 +74,11 @@ public class SetupController {
 
     @FXML
     public void initialize() {
+        ScreenUtil.setupStretch(rootPane, backgroundImage, contentPane);
+
         aatroxStatText.setText(AATROX_INFO);
         xolaaniStatText.setText(XOLAANI_INFO);
 
-        // Load warrior images
         aatroxImage.setImage(new Image(
                 getClass().getResource("/images/aatrox.png").toExternalForm()));
         xolaaniImage.setImage(new Image(
@@ -200,7 +207,7 @@ public class SetupController {
             characterSelectController.setGameData(pendingGuild, difficulty);
 
             Stage stage = (Stage) guildNameField.getScene().getWindow();
-            stage.setScene(new Scene(root, 900, 600));
+            ScreenUtil.switchScene(stage, root);
             stage.setTitle("The Fall of Shurima — Choose Warriors");
 
         } catch (Exception e) {

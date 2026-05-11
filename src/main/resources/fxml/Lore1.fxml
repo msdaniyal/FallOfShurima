@@ -1,62 +1,83 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.shape.Rectangle?>
 
-<AnchorPane prefHeight="600.0" prefWidth="900.0"
+<AnchorPane fx:id="rootPane"
+            prefHeight="600.0"
+            prefWidth="900.0"
             xmlns="http://javafx.com/javafx/17.0.12"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="seng201.team0.controller.LoreController1">
-    <children>
+            fx:controller="seng201.team0.controller.LoreController1"
+            style="-fx-background-color: #111111;">
+
+
+    <Pane fx:id="contentPane"
+          prefWidth="900.0"
+          prefHeight="600.0">
 
         <!-- Dark background -->
-        <Rectangle layoutX="0" layoutY="0" width="900" height="600" fill="black"/>
+        <Rectangle layoutX="0"
+                   layoutY="0"
+                   width="900"
+                   height="600"
+                   fill="black"/>
 
-        <!-- Sunburst canvas — controller draws the golden explosion here -->
-        <javafx.scene.canvas.Canvas fx:id="burstCanvas"
-                                    layoutX="0" layoutY="0"
-                                    width="900" height="600"/>
+        <!-- Sunburst canvas -->
+        <Canvas fx:id="burstCanvas"
+                layoutX="0"
+                layoutY="0"
+                width="900"
+                height="600"/>
 
-        <!-- Lore text — types out letter by letter -->
+        <!-- Lore text -->
         <Label fx:id="loreLabel"
-               layoutX="100.0" layoutY="200.0"
+               layoutX="100.0"
+               layoutY="200.0"
                prefWidth="700.0"
                wrapText="true"
                alignment="CENTER"
                textFill="#C9A84C"
                opacity="0.0"
-               style="-fx-font-family:Georgia;
-                      -fx-font-size:28px;
-                      -fx-font-style:italic;"/>
+               style="-fx-font-family: Georgia;
+                      -fx-font-size: 28px;
+                      -fx-font-style: italic;"/>
 
-        <!-- Click to continue — appears after typing finishes -->
+        <!-- Click to continue -->
         <Label fx:id="continueLabel"
-               layoutX="0.0" layoutY="520.0"
+               layoutX="0.0"
+               layoutY="520.0"
                prefWidth="900.0"
                alignment="CENTER"
                text="Click anywhere to continue..."
                textFill="#aaaaaa"
                opacity="0.0"
-               style="-fx-font-family:Georgia; -fx-font-size:14px;"/>
+               style="-fx-font-family: Georgia;
+                      -fx-font-size: 14px;"/>
 
-        <!-- Invisible click-catcher — only active after typing finishes -->
+        <!-- Invisible click-catcher -->
         <Rectangle fx:id="clickCatcher"
-                   layoutX="0" layoutY="0"
-                   width="900" height="600"
+                   layoutX="0"
+                   layoutY="0"
+                   width="900"
+                   height="600"
                    fill="transparent"
                    mouseTransparent="true"
                    onMouseClicked="#onContinue"/>
 
         <!-- Black overlay for fade transitions -->
         <Rectangle fx:id="transitionOverlay"
-                   layoutX="0" layoutY="0"
-                   width="900" height="600"
+                   layoutX="0"
+                   layoutY="0"
+                   width="900"
+                   height="600"
                    fill="black"
                    opacity="1.0"
                    mouseTransparent="true"/>
 
-    </children>
+    </Pane>
+
 </AnchorPane>

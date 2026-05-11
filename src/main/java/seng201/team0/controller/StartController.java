@@ -26,11 +26,28 @@ public class StartController {
     @FXML private Label titleLabel;
     @FXML private Button startButton;
     @FXML private Rectangle transitionOverlay;
+    @FXML private javafx.scene.layout.AnchorPane rootPane;
+    @FXML private javafx.scene.image.ImageView backgroundImage;
+    @FXML private javafx.scene.layout.Pane contentPane;
 
     @FXML
     public void initialize() {
+        ScreenUtil.setupStretch(rootPane, backgroundImage, contentPane);
         applyTitleGlow();
         playTitleFadeIn();
+    }
+
+    private void setupResponsiveScaling() {
+        rootPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                rootPane.scaleXProperty().bind(
+                        newScene.widthProperty().divide(900)
+                );
+                rootPane.scaleYProperty().bind(
+                        newScene.heightProperty().divide(600)
+                );
+            }
+        });
     }
 
     // ── Title ─────────────────────────────────────────────────────────────────
@@ -103,9 +120,13 @@ public class StartController {
                 Parent root = loader.load();
 
                 Stage stage = (Stage) startButton.getScene().getWindow();
-                Scene newScene = new Scene(root, 900, 600);
-                stage.setScene(newScene);
+                double currentWidth = stage.getScene().getWidth();
+                double currentHeight = stage.getScene().getHeight();
+                boolean wasFullScreen = stage.isFullScreen();
+
+                ScreenUtil.switchScene(stage, root);
                 stage.setTitle("The Fall of Shurima");
+
 
                 // Fade in from black on the new scene
                 // We add a temporary black rectangle on top of the setup scene and fade it out
