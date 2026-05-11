@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Controller for shop.fxml.
+ * Controller for the shop page screen.
  *
  * The shop sells three healing items:
  * 1. Small Potion  - heals one selected adventurer
