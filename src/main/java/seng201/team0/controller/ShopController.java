@@ -29,7 +29,7 @@ import java.util.List;
  *
  * Item prices change depending on difficulty.
  *
- * @author Xinyi
+ * @author Mohammed, Xinyi
  */
 public class ShopController {
 
