@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 import seng201.team0.models.Game;
 import seng201.team0.models.Guild;
 
+
 /**
  * Controller for the real main menu screen.
  * Shows three options:
@@ -69,9 +70,20 @@ public class MainMenuController {
 
     @FXML
     public void onShop() {
-        messageLabel.setText("Shop screen coming soon.");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/shop.fxml"));
+            Parent root = loader.load();
 
-        // Later:
-        // navigateToShopScreen();
+            ShopController controller = loader.getController();
+            controller.setGameData(game);
+
+            Stage stage = (Stage) guildNameLabel.getScene().getWindow();
+            stage.setScene(new Scene(root, 900, 600));
+            stage.setTitle("The Fall of Shurima — Shop");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            messageLabel.setText("Error loading shop.");
+        }
     }
 }
