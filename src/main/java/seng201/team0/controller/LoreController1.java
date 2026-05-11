@@ -20,14 +20,12 @@ import javafx.util.Duration;
 
 /**
  * Controller for the lore screen shown between start and setup.
- *
  * Sequence:
  * 1. Screen fades in from black
  * 2. Golden sunburst explosion animates on the canvas
  * 3. Burst fades out, lore text fades in and types out letter by letter
  * 4. "Click to continue" prompt appears
  * 5. Player clicks -> fade to black -> setup.fxml loads
- *
  * @author Mohammed, Xinyi
  */
 public class LoreController1 {
