@@ -51,7 +51,6 @@ public class StartController {
     }
 
     // ── Title ─────────────────────────────────────────────────────────────────
-
     private void applyTitleGlow() {
         DropShadow glow = new DropShadow();
         glow.setColor(Color.color(0.8, 0.65, 0.1, 0.8));
@@ -70,7 +69,6 @@ public class StartController {
     }
 
     // ── Button ────────────────────────────────────────────────────────────────
-
     private void playButtonFadeIn() {
         FadeTransition btnFade = new FadeTransition(Duration.seconds(1), startButton);
         btnFade.setFromValue(0.0);
@@ -97,7 +95,6 @@ public class StartController {
     }
 
     // ── Transition on START click ─────────────────────────────────────────────
-
     /**
      * On START click:
      *   1. Fade the black overlay IN (screen goes dark over 500ms)

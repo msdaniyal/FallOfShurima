@@ -39,15 +39,22 @@
                style="-fx-font-size: 30px; -fx-font-weight: bold;" />
 
         <Label fx:id="instructionLabel"
-               layoutX="335"
-               layoutY="115"
+               layoutX="320"
+               layoutY="100"
                text="Choose up to 5 warriors to join your guild."
                textFill="WHITE"
                style="-fx-font-size: 15px;" />
 
+        <Label fx:id="goldLabel"
+               layoutX="405"
+               layoutY="130"
+               text="Gold: 0"
+               textFill="GOLD"
+               style="-fx-font-size: 15px; -fx-font-weight: bold;" />
+
         <Label fx:id="selectedCountLabel"
                layoutX="405"
-               layoutY="155"
+               layoutY="160"
                text="Selected: 0 / 5"
                textFill="WHITE"
                style="-fx-font-size: 14px;" />

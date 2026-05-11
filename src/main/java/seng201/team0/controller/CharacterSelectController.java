@@ -38,6 +38,7 @@ public class CharacterSelectController {
     @FXML private Label instructionLabel;
     @FXML private Label selectedCountLabel;
     @FXML private Label warningLabel;
+    @FXML private Label goldLabel;
     @FXML private AnchorPane rootPane;
     @FXML private ImageView backgroundImage;
     @FXML private Pane contentPane;
@@ -46,6 +47,8 @@ public class CharacterSelectController {
     private Guild guild;
     private Difficulty difficulty;
     private Game game;
+    private int availableGold;
+
 
     // ── Show all characters ───────────────────────────────────────────────────
     private final List<Adventurer> allCharacters = new ArrayList<>();
@@ -71,6 +74,7 @@ public class CharacterSelectController {
         this.guild = guild;
         this.difficulty = difficulty;
         this.game = null;
+        this.availableGold = guild.getGold();
 
         createCharacterList();
         displayCharacters();
@@ -83,6 +87,7 @@ public class CharacterSelectController {
         this.game = game;
         this.guild = game.getGuild();
         this.difficulty = game.getDifficulty();
+        this.availableGold = guild.getGold();
 
         createCharacterList();
         displayCharacters();
@@ -168,7 +173,15 @@ public class CharacterSelectController {
                 highlightCard(card);
             }
         }
+
         updateSelectedCount();
+        updateGoldLabel();
+    }
+
+    private void updateGoldLabel() {
+        if (goldLabel != null) {
+            goldLabel.setText("Gold: " + availableGold);
+        }
     }
 
     private boolean isAlreadyInParty(Adventurer adventurer) {
@@ -246,6 +259,10 @@ public class CharacterSelectController {
         if (selectedCharacters.contains(adventurer)) {
             selectedCharacters.remove(adventurer);
             unhighlightCard(card);
+
+            // Refund when any selected character is removed
+            availableGold += adventurer.getPay();
+
         } else {
             if (selectedCharacters.size() >= MAX_SELECTED) {
                 warningLabel.setTextFill(Color.RED);
@@ -253,11 +270,21 @@ public class CharacterSelectController {
                 return;
             }
 
+            if (availableGold < adventurer.getPay()) {
+                warningLabel.setTextFill(Color.RED);
+                warningLabel.setText("Not enough gold to hire " + adventurer.getName() + ".");
+                return;
+            }
+
+            // Pay when any character is selected
+            availableGold -= adventurer.getPay();
+
             selectedCharacters.add(adventurer);
             highlightCard(card);
         }
 
         updateSelectedCount();
+        updateGoldLabel();
     }
 
     private void highlightCard(VBox card) {
@@ -305,6 +332,20 @@ public class CharacterSelectController {
             warningLabel.setTextFill(Color.RED);
             warningLabel.setText("Choose at least 1 warrior.");
             return;
+        }
+
+        int goldDifference = availableGold - guild.getGold();
+
+        if (goldDifference > 0) {
+            guild.addGold(goldDifference);
+        } else if (goldDifference < 0) {
+            boolean paid = guild.spendGold(-goldDifference);
+
+            if (!paid) {
+                warningLabel.setTextFill(Color.RED);
+                warningLabel.setText("Payment failed.");
+                return;
+            }
         }
 
         guild.getMainParty().clear();
