@@ -34,8 +34,8 @@
         </ImageView>
 
         <!-- Guild name row -->
-        <Label layoutX="40.0"
-               layoutY="40.0"
+        <Label layoutX="240.0"
+               layoutY="80.0"
                style="-fx-font-family: Georgia;
                       -fx-font-size: 22px;
                       -fx-font-weight: bold;"
@@ -43,8 +43,8 @@
                textFill="#C9A84C" />
 
         <TextField fx:id="guildNameField"
-                   layoutX="240.0"
-                   layoutY="35.0"
+                   layoutX="440.0"
+                   layoutY="75.0"
                    prefHeight="36.0"
                    prefWidth="220.0"
                    promptText="2–12 characters"
@@ -58,7 +58,7 @@
 
         <!-- Heading -->
         <Label layoutX="40.0"
-               layoutY="100.0"
+               layoutY="170.0"
                style="-fx-font-family: Georgia;
                       -fx-font-size: 26px;
                       -fx-font-weight: bold;"
@@ -184,78 +184,101 @@
                        -fx-cursor: hand;"
                 text="CONFIRM" />
 
-        <!-- Difficulty popup overlay -->
+        <!-- ═══════════════════ DIFFICULTY POPUP OVERLAY ═══════════════════ -->
         <Rectangle fx:id="popupOverlay"
                    height="600.0"
+                   width="900.0"
                    layoutX="0.0"
                    layoutY="0.0"
-                   style="-fx-fill: #000000aa;"
-                   visible="false"
-                   width="900.0" />
+                   fill="#000000AA"
+                   visible="false" />
 
-        <!-- Difficulty popup -->
         <VBox fx:id="difficultyPopup"
-              layoutX="275.0"
-              layoutY="150.0"
-              prefWidth="350.0"
-              style="-fx-background-color: #1a1a2e;
-                     -fx-border-color: #5599ff;
-                     -fx-border-width: 2;
-                     -fx-border-radius: 8;
-                     -fx-background-radius: 8;"
-              visible="false">
+              layoutX="245.0"
+              layoutY="110.0"
+              prefWidth="410.0"
+              spacing="14.0"
+              visible="false"
+              style="-fx-background-color: linear-gradient(to bottom, #1b1623, #0f0b14);
+             -fx-border-color: #d4af37;
+             -fx-border-width: 2.5;
+             -fx-border-radius: 14;
+             -fx-background-radius: 14;
+             -fx-padding: 18 20 18 20;">
 
-            <HBox alignment="CENTER_LEFT"
-                  style="-fx-background-color: #2244aa;
-                         -fx-background-radius: 6 6 0 0;
-                         -fx-padding: 8 12;">
-                <Label style="-fx-font-family: Georgia;
-                              -fx-font-size: 15px;
-                              -fx-font-weight: bold;"
-                       text="⚔  Select Combat Difficulty"
-                       textFill="white" />
-            </HBox>
+            <children>
 
-            <Button fx:id="easyBtn"
-                    maxWidth="Infinity"
-                    onAction="#onEasySelected"
-                    prefHeight="52.0"
-                    style="-fx-background-color: #888899;
-                           -fx-text-fill: white;
-                           -fx-font-family: Georgia;
-                           -fx-font-size: 20px;
-                           -fx-font-weight: bold;
-                           -fx-cursor: hand;
-                           -fx-border-color: #aaaacc;
-                           -fx-border-width: 0 0 1 0;"
-                    text="Easy" />
+                <!-- Title -->
+                <VBox alignment="CENTER" spacing="4.0">
+                    <children>
+                        <Label text="⚔ Select Difficulty"
+                               textFill="#f4d36b"
+                               style="-fx-font-family: Georgia;
+                              -fx-font-size: 24px;
+                              -fx-font-weight: bold;" />
+                    </children>
+                </VBox>
 
-            <Button fx:id="normalBtn"
-                    maxWidth="Infinity"
-                    onAction="#onNormalSelected"
-                    prefHeight="52.0"
-                    style="-fx-background-color: #888899;
-                           -fx-text-fill: white;
-                           -fx-font-family: Georgia;
-                           -fx-font-size: 20px;
-                           -fx-font-weight: bold;
-                           -fx-cursor: hand;
-                           -fx-border-color: #aaaacc;
-                           -fx-border-width: 0 0 1 0;"
-                    text="Normal" />
+                <!-- Divider -->
+                <Rectangle height="1.5"
+                           width="360.0"
+                           fill="#d4af37" />
 
-            <Button fx:id="hardBtn"
-                    maxWidth="Infinity"
-                    onAction="#onHardSelected"
-                    prefHeight="52.0"
-                    style="-fx-background-color: #888899;
-                           -fx-text-fill: white;
-                           -fx-font-family: Georgia;
-                           -fx-font-size: 20px;
-                           -fx-font-weight: bold;
-                           -fx-cursor: hand;"
-                    text="Hard" />
+                <!-- Easy -->
+                <Button fx:id="easyBtn"
+                        maxWidth="Infinity"
+                        prefHeight="62.0"
+                        onAction="#onEasySelected"
+                        text="Easy"
+                        wrapText="true"
+                        style="-fx-background-color: linear-gradient(to bottom, #6f8f3f, #4f682a);
+                       -fx-text-fill: white;
+                       -fx-font-family: Georgia;
+                       -fx-font-size: 28px;
+                       -fx-font-weight: bold;
+                       -fx-background-radius: 10;
+                       -fx-border-radius: 10;
+                       -fx-border-color: #b7d37a;
+                       -fx-border-width: 1.5;
+                       -fx-cursor: hand;" />
 
+                <!-- Normal -->
+                <Button fx:id="normalBtn"
+                        maxWidth="Infinity"
+                        prefHeight="62.0"
+                        onAction="#onNormalSelected"
+                        text="Normal"
+                        wrapText="true"
+                        style="-fx-background-color: linear-gradient(to bottom, #4e5f87, #33405f);
+                       -fx-text-fill: white;
+                       -fx-font-family: Georgia;
+                       -fx-font-size: 28px;
+                       -fx-font-weight: bold;
+                       -fx-background-radius: 10;
+                       -fx-border-radius: 10;
+                       -fx-border-color: #8fa8da;
+                       -fx-border-width: 1.5;
+                       -fx-cursor: hand;" />
+
+                <!-- Hard -->
+                <Button fx:id="hardBtn"
+                        maxWidth="Infinity"
+                        prefHeight="62.0"
+                        onAction="#onHardSelected"
+                        text="Hard"
+                        wrapText="true"
+                        style="-fx-background-color: linear-gradient(to bottom, #8b3f3f, #5f2525);
+                       -fx-text-fill: white;
+                       -fx-font-family: Georgia;
+                       -fx-font-size: 28px;
+                       -fx-font-weight: bold;
+                       -fx-background-radius: 10;
+                       -fx-border-radius: 10;
+                       -fx-border-color: #d88a8a;
+                       -fx-border-width: 1.5;
+                       -fx-cursor: hand;" />
+
+            </children>
         </VBox>
 
     </Pane>

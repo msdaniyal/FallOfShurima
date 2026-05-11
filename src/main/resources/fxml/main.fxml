@@ -7,10 +7,13 @@
 <?import javafx.scene.Node?>
 
 <AnchorPane fx:id="rootPane"
-            prefHeight="500.0" prefWidth="800.0"
-            xmlns="http://javafx.com/javafx/17.0.2-ea"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="seng201.team0.controller.MemoryGameController">
+            prefHeight="600.0"
+            prefWidth="900.0"
+            xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="seng201.team0.controller.MainMenuController"
+            stylesheets="@../css/mainmenu.css"
+            style="-fx-background-color: black;">
 
    <children>
       <Label fx:id="statusLabel"

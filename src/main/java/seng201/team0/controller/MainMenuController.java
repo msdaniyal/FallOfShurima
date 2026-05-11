@@ -47,9 +47,9 @@ public class MainMenuController {
     private void updateDisplay() {
         Guild guild = game.getGuild();
 
-        guildNameLabel.setText("Guild: " + guild.getName());
-        goldLabel.setText("Gold: " + guild.getGold());
-        partyCountLabel.setText("Party Members: " + guild.getMainParty().size() + " / 5");
+        partyCountLabel.setText(guild.getMainParty().size() + " / 5");
+        guildNameLabel.setText(guild.getName());
+        goldLabel.setText(String.valueOf(guild.getGold()));
         messageLabel.setText("");
     }
 

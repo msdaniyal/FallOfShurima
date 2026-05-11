@@ -5,7 +5,13 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.Region?>
+
 
 <AnchorPane fx:id="rootPane"
             prefHeight="600.0"
@@ -13,105 +19,351 @@
             xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="seng201.team0.controller.ShopController"
-            style="-fx-background-color: #111111;">
+            style="-fx-background-color: black;">
 
     <Pane fx:id="contentPane"
           prefWidth="900.0"
           prefHeight="600.0">
 
         <ImageView fx:id="backgroundImage"
+                   fitWidth="900.0"
+                   fitHeight="600.0"
                    preserveRatio="false"
                    mouseTransparent="true">
             <image>
-                <Image url="@../images/mainmenu.png" />
+                <Image url="@../images/shop.png" />
             </image>
         </ImageView>
 
         <Label text="Shop"
-               layoutX="400"
-               layoutY="45"
+               layoutX="425"
+               layoutY="75"
                textFill="GOLD"
-               style="-fx-font-size: 38px;
-                      -fx-font-weight: bold;" />
+               style="-fx-font-size: 38px; -fx-font-weight: bold;" />
 
-        <Label fx:id="goldLabel"
-               layoutX="390"
-               layoutY="105"
-               text="Gold:"
-               textFill="WHITE"
-               style="-fx-font-size: 18px;
-                      -fx-font-weight: bold;" />
+        <!-- Top info bar, same position as Main Menu -->
+        <HBox layoutX="735"
+              layoutY="20"
+              prefWidth="130"
+              prefHeight="45"
+              spacing="10"
+              alignment="CENTER"
+              style="-fx-background-color: rgba(0,0,0,0.55);
+             -fx-border-color: gold;
+             -fx-border-width: 2;
+             -fx-padding: 0 12 0 12;">
 
-        <!-- Small Potion -->
-        <Label fx:id="smallPotionLabel"
-               layoutX="210"
-               layoutY="190"
-               prefWidth="330"
-               textFill="WHITE"
-               style="-fx-font-size: 15px;
-                      -fx-background-color: rgba(0,0,0,0.55);
-                      -fx-padding: 10;" />
+            <ImageView fitWidth="40"
+                       fitHeight="32"
+                       preserveRatio="true"
+                       mouseTransparent="true">
+                <image>
+                    <Image url="@../images/gold.png" />
+                </image>
+            </ImageView>
 
-        <Button text="Buy"
-                layoutX="590"
-                layoutY="245"
-                prefWidth="100"
-                onAction="#onBuySmallPotion"
-                style="-fx-font-size: 14px;
-                       -fx-background-color: gold;" />
+            <Label fx:id="goldLabel"
+                   text="0"
+                   textFill="WHITE"
+                   style="-fx-font-size: 18px; -fx-font-weight: bold;" />
 
-        <!-- Party Potion -->
-        <Label fx:id="partyPotionLabel"
-               layoutX="210"
-               layoutY="290"
-               prefWidth="330"
-               textFill="WHITE"
-               style="-fx-font-size: 15px;
-                      -fx-background-color: rgba(0,0,0,0.55);
-                      -fx-padding: 10;" />
+        </HBox>
 
-        <Button text="Buy"
-                layoutX="590"
-                layoutY="335"
-                prefWidth="100"
-                onAction="#onBuyPartyPotion"
-                style="-fx-font-size: 14px;
-                       -fx-background-color: gold;" />
 
-        <!-- Full Restore -->
-        <Label fx:id="fullRestoreLabel"
-               layoutX="210"
-               layoutY="390"
-               prefWidth="330"
-               textFill="WHITE"
-               style="-fx-font-size: 15px;
-                      -fx-background-color: rgba(0,0,0,0.55);
-                      -fx-padding: 10;" />
+        <!-- Three potions in a row -->
+        <HBox layoutX="105"
+              layoutY="180"
+              spacing="65"
+              alignment="CENTER">
 
-        <Button text="Buy"
-                layoutX="590"
-                layoutY="425"
-                prefWidth="100"
-                onAction="#onBuyFullRestore"
-                style="-fx-font-size: 14px;
-                       -fx-background-color: gold;" />
+            <!-- Silver Potion / Small Potion -->
+            <VBox spacing="10"
+                  alignment="CENTER"
+                  prefWidth="200">
+
+                <StackPane>
+
+                    <ImageView fx:id="smallPotionImage"
+                               fitWidth="130"
+                               fitHeight="130"
+                               preserveRatio="true"
+                               pickOnBounds="true"
+                               onMouseEntered="#onSmallPotionHover"
+                               onMouseExited="#onPotionHoverExit">
+                        <image>
+                            <Image url="@../images/silver_potion.png" />
+                        </image>
+                    </ImageView>
+
+                    <VBox fx:id="smallPotionStats"
+                          translateY="-95"
+                          mouseTransparent="true"
+                          visible="false"
+                          prefWidth="190"
+                          style="-fx-background-color: #000000cc;
+                 -fx-border-color: silver;
+                 -fx-border-width: 1.5;
+                 -fx-padding: 10;">
+                        <Label text="Silver Potion"
+                               textFill="SILVER"
+                               style="-fx-font-size: 15px; -fx-font-weight: bold;" />
+                        <Label fx:id="smallPotionStatText"
+                               textFill="WHITE"
+                               wrapText="true"
+                               style="-fx-font-size: 12px;" />
+                    </VBox>
+
+                </StackPane>
+
+                <Label text="Silver Potion"
+                       textFill="SILVER"
+                       style="-fx-font-size: 17px; -fx-font-weight: bold;" />
+
+                <Label fx:id="smallPotionPriceLabel"
+                       text="Price:"
+                       textFill="WHITE"
+                       style="-fx-font-size: 14px;" />
+
+                <HBox spacing="8"
+                      alignment="CENTER">
+                    <Button text="-"
+                            onAction="#onDecreaseSmallPotion"
+                            prefWidth="32"
+                            prefHeight="28" />
+
+                    <Label fx:id="smallPotionQuantityLabel"
+                           text="1"
+                           textFill="WHITE"
+                           alignment="CENTER"
+                           prefWidth="30"
+                           style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+
+                    <Button text="+"
+                            onAction="#onIncreaseSmallPotion"
+                            prefWidth="32"
+                            prefHeight="28" />
+                </HBox>
+
+                <Button text="Buy"
+                        onAction="#onBuySmallPotion"
+                        prefWidth="100"
+                        prefHeight="32"
+                        style="-fx-font-size: 14px; -fx-background-color: gold;" />
+
+            </VBox>
+
+            <!-- Gold Potion / Party Potion -->
+            <VBox spacing="10"
+                  alignment="CENTER"
+                  prefWidth="200">
+
+                <StackPane>
+
+                    <ImageView fx:id="partyPotionImage"
+                               fitWidth="130"
+                               fitHeight="130"
+                               preserveRatio="true"
+                               pickOnBounds="true"
+                               onMouseEntered="#onPartyPotionHover"
+                               onMouseExited="#onPotionHoverExit">
+                        <image>
+                            <Image url="@../images/gold_potion.png" />
+                        </image>
+                    </ImageView>
+
+                    <VBox fx:id="partyPotionStats"
+                          translateY="-95"
+                          mouseTransparent="true"
+                          visible="false"
+                          prefWidth="190"
+                          style="-fx-background-color: #000000cc;
+                 -fx-border-color: gold;
+                 -fx-border-width: 1.5;
+                 -fx-padding: 10;">
+                        <Label text="Gold Potion"
+                               textFill="GOLD"
+                               style="-fx-font-size: 15px; -fx-font-weight: bold;" />
+                        <Label fx:id="partyPotionStatText"
+                               textFill="WHITE"
+                               wrapText="true"
+                               style="-fx-font-size: 12px;" />
+                    </VBox>
+
+                </StackPane>
+
+                <Label text="Gold Potion"
+                       textFill="GOLD"
+                       style="-fx-font-size: 17px; -fx-font-weight: bold;" />
+
+                <Label fx:id="partyPotionPriceLabel"
+                       text="Price:"
+                       textFill="WHITE"
+                       style="-fx-font-size: 14px;" />
+
+                <HBox spacing="8"
+                      alignment="CENTER">
+                    <Button text="-"
+                            onAction="#onDecreasePartyPotion"
+                            prefWidth="32"
+                            prefHeight="28" />
+
+                    <Label fx:id="partyPotionQuantityLabel"
+                           text="1"
+                           textFill="WHITE"
+                           alignment="CENTER"
+                           prefWidth="30"
+                           style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+
+                    <Button text="+"
+                            onAction="#onIncreasePartyPotion"
+                            prefWidth="32"
+                            prefHeight="28" />
+                </HBox>
+
+                <Button text="Buy"
+                        onAction="#onBuyPartyPotion"
+                        prefWidth="100"
+                        prefHeight="32"
+                        style="-fx-font-size: 14px; -fx-background-color: gold;" />
+
+            </VBox>
+
+            <!-- Purple Potion / Full Restore -->
+            <VBox spacing="10"
+                  alignment="CENTER"
+                  prefWidth="200">
+
+                <StackPane>
+
+                    <ImageView fx:id="fullRestoreImage"
+                               fitWidth="130"
+                               fitHeight="130"
+                               preserveRatio="true"
+                               pickOnBounds="true"
+                               onMouseEntered="#onFullRestoreHover"
+                               onMouseExited="#onPotionHoverExit">
+                        <image>
+                            <Image url="@../images/purple_potion.png" />
+                        </image>
+                    </ImageView>
+
+                    <VBox fx:id="fullRestoreStats"
+                          translateY="-95"
+                          mouseTransparent="true"
+                          visible="false"
+                          prefWidth="190"
+                          style="-fx-background-color: #000000cc;
+                 -fx-border-color: #c77dff;
+                 -fx-border-width: 1.5;
+                 -fx-padding: 10;">
+                        <Label text="Purple Potion"
+                               textFill="#c77dff"
+                               style="-fx-font-size: 15px; -fx-font-weight: bold;" />
+                        <Label fx:id="fullRestoreStatText"
+                               textFill="WHITE"
+                               wrapText="true"
+                               style="-fx-font-size: 12px;" />
+                    </VBox>
+
+                </StackPane>
+
+                <Label text="Purple Potion"
+                       textFill="#c77dff"
+                       style="-fx-font-size: 17px; -fx-font-weight: bold;" />
+
+                <Label fx:id="fullRestorePriceLabel"
+                       text="Price:"
+                       textFill="WHITE"
+                       style="-fx-font-size: 14px;" />
+
+                <HBox spacing="8"
+                      alignment="CENTER">
+                    <Button text="-"
+                            onAction="#onDecreaseFullRestore"
+                            prefWidth="32"
+                            prefHeight="28" />
+
+                    <Label fx:id="fullRestoreQuantityLabel"
+                           text="1"
+                           textFill="WHITE"
+                           alignment="CENTER"
+                           prefWidth="30"
+                           style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+
+                    <Button text="+"
+                            onAction="#onIncreaseFullRestore"
+                            prefWidth="32"
+                            prefHeight="28" />
+                </HBox>
+
+                <Button text="Buy"
+                        onAction="#onBuyFullRestore"
+                        prefWidth="100"
+                        prefHeight="32"
+                        style="-fx-font-size: 14px; -fx-background-color: gold;" />
+
+            </VBox>
+
+        </HBox>
 
         <Label fx:id="messageLabel"
-               layoutX="250"
-               layoutY="510"
-               prefWidth="400"
-               textAlignment="CENTER"
+               layoutX="200"
+               layoutY="490"
+               prefWidth="500"
+               alignment="CENTER"
                textFill="LIGHTGREEN"
-               style="-fx-font-size: 15px;
-                      -fx-font-weight: bold;" />
+               style="-fx-font-size: 15px; -fx-font-weight: bold;" />
 
         <Button text="Back"
-                layoutX="390"
-                layoutY="545"
+                layoutX="410"
+                layoutY="540"
                 prefWidth="120"
                 prefHeight="32"
                 onAction="#onBack"
                 style="-fx-font-size: 14px;" />
+
+        <Rectangle fx:id="targetPopupOverlay"
+                   layoutX="0"
+                   layoutY="0"
+                   width="900"
+                   height="600"
+                   fill="#000000AA"
+                   visible="false" />
+
+        <VBox fx:id="targetPopup"
+              layoutX="275"
+              layoutY="160"
+              prefWidth="350"
+              spacing="14"
+              alignment="CENTER"
+              visible="false"
+              style="-fx-background-color: rgba(20,20,30,0.95);
+             -fx-border-color: gold;
+             -fx-border-width: 2;
+             -fx-border-radius: 10;
+             -fx-background-radius: 10;
+             -fx-padding: 20;">
+
+            <Label fx:id="targetPopupTitle"
+                   text="Choose a target"
+                   textFill="GOLD"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+
+            <Label text="Who should use the Silver Potion?"
+                   textFill="WHITE"
+                   style="-fx-font-size: 14px;" />
+
+            <VBox fx:id="targetListBox"
+                  spacing="8"
+                  alignment="CENTER" />
+
+            <Button text="Cancel"
+                    onAction="#onCancelTargetSelection"
+                    prefWidth="120"
+                    prefHeight="32"
+                    style="-fx-font-size: 14px;" />
+
+        </VBox>
 
     </Pane>
 

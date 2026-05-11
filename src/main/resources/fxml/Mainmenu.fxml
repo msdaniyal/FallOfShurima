@@ -5,7 +5,9 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
 <AnchorPane fx:id="rootPane"
@@ -14,15 +16,14 @@
             xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="seng201.team0.controller.MainMenuController"
+            stylesheets="@../css/mainmenu.css"
             style="-fx-background-color: black;">
 
     <Pane fx:id="contentPane"
-          prefWidth="900.0"
-          prefHeight="600.0">
+          prefWidth="900"
+          prefHeight="600">
 
         <ImageView fx:id="backgroundImage"
-                   fitWidth="900.0"
-                   fitHeight="600.0"
                    preserveRatio="false"
                    mouseTransparent="true">
             <image>
@@ -30,61 +31,110 @@
             </image>
         </ImageView>
 
+        <!-- Top info bar -->
+        <Pane layoutX="35"
+              layoutY="20"
+              prefWidth="830"
+              prefHeight="45"
+              style="-fx-background-color: rgba(0,0,0,0.55);
+             -fx-border-color: gold;
+             -fx-border-width: 2;">
+
+            <!-- Left: party members -->
+            <HBox layoutX="25"
+                  layoutY="5"
+                  spacing="8"
+                  alignment="CENTER_LEFT">
+
+                <ImageView fitWidth="33"
+                           fitHeight="32"
+                           preserveRatio="true"
+                           mouseTransparent="true">
+                    <image>
+                        <Image url="@../images/sword.png" />
+                    </image>
+                </ImageView>
+
+                <Label fx:id="partyCountLabel"
+                       text="0 / 5"
+                       textFill="WHITE"
+                       style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+
+            </HBox>
+
+            <!-- Center: guild name -->
+            <Label fx:id="guildNameLabel"
+                   layoutX="265"
+                   layoutY="9"
+                   prefWidth="300"
+                   alignment="CENTER"
+                   text="Guild Name"
+                   textFill="GOLD"
+                   style="-fx-font-size: 23px; -fx-font-weight: bold;" />
+
+            <!-- Right: gold -->
+            <HBox layoutX="675"
+                  layoutY="5"
+                  spacing="8"
+                  alignment="CENTER_RIGHT"
+                  prefWidth="130">
+
+                <ImageView fitWidth="40"
+                           fitHeight="32"
+                           preserveRatio="true"
+                           mouseTransparent="true">
+                    <image>
+                        <Image url="@../images/gold.png" />
+                    </image>
+                </ImageView>
+
+                <Label fx:id="goldLabel"
+                       text="0"
+                       textFill="WHITE"
+                       style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+
+            </HBox>
+
+        </Pane>
+
+        <!-- Title -->
         <Label text="Main Menu"
-               layoutX="360"
-               layoutY="70"
+               layoutX="370"
+               layoutY="130"
                textFill="GOLD"
                style="-fx-font-size: 38px; -fx-font-weight: bold;" />
 
-        <Label fx:id="guildNameLabel"
-               layoutX="355"
-               layoutY="150"
-               text="Guild:"
-               textFill="WHITE"
-               style="-fx-font-size: 18px;" />
-
-        <Label fx:id="goldLabel"
-               layoutX="355"
-               layoutY="185"
-               text="Gold:"
-               textFill="WHITE"
-               style="-fx-font-size: 18px;" />
-
-        <Label fx:id="partyCountLabel"
-               layoutX="355"
-               layoutY="220"
-               text="Party Members:"
-               textFill="WHITE"
-               style="-fx-font-size: 18px;" />
-
+        <!-- Buttons -->
         <VBox layoutX="350"
-              layoutY="280"
+              layoutY="270"
               spacing="18"
               alignment="CENTER">
 
-            <Button text="Start Quest"
+            <Button text="START QUEST"
                     onAction="#onStartQuest"
-                    prefWidth="200"
-                    prefHeight="42"
-                    style="-fx-font-size: 16px; -fx-background-color: gold;" />
+                    prefWidth="250"
+                    prefHeight="50"
+                    styleClass="main-menu-button" />
 
-            <Button text="My Party"
+            <Button text="MY PARTY"
                     onAction="#onMyParty"
-                    prefWidth="200"
-                    prefHeight="42"
-                    style="-fx-font-size: 16px;" />
+                    prefWidth="250"
+                    prefHeight="50"
+                    styleClass="main-menu-button" />
 
-            <Button text="Shop"
+            <Button text="SHOP"
                     onAction="#onShop"
-                    prefWidth="200"
-                    prefHeight="42"
-                    style="-fx-font-size: 16px;" />
+                    prefWidth="250"
+                    prefHeight="50"
+                    styleClass="main-menu-button" />
 
         </VBox>
 
         <Label fx:id="messageLabel"
-               layoutX="320"
+               layoutX="250"
                layoutY="520"
+               prefWidth="400"
+               textAlignment="CENTER"
                textFill="LIGHTGREEN"
                style="-fx-font-size: 15px;" />
 

@@ -30,10 +30,14 @@
 
         <Label fx:id="titleLabel"
                layoutX="145"
-               layoutY="185"
+               layoutY="235"
                text="THE FALL OF SHURIMA"
                textFill="#d6b63f"
-               style="-fx-font-size: 56px; -fx-font-weight: bold;" />
+               style="-fx-font-size: 56px;
+              -fx-font-weight: bold;
+              -fx-background-color: rgba(0,0,0,0.28);
+              -fx-background-radius: 8;
+              -fx-padding: 4 16 4 16;" />
 
         <Button fx:id="startButton"
                 layoutX="365"
