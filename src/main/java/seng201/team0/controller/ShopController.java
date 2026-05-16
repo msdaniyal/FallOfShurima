@@ -315,11 +315,6 @@ public class ShopController {
      */
     @FXML
     public void onBuySmallPotion() {
-        if (guild.getMainParty().isEmpty()) {
-            showError("Your party is empty.");
-            return;
-        }
-
         int totalCost = smallPotion.getCost() * smallPotionQuantity;
 
         if (guild.getGold() < totalCost) {
@@ -327,57 +322,13 @@ public class ShopController {
             return;
         }
 
-        showTargetSelectionPopup();
+        guild.spendGold(totalCost);
+        guild.addSmallPotions(smallPotionQuantity);
+
+        showSuccess("Bought " + smallPotionQuantity + " Silver Potion.");
+        updateGoldLabel();
     }
 
-    private void showTargetSelectionPopup() {
-        targetListBox.getChildren().clear();
-
-        targetPopupTitle.setText("Use " + smallPotionQuantity + " Silver Potion");
-
-        for (Adventurer adventurer : guild.getMainParty()) {
-            Button targetButton = new Button(
-                    adventurer.getName() +
-                            "    HP: " +
-                            adventurer.getCurrentHealth() +
-                            "/" +
-                            adventurer.getMaxHealth()
-            );
-
-            targetButton.setPrefWidth(260);
-            targetButton.setPrefHeight(36);
-            targetButton.setStyle(
-                    "-fx-font-size: 14px;" +
-                            "-fx-background-color: #333333;" +
-                            "-fx-text-fill: white;" +
-                            "-fx-border-color: gold;" +
-                            "-fx-border-width: 1;"
-            );
-
-            targetButton.setOnAction(event -> {
-                hideTargetSelectionPopup();
-                buyItem(smallPotion, adventurer, smallPotionQuantity);
-            });
-
-            targetListBox.getChildren().add(targetButton);
-        }
-
-        targetPopupOverlay.setVisible(true);
-        targetPopup.setVisible(true);
-        targetPopupOverlay.toFront();
-        targetPopup.toFront();
-    }
-
-    @FXML
-    public void onCancelTargetSelection() {
-        hideTargetSelectionPopup();
-    }
-
-    private void hideTargetSelectionPopup() {
-        targetPopupOverlay.setVisible(false);
-        targetPopup.setVisible(false);
-        targetListBox.getChildren().clear();
-    }
 
     /**
      * Buy Gold Potion.
@@ -385,7 +336,18 @@ public class ShopController {
      */
     @FXML
     public void onBuyPartyPotion() {
-        buyItem(partyPotion, null, partyPotionQuantity);
+        int totalCost = partyPotion.getCost() * partyPotionQuantity;
+
+        if (guild.getGold() < totalCost) {
+            showError("Not enough gold for " + partyPotionQuantity + " " + partyPotion.getName() + ".");
+            return;
+        }
+
+        guild.spendGold(totalCost);
+        guild.addPartyPotions(partyPotionQuantity);
+
+        showSuccess("Bought " + partyPotionQuantity + " Gold Potion.");
+        updateGoldLabel();
     }
 
     /**
@@ -394,7 +356,18 @@ public class ShopController {
      */
     @FXML
     public void onBuyFullRestore() {
-        buyItem(fullRestore, null, fullRestoreQuantity);
+        int totalCost = fullRestore.getCost() * fullRestoreQuantity;
+
+        if (guild.getGold() < totalCost) {
+            showError("Not enough gold for " + fullRestoreQuantity + " " + fullRestore.getName() + ".");
+            return;
+        }
+
+        guild.spendGold(totalCost);
+        guild.addFullRestores(fullRestoreQuantity);
+
+        showSuccess("Bought " + fullRestoreQuantity + " Purple Potion.");
+        updateGoldLabel();
     }
 
     /**

@@ -18,6 +18,10 @@ public class Guild {
     private List<Adventurer> reserves;
     private List<Adventurer> recruitPool;
 
+    private int smallPotionCount;
+    private int partyPotionCount;
+    private int fullRestoreCount;
+
     private static final int MAX_PARTY_SIZE = 5;
     private static final int MAX_RESERVE_SIZE = 5;
 
@@ -35,6 +39,9 @@ public class Guild {
         this.mainParty = new ArrayList<>();
         this.reserves = new ArrayList<>();
         this.recruitPool = new ArrayList<>();
+        this.smallPotionCount = 0;
+        this.partyPotionCount = 0;
+        this.fullRestoreCount = 0;
     }
 
     /**
@@ -92,6 +99,70 @@ public class Guild {
      */
     public List<Adventurer> getRecruitPool() {
         return recruitPool;
+    }
+
+    /**
+     * @return The number of small potion owned
+     */
+    public int getSmallPotionCount() {
+        return smallPotionCount;
+    }
+
+
+    /**
+     * @return The number of party potion owned
+     */
+    public int getPartyPotionCount() {
+        return partyPotionCount;
+    }
+
+    /**
+     * @return The number of full-restore potion owned
+     */
+    public int getFullRestoreCount() {
+        return fullRestoreCount;
+    }
+
+    public void addSmallPotions(int amount) {
+        smallPotionCount += amount;
+    }
+
+    public void addPartyPotions(int amount) {
+        partyPotionCount += amount;
+    }
+
+    public void addFullRestores(int amount) {
+        fullRestoreCount += amount;
+    }
+
+    public boolean useSmallPotion() {
+        if (smallPotionCount <= 0) {
+            return false;
+        }
+        smallPotionCount--;
+        return true;
+    }
+
+    public boolean usePartyPotion() {
+        if (partyPotionCount <= 0) {
+            return false;
+        }
+        partyPotionCount--;
+        return true;
+    }
+
+    public boolean useFullRestore() {
+        if (fullRestoreCount <= 0) {
+            return false;
+        }
+        fullRestoreCount--;
+        return true;
+    }
+
+    public void healMainPartyToFull() {
+        for (Adventurer adventurer : mainParty) {
+            adventurer.resetHealth();
+        }
     }
 
     /**

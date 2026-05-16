@@ -357,12 +357,6 @@
                   spacing="8"
                   alignment="CENTER" />
 
-            <Button text="Cancel"
-                    onAction="#onCancelTargetSelection"
-                    prefWidth="120"
-                    prefHeight="32"
-                    style="-fx-font-size: 14px;" />
-
         </VBox>
 
     </Pane>
