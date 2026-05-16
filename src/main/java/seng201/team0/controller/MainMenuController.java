@@ -41,6 +41,14 @@ public class MainMenuController {
     @FXML private Label partyPotionInventoryLabel;
     @FXML private Label fullRestoreInventoryLabel;
 
+    @FXML private Label ownedSmallPotionLabel;
+    @FXML private Label ownedPartyPotionLabel;
+    @FXML private Label ownedFullRestoreLabel;
+
+    @FXML private ImageView ownedSmallPotionImage;
+    @FXML private ImageView ownedPartyPotionImage;
+    @FXML private ImageView ownedFullRestoreImage;
+
     private Game game;
 
     @FXML

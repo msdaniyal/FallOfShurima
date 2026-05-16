@@ -69,6 +69,76 @@
 
         </HBox>
 
+        <!-- Owned potion inventory panel -->
+        <VBox fx:id="ownedPotionPanel"
+              layoutX="25"
+              layoutY="20"
+              spacing="7"
+              alignment="CENTER"
+              prefWidth="155"
+              prefHeight="145"
+              style="-fx-background-color: rgba(0,0,0,0.55);
+             -fx-border-color: #d6b63f;
+             -fx-border-width: 2;
+             -fx-border-radius: 14;
+             -fx-background-radius: 14;
+             -fx-padding: 8;">
+
+            <HBox spacing="10" alignment="CENTER">
+                <ImageView fx:id="ownedSmallPotionImage"
+                           fitWidth="28"
+                           fitHeight="28"
+                           preserveRatio="true">
+                    <image>
+                        <Image url="@../images/silver_potion.png" />
+                    </image>
+                </ImageView>
+
+                <Label fx:id="ownedSmallPotionLabel"
+                       text="x0"
+                       textFill="WHITE"
+                       style="-fx-font-size: 15px;
+                      -fx-font-weight: bold;
+                      -fx-effect: dropshadow(gaussian, black, 4, 0.8, 0, 0);" />
+            </HBox>
+
+            <HBox spacing="10" alignment="CENTER">
+                <ImageView fx:id="ownedPartyPotionImage"
+                           fitWidth="28"
+                           fitHeight="28"
+                           preserveRatio="true">
+                    <image>
+                        <Image url="@../images/gold_potion.png" />
+                    </image>
+                </ImageView>
+
+                <Label fx:id="ownedPartyPotionLabel"
+                       text="x0"
+                       textFill="WHITE"
+                       style="-fx-font-size: 15px;
+                      -fx-font-weight: bold;
+                      -fx-effect: dropshadow(gaussian, black, 4, 0.8, 0, 0);" />
+            </HBox>
+
+            <HBox spacing="10" alignment="CENTER">
+                <ImageView fx:id="ownedFullRestoreImage"
+                           fitWidth="28"
+                           fitHeight="28"
+                           preserveRatio="true">
+                    <image>
+                        <Image url="@../images/purple_potion.png" />
+                    </image>
+                </ImageView>
+
+                <Label fx:id="ownedFullRestoreLabel"
+                       text="x0"
+                       textFill="WHITE"
+                       style="-fx-font-size: 15px;
+                      -fx-font-weight: bold;
+                      -fx-effect: dropshadow(gaussian, black, 4, 0.8, 0, 0);" />
+            </HBox>
+
+        </VBox>
 
         <!-- Three potions in a row -->
         <HBox layoutX="105"

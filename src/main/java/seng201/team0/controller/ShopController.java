@@ -60,6 +60,14 @@ public class ShopController {
     @FXML private Label partyPotionQuantityLabel;
     @FXML private Label fullRestoreQuantityLabel;
 
+    @FXML private Label ownedSmallPotionLabel;
+    @FXML private Label ownedPartyPotionLabel;
+    @FXML private Label ownedFullRestoreLabel;
+
+    @FXML private ImageView ownedSmallPotionImage;
+    @FXML private ImageView ownedPartyPotionImage;
+    @FXML private ImageView ownedFullRestoreImage;
+
     @FXML private Rectangle targetPopupOverlay;
     @FXML private VBox targetPopup;
     @FXML private Label targetPopupTitle;
@@ -111,6 +119,7 @@ public class ShopController {
         createShopItems();
         displayItemInfo();
         updateGoldLabel();
+        updateOwnedPotionDisplay();
     }
 
     /**
@@ -327,8 +336,8 @@ public class ShopController {
 
         showSuccess("Bought " + smallPotionQuantity + " Silver Potion.");
         updateGoldLabel();
+        updateOwnedPotionDisplay();
     }
-
 
     /**
      * Buy Gold Potion.
@@ -348,6 +357,7 @@ public class ShopController {
 
         showSuccess("Bought " + partyPotionQuantity + " Gold Potion.");
         updateGoldLabel();
+        updateOwnedPotionDisplay();
     }
 
     /**
@@ -368,46 +378,17 @@ public class ShopController {
 
         showSuccess("Bought " + fullRestoreQuantity + " Purple Potion.");
         updateGoldLabel();
+        updateOwnedPotionDisplay();
     }
 
-    /**
-     * Handles payment and item use.
-     *
-     * @param item The item being bought
-     * @param target The target adventurer, only needed for SINGLE item
-     * @param quantity How many potions to buy and use
-     */
-    private void buyItem(Item item, Adventurer target, int quantity) {
-        if (guild.getMainParty().isEmpty()) {
-            showError("Your party is empty.");
+    private void updateOwnedPotionDisplay() {
+        if (guild == null) {
             return;
         }
 
-        int totalCost = item.getCost() * quantity;
-
-        if (guild.getGold() < totalCost) {
-            showError("Not enough gold. Need " + totalCost + " gold.");
-            return;
-        }
-
-        boolean paid = guild.spendGold(totalCost);
-
-        if (!paid) {
-            showError("Not enough gold.");
-            return;
-        }
-
-        for (int i = 0; i < quantity; i++) {
-            item.use(guild, target);
-        }
-
-        updateGoldLabel();
-
-        if (target != null) {
-            showSuccess("Bought and used " + quantity + " " + item.getName() + " on " + target.getName() + ".");
-        } else {
-            showSuccess("Bought and used " + quantity + " " + item.getName() + " on your party.");
-        }
+        ownedSmallPotionLabel.setText("x" + guild.getSmallPotionCount());
+        ownedPartyPotionLabel.setText("x" + guild.getPartyPotionCount());
+        ownedFullRestoreLabel.setText("x" + guild.getFullRestoreCount());
     }
 
     /**
