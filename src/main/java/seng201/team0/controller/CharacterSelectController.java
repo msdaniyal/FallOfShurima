@@ -233,12 +233,14 @@ public class CharacterSelectController {
         VBox rightBox = new VBox(4);
         rightBox.setStyle("-fx-alignment: center-left;");
 
+        Adventurer displayAdventurer = getRealPartyMember(adventurer);
+
         Label statsLabel = new Label(
-                "HP: " + adventurer.getMaxHealth() + "\n" +
-                        "ATK: " + adventurer.getAttack() + "\n" +
-                        "DEF: " + adventurer.getDefense() + "\n" +
-                        "Pay: " + adventurer.getPay() + "\n" +
-                        "Loyalty: " + adventurer.getLoyalty()
+                "HP: " + displayAdventurer.getCurrentHealth() + " / " + displayAdventurer.getMaxHealth() + "\n" +
+                        "ATK: " + displayAdventurer.getAttack() + "\n" +
+                        "DEF: " + displayAdventurer.getDefense() + "\n" +
+                        "Pay: " + displayAdventurer.getPay() + "\n" +
+                        "Loyalty: " + displayAdventurer.getLoyalty()
         );
         statsLabel.setTextFill(Color.WHITE);
         statsLabel.setStyle("-fx-font-size: 11px;");
@@ -251,6 +253,20 @@ public class CharacterSelectController {
         card.setOnMouseClicked(event -> toggleCharacterSelection(adventurer, card));
 
         return card;
+    }
+
+    private Adventurer getRealPartyMember(Adventurer adventurer) {
+        if (guild == null) {
+            return adventurer;
+        }
+
+        for (Adventurer partyMember : guild.getMainParty()) {
+            if (partyMember.getName().equals(adventurer.getName())) {
+                return partyMember;
+            }
+        }
+
+        return adventurer;
     }
 
     private void toggleCharacterSelection(Adventurer adventurer, VBox card) {

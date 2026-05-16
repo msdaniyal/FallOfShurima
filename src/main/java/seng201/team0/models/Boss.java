@@ -11,7 +11,7 @@ public class Boss extends Character {
     // ------------------------------------- MEMBERS -------------------------------------
 
     private int goldDrop;
-    private int loyaltyEffectOnWin;
+    private final int loyaltyEffectOnWin;
     private int loyaltyEffectOnLoss;
     private String description;
     private BossAbility ability;

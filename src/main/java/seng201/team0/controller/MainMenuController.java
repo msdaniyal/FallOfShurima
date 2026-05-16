@@ -55,10 +55,21 @@ public class MainMenuController {
 
     @FXML
     public void onStartQuest() {
-        messageLabel.setText("Quest screen coming soon.");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/quest1.fxml"));
+            Parent root = loader.load();
 
-        // Later:
-        // navigateToQuestScreen();
+            Quest1Controller controller = loader.getController();
+            controller.setGameData(game);
+
+            Stage stage = (Stage) guildNameLabel.getScene().getWindow();
+            ScreenUtil.switchScene(stage, root);
+            stage.setTitle("The Fall of Shurima — Quest 1");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            messageLabel.setText("Error loading Quest 1.");
+        }
     }
 
     @FXML
