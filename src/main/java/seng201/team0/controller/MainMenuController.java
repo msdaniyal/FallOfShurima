@@ -12,6 +12,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.image.Image;
 
 /**
  * Controller for the real main menu screen.
@@ -32,11 +33,20 @@ public class MainMenuController {
     @FXML private javafx.scene.image.ImageView backgroundImage;
     @FXML private Pane contentPane;
 
+    @FXML private ImageView smallPotionInventoryImage;
+    @FXML private ImageView partyPotionInventoryImage;
+    @FXML private ImageView fullRestoreInventoryImage;
+
+    @FXML private Label smallPotionInventoryLabel;
+    @FXML private Label partyPotionInventoryLabel;
+    @FXML private Label fullRestoreInventoryLabel;
+
     private Game game;
 
     @FXML
     public void initialize() {
         ScreenUtil.setupStretch(rootPane, backgroundImage, contentPane);
+        loadPotionInventoryImages();
     }
 
     public void setGameData(Game game) {
@@ -51,6 +61,14 @@ public class MainMenuController {
         guildNameLabel.setText(guild.getName());
         goldLabel.setText(String.valueOf(guild.getGold()));
         messageLabel.setText("");
+
+        updatePotionInventoryDisplay(guild);
+    }
+
+    private void updatePotionInventoryDisplay(Guild guild) {
+        smallPotionInventoryLabel.setText("x" + guild.getSmallPotionCount());
+        partyPotionInventoryLabel.setText("x" + guild.getPartyPotionCount());
+        fullRestoreInventoryLabel.setText("x" + guild.getFullRestoreCount());
     }
 
     @FXML
@@ -107,6 +125,24 @@ public class MainMenuController {
         } catch (Exception e) {
             e.printStackTrace();
             messageLabel.setText("Error loading shop.");
+        }
+    }
+
+    private void loadPotionInventoryImages() {
+        try {
+            smallPotionInventoryImage.setImage(new Image(
+                    getClass().getResource("/images/silver_potion.png").toExternalForm()
+            ));
+
+            partyPotionInventoryImage.setImage(new Image(
+                    getClass().getResource("/images/gold_potion.png").toExternalForm()
+            ));
+
+            fullRestoreInventoryImage.setImage(new Image(
+                    getClass().getResource("/images/purple_potion.png").toExternalForm()
+            ));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

@@ -138,6 +138,61 @@
                textFill="LIGHTGREEN"
                style="-fx-font-size: 15px;" />
 
+        <HBox fx:id="potionInventoryBar"
+              layoutX="365"
+              layoutY="505"
+              spacing="28"
+              alignment="CENTER"
+              prefWidth="220"
+              prefHeight="70"
+              style="-fx-background-color: rgba(0,0,0,0.45);
+             -fx-border-color: #d6b63f;
+             -fx-border-width: 2;
+             -fx-border-radius: 14;
+             -fx-background-radius: 14;
+             -fx-padding: 8;">
+
+            <VBox alignment="CENTER" spacing="3">
+                <ImageView fx:id="smallPotionInventoryImage"
+                           fitWidth="34"
+                           fitHeight="34"
+                           preserveRatio="true" />
+                <Label fx:id="smallPotionInventoryLabel"
+                       text="x0"
+                       textFill="WHITE"
+                       style="-fx-font-size: 16px;
+                      -fx-font-weight: bold;
+                      -fx-effect: dropshadow(gaussian, black, 5, 0.8, 0, 0);" />
+            </VBox>
+
+            <VBox alignment="CENTER" spacing="3">
+                <ImageView fx:id="partyPotionInventoryImage"
+                           fitWidth="34"
+                           fitHeight="34"
+                           preserveRatio="true" />
+                <Label fx:id="partyPotionInventoryLabel"
+                       text="x0"
+                       textFill="WHITE"
+                       style="-fx-font-size: 16px;
+                      -fx-font-weight: bold;
+                      -fx-effect: dropshadow(gaussian, black, 5, 0.8, 0, 0);" />
+            </VBox>
+
+            <VBox alignment="CENTER" spacing="3">
+                <ImageView fx:id="fullRestoreInventoryImage"
+                           fitWidth="34"
+                           fitHeight="34"
+                           preserveRatio="true" />
+                <Label fx:id="fullRestoreInventoryLabel"
+                       text="x0"
+                       textFill="WHITE"
+                       style="-fx-font-size: 16px;
+                      -fx-font-weight: bold;
+                      -fx-effect: dropshadow(gaussian, black, 5, 0.8, 0, 0);" />
+            </VBox>
+
+        </HBox>
+
     </Pane>
 
 </AnchorPane>
