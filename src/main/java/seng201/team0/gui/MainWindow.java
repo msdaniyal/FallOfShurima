@@ -6,6 +6,12 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import seng201.team0.controller.MemoryGameController;
+import seng201.team0.controller.MainMenuController;
+import seng201.team0.models.Adventurer;
+import seng201.team0.models.Difficulty;
+import seng201.team0.models.Faction;
+import seng201.team0.models.Game;
+import seng201.team0.models.Guild;
 
 import java.io.IOException;
 
@@ -23,6 +29,13 @@ public class MainWindow extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
 
+        boolean DEBUG_MAIN_MENU = true;
+
+        if (DEBUG_MAIN_MENU) {
+            startDebugMainMenu(primaryStage);
+            return;
+        }
+
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/start.fxml"));
         Parent root = loader.load();
 
@@ -30,15 +43,15 @@ public class MainWindow extends Application {
         primaryStage.setTitle("The Fall of Shurima");
         primaryStage.setResizable(true);
         primaryStage.setFullScreen(true);
-
         primaryStage.setFullScreenExitHint("");
-
         primaryStage.show();
+
         primaryStage.maximizedProperty().addListener((obs, wasMaximized, isNowMaximized) -> {
             if (isNowMaximized) {
                 primaryStage.setFullScreen(true);
             }
         });
+
 //            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/setup.fxml"));
 //            Parent root = loader.load();
 //
@@ -88,6 +101,63 @@ public class MainWindow extends Application {
 //        primaryStage.setScene(scene);
 //        primaryStage.setTitle("Boss Fight");
 //        primaryStage.show();
+    }
+
+    private void startDebugMainMenu(Stage primaryStage) throws IOException {
+        Difficulty difficulty = Difficulty.NORMAL;
+
+        Guild guild = new Guild(
+                "Debug Guild",
+                difficulty.getStartingGold(),
+                Faction.AATROX
+        );
+
+        guild.addToMainParty(new Adventurer(
+                "Baalkux",
+                110,
+                18,
+                8,
+                20,
+                Faction.AATROX,
+                guild.getPlayerFaction(),
+                "A brutal Darkin warrior with strong attack power."
+        ));
+
+        guild.addToMainParty(new Adventurer(
+                "Horazi",
+                90,
+                20,
+                5,
+                25,
+                Faction.XOLAANI,
+                guild.getPlayerFaction(),
+                "A celestial marksman with high damage but lower defense."
+        ));
+
+        guild.addToMainParty(new Adventurer(
+                "Zaahen",
+                105,
+                17,
+                9,
+                20,
+                Faction.NEUTRAL,
+                guild.getPlayerFaction(),
+                "A balanced warrior who is not tied strongly to either side."
+        ));
+
+        Game game = new Game(guild, difficulty);
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/mainmenu.fxml"));
+        Parent root = loader.load();
+
+        MainMenuController controller = loader.getController();
+        controller.setGameData(game);
+
+        primaryStage.setScene(new Scene(root, 900, 600));
+        primaryStage.setTitle("The Fall of Shurima — Debug Main Menu");
+        primaryStage.setResizable(true);
+        primaryStage.setFullScreen(false);
+        primaryStage.show();
     }
 
     /**
