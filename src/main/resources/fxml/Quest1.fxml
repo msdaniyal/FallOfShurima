@@ -130,6 +130,60 @@
               prefHeight="330.0"
               style="-fx-background-color: transparent;" />
 
+        <HBox fx:id="potionBar"
+              layoutX="270.0"
+              layoutY="500.0"
+              prefWidth="360.0"
+              prefHeight="55.0"
+              spacing="15.0"
+              style="-fx-alignment: center;
+             -fx-background-color: rgba(0,0,0,0.35);
+             -fx-border-color: #d6b63f;
+             -fx-border-width: 2;
+             -fx-border-radius: 14;
+             -fx-background-radius: 14;">
+
+            <VBox fx:id="smallPotionBox"
+                  spacing="2.0"
+                  style="-fx-alignment: center;">
+                <ImageView fx:id="smallPotionImage"
+                           fitWidth="32.0"
+                           fitHeight="32.0"
+                           preserveRatio="true" />
+                <Label fx:id="smallPotionCountLabel"
+                       text="x0"
+                       textFill="WHITE"
+                       style="-fx-font-size: 13px; -fx-font-weight: bold;" />
+            </VBox>
+
+            <VBox fx:id="partyPotionBox"
+                  spacing="2.0"
+                  style="-fx-alignment: center;">
+                <ImageView fx:id="partyPotionImage"
+                           fitWidth="32.0"
+                           fitHeight="32.0"
+                           preserveRatio="true" />
+                <Label fx:id="partyPotionCountLabel"
+                       text="x0"
+                       textFill="WHITE"
+                       style="-fx-font-size: 13px; -fx-font-weight: bold;" />
+            </VBox>
+
+            <VBox fx:id="fullRestoreBox"
+                  spacing="2.0"
+                  style="-fx-alignment: center;">
+                <ImageView fx:id="fullRestoreImage"
+                           fitWidth="32.0"
+                           fitHeight="32.0"
+                           preserveRatio="true" />
+                <Label fx:id="fullRestoreCountLabel"
+                       text="x0"
+                       textFill="WHITE"
+                       style="-fx-font-size: 13px; -fx-font-weight: bold;" />
+            </VBox>
+
+        </HBox>
+
         <!-- Pause overlay -->
         <Rectangle fx:id="pauseOverlay"
                    width="900.0"

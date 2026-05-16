@@ -79,6 +79,33 @@ public class Quest1Controller {
     private int attackerIndex = 0;
     private int timeRemaining;
 
+    // ----------------------------- Potion state -----------------------------
+
+    @FXML private HBox potionBar;
+
+    @FXML private VBox smallPotionBox;
+    @FXML private VBox partyPotionBox;
+    @FXML private VBox fullRestoreBox;
+
+    @FXML private ImageView smallPotionImage;
+    @FXML private ImageView partyPotionImage;
+    @FXML private ImageView fullRestoreImage;
+
+    @FXML private Label smallPotionCountLabel;
+    @FXML private Label partyPotionCountLabel;
+    @FXML private Label fullRestoreCountLabel;
+
+    private boolean potionUsedThisTurn = false;
+
+    private enum SelectedPotion {
+        NONE,
+        SMALL,
+        PARTY,
+        FULL
+    }
+
+    private SelectedPotion selectedPotion = SelectedPotion.NONE;
+
     // ----------------------------- Memory game state -----------------------------
 
     private final List<Integer> correctPattern = new ArrayList<>();
@@ -111,6 +138,7 @@ public class Quest1Controller {
     @FXML
     public void initialize() {
         ScreenUtil.setupStretch(rootPane, backgroundImage, contentPane);
+        loadPotionImages();
 
         if (attackButton != null) {
             attackButton.setVisible(false);
@@ -124,6 +152,26 @@ public class Quest1Controller {
         if (pausePopup != null) {
             pausePopup.setVisible(false);
         }
+    }
+
+    private void loadPotionImages() {
+        try {
+            smallPotionImage.setImage(new Image(
+                    getClass().getResource("/images/silver_potion.png").toExternalForm()
+            ));
+            partyPotionImage.setImage(new Image(
+                    getClass().getResource("/images/gold_potion.png").toExternalForm()
+            ));
+            fullRestoreImage.setImage(new Image(
+                    getClass().getResource("/images/purple_potion.png").toExternalForm()
+            ));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        smallPotionBox.setOnMouseClicked(e -> onPotionClicked(SelectedPotion.SMALL));
+        partyPotionBox.setOnMouseClicked(e -> onPotionClicked(SelectedPotion.PARTY));
+        fullRestoreBox.setOnMouseClicked(e -> onPotionClicked(SelectedPotion.FULL));
     }
 
     public void setGameData(Game game) {
@@ -184,6 +232,8 @@ public class Quest1Controller {
 
         paused = false;
         inputEnabled = false;
+        potionUsedThisTurn = false;
+        selectedPotion = SelectedPotion.NONE;
 
         pauseOverlay.setVisible(false);
         pausePopup.setVisible(false);
@@ -192,6 +242,7 @@ public class Quest1Controller {
         attackButton.setDisable(true);
         timerLabel.setText("");
 
+        updatePotionDisplay(false);
         setupPartyDisplay();
         setupBossDisplay();
         prepareNextAttacker();
@@ -209,14 +260,37 @@ public class Quest1Controller {
             Adventurer adventurer = party.get(i);
             StackPane sprite = createPartySprite(adventurer);
 
-            double x = 15 + (i % 2) * 135;
-            double y = 10 + (i / 2) * 95;
+            double[] position = getPartyPosition(i);
 
-            sprite.setLayoutX(x);
-            sprite.setLayoutY(y);
+            sprite.setLayoutX(position[0]);
+            sprite.setLayoutY(position[1]);
 
             partyPane.getChildren().add(sprite);
             partySpriteMap.put(adventurer, sprite);
+        }
+    }
+
+    private double[] getPartyPosition(int index) {
+        double leftX = 0;
+        double middleX = 135;
+        double rightX = 270;
+
+        double topY = 0;
+        double bottomY = 160;
+
+        switch (index) {
+            case 0:
+                return new double[] { leftX, topY };
+            case 1:
+                return new double[] { leftX, bottomY };
+            case 2:
+                return new double[] { middleX, topY };
+            case 3:
+                return new double[] { middleX, bottomY };
+            case 4:
+                return new double[] { rightX, topY };
+            default:
+                return new double[] { rightX, bottomY };
         }
     }
 
@@ -229,9 +303,7 @@ public class Quest1Controller {
         box.setAlignment(Pos.CENTER);
         box.setStyle("-fx-background-color: transparent;");
 
-        ProgressBar hpBar = new ProgressBar(getHealthPercent(adventurer));
-        hpBar.setPrefWidth(90);
-        hpBar.setStyle("-fx-accent: #2cff5a;");
+        StackPane hpBar = createHealthBar(adventurer, "#2cff5a");
 
         ImageView imageView = new ImageView();
         imageView.setFitWidth(100);
@@ -283,9 +355,8 @@ public class Quest1Controller {
         box.setAlignment(Pos.CENTER);
         box.setStyle("-fx-background-color: transparent;");
 
-        ProgressBar hpBar = new ProgressBar(getHealthPercent(boss));
+        StackPane hpBar = createHealthBar(boss, "#ff3333");
         hpBar.setPrefWidth(130);
-        hpBar.setStyle("-fx-accent: #ff3333;");
 
         ImageView imageView = new ImageView();
         imageView.setFitWidth(155);
@@ -322,6 +393,28 @@ public class Quest1Controller {
         return (double) character.getCurrentHealth() / character.getMaxHealth();
     }
 
+    private StackPane createHealthBar(seng201.team0.models.Character character, String color) {
+        StackPane healthStack = new StackPane();
+        healthStack.setPrefWidth(100);
+        healthStack.setPrefHeight(18);
+
+        ProgressBar hpBar = new ProgressBar(getHealthPercent(character));
+        hpBar.setPrefWidth(100);
+        hpBar.setPrefHeight(18);
+        hpBar.setStyle("-fx-accent: " + color + ";");
+
+        Label hpText = new Label(character.getCurrentHealth() + " / " + character.getMaxHealth());
+        hpText.setTextFill(Color.WHITE);
+        hpText.setStyle(
+                "-fx-font-size: 11px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-effect: dropshadow(gaussian, black, 4, 0.9, 0, 0);"
+        );
+
+        healthStack.getChildren().addAll(hpBar, hpText);
+        return healthStack;
+    }
+
     // ----------------------------- Turn flow -----------------------------
 
     private void prepareNextAttacker() {
@@ -334,6 +427,7 @@ public class Quest1Controller {
             statusLabel.setText("Your party has fallen.");
             attackButton.setVisible(false);
             attackButton.setDisable(true);
+            updatePotionDisplay(false);
             return;
         }
 
@@ -342,6 +436,10 @@ public class Quest1Controller {
         }
 
         currentAttacker = guild.getMainParty().get(attackerIndex);
+
+        potionUsedThisTurn = false;
+        selectedPotion = SelectedPotion.NONE;
+        updatePotionDisplay(false);
 
         setupPartyDisplay();
         setupBossDisplay();
@@ -378,8 +476,9 @@ public class Quest1Controller {
         attackButton.setVisible(false);
         attackButton.setDisable(true);
         memoryArea.getChildren().clear();
+        updatePotionDisplay(false);
 
-        statusLabel.setText("Are you ready?");
+        statusLabel.setText("Ready?");
 
         startCountdown(3, () -> {
             generatePattern();
@@ -447,6 +546,7 @@ public class Quest1Controller {
 
         attackButton.setVisible(false);
         attackButton.setDisable(true);
+        updatePotionDisplay(false);
 
         for (int imageIndex : correctPattern) {
             StackPane card = createMemoryCard(imageIndex);
@@ -462,7 +562,7 @@ public class Quest1Controller {
         memoryArea.getChildren().clear();
         playerInput.clear();
 
-        statusLabel.setText("Choose the cards in order.");
+        statusLabel.setText("Choose cards in order");
 
         attackButton.setVisible(true);
         attackButton.setDisable(true);
@@ -477,12 +577,16 @@ public class Quest1Controller {
         }
 
         inputEnabled = true;
+        updatePotionDisplay(true);
 
         startCountdown(8, () -> {
             if (inputEnabled) {
                 inputEnabled = false;
                 attackButton.setDisable(true);
                 attackButton.setVisible(false);
+
+                updatePotionDisplay(false);
+                selectedPotion = SelectedPotion.NONE;
                 resolvePlayerAttack(false);
             }
         });
@@ -595,12 +699,270 @@ public class Quest1Controller {
         boolean success = playerInput.equals(correctPattern);
 
         resolvePlayerAttack(success);
+        updatePotionDisplay(false);
+        selectedPotion = SelectedPotion.NONE;
+    }
+
+    // ----------------------------- Potion logic -----------------------------
+
+    private void updatePotionDisplay(boolean usable) {
+        if (guild == null) {
+            return;
+        }
+
+        smallPotionCountLabel.setText("x" + guild.getSmallPotionCount());
+        partyPotionCountLabel.setText("x" + guild.getPartyPotionCount());
+        fullRestoreCountLabel.setText("x" + guild.getFullRestoreCount());
+
+        boolean canUseSmall = usable && !paused && !potionUsedThisTurn && guild.getSmallPotionCount() > 0;
+        boolean canUseParty = usable && !paused && !potionUsedThisTurn && guild.getPartyPotionCount() > 0;
+        boolean canUseFull = usable && !paused && !potionUsedThisTurn && guild.getFullRestoreCount() > 0;
+
+        updatePotionBoxStyle(smallPotionBox, canUseSmall, selectedPotion == SelectedPotion.SMALL);
+        updatePotionBoxStyle(partyPotionBox, canUseParty, selectedPotion == SelectedPotion.PARTY);
+        updatePotionBoxStyle(fullRestoreBox, canUseFull, selectedPotion == SelectedPotion.FULL);
+
+        setPotionImageGrey(smallPotionImage, !canUseSmall);
+        setPotionImageGrey(partyPotionImage, !canUseParty);
+        setPotionImageGrey(fullRestoreImage, !canUseFull);
+    }
+
+    private void updatePotionBoxStyle(VBox box, boolean usable, boolean selected) {
+        if (selected) {
+            box.setStyle(
+                    "-fx-alignment: center;" +
+                            "-fx-border-color: gold;" +
+                            "-fx-border-width: 3;" +
+                            "-fx-border-radius: 10;" +
+                            "-fx-background-color: rgba(255,215,0,0.18);" +
+                            "-fx-background-radius: 10;" +
+                            "-fx-padding: 3;" +
+                            "-fx-cursor: hand;"
+            );
+        } else if (usable) {
+            box.setStyle(
+                    "-fx-alignment: center;" +
+                            "-fx-border-color: transparent;" +
+                            "-fx-padding: 3;" +
+                            "-fx-cursor: hand;"
+            );
+        } else {
+            box.setStyle(
+                    "-fx-alignment: center;" +
+                            "-fx-border-color: transparent;" +
+                            "-fx-padding: 3;"
+            );
+        }
+    }
+
+    private void setPotionImageGrey(ImageView imageView, boolean grey) {
+        if (grey) {
+            javafx.scene.effect.ColorAdjust adjust = new javafx.scene.effect.ColorAdjust();
+            adjust.setSaturation(-1.0);
+            adjust.setBrightness(-0.35);
+            imageView.setEffect(adjust);
+            imageView.setOpacity(0.55);
+        } else {
+            imageView.setEffect(null);
+            imageView.setOpacity(1.0);
+        }
+    }
+
+    private void onPotionClicked(SelectedPotion potion) {
+        if (!inputEnabled || paused || potionUsedThisTurn) {
+            return;
+        }
+
+        selectedPotion = potion;
+        updatePotionDisplay(true);
+
+        boolean used = false;
+
+        switch (potion) {
+            case SMALL:
+                used = useSmallPotionOnCurrentAttacker();
+                break;
+            case PARTY:
+                used = usePartyPotion();
+                break;
+            case FULL:
+                used = useFullRestore();
+                break;
+            default:
+                break;
+        }
+
+        if (used) {
+            potionUsedThisTurn = true;
+            selectedPotion = SelectedPotion.NONE;
+
+            setupPartyDisplay();
+            highlightCurrentAttacker();
+
+            statusLabel.setText("Potion used.");
+            updatePotionDisplay(true);
+        } else {
+            selectedPotion = SelectedPotion.NONE;
+            statusLabel.setText("No potion left.");
+            updatePotionDisplay(true);
+        }
+    }
+
+    private boolean useSmallPotionOnCurrentAttacker() {
+        if (guild.getSmallPotionCount() <= 0) {
+            return false;
+        }
+
+        Adventurer lowestHealthAdventurer = getLowestHealthAdventurer();
+
+        if (lowestHealthAdventurer == null) {
+            statusLabel.setText("Everyone is already full HP.");
+            return false;
+        }
+
+        int before = lowestHealthAdventurer.getCurrentHealth();
+        int after = Math.min(lowestHealthAdventurer.getMaxHealth(), before + 30);
+        int healed = after - before;
+
+        if (healed <= 0) {
+            statusLabel.setText("Everyone is already full HP.");
+            return false;
+        }
+
+        guild.useSmallPotion();
+        lowestHealthAdventurer.setCurrentHealth(after);
+        showHealNumber(partySpriteMap.get(lowestHealthAdventurer), healed);
+
+        return true;
+    }
+
+    private Adventurer getLowestHealthAdventurer() {
+        Adventurer lowest = null;
+
+        for (Adventurer adventurer : guild.getMainParty()) {
+            if (adventurer.isDead()) {
+                continue;
+            }
+
+            if (adventurer.getCurrentHealth() >= adventurer.getMaxHealth()) {
+                continue;
+            }
+
+            if (lowest == null || adventurer.getCurrentHealth() < lowest.getCurrentHealth()) {
+                lowest = adventurer;
+            }
+        }
+
+        return lowest;
+    }
+
+    private boolean usePartyPotion() {
+        if (guild.getPartyPotionCount() <= 0) {
+            return false;
+        }
+
+        boolean anyoneHealed = false;
+        Map<Adventurer, Integer> healedAmounts = new HashMap<>();
+
+        for (Adventurer adventurer : guild.getMainParty()) {
+            if (!adventurer.isDead() && adventurer.getCurrentHealth() < adventurer.getMaxHealth()) {
+                int before = adventurer.getCurrentHealth();
+                int after = Math.min(adventurer.getMaxHealth(), before + 20);
+                int healed = after - before;
+
+                if (healed > 0) {
+                    adventurer.setCurrentHealth(after);
+                    healedAmounts.put(adventurer, healed);
+                    anyoneHealed = true;
+                }
+            }
+        }
+
+        if (!anyoneHealed) {
+            statusLabel.setText("Everyone is already full HP.");
+            return false;
+        }
+
+        guild.usePartyPotion();
+
+        for (Map.Entry<Adventurer, Integer> entry : healedAmounts.entrySet()) {
+            showHealNumber(partySpriteMap.get(entry.getKey()), entry.getValue());
+        }
+
+        return true;
+    }
+
+    private boolean useFullRestore() {
+        if (guild.getFullRestoreCount() <= 0) {
+            return false;
+        }
+
+        boolean anyoneHealed = false;
+        Map<Adventurer, Integer> healedAmounts = new HashMap<>();
+
+        for (Adventurer adventurer : guild.getMainParty()) {
+            if (!adventurer.isDead() && adventurer.getCurrentHealth() < adventurer.getMaxHealth()) {
+                int before = adventurer.getCurrentHealth();
+                adventurer.resetHealth();
+                int healed = adventurer.getCurrentHealth() - before;
+
+                if (healed > 0) {
+                    healedAmounts.put(adventurer, healed);
+                    anyoneHealed = true;
+                }
+            }
+        }
+
+        if (!anyoneHealed) {
+            statusLabel.setText("Everyone is already full HP.");
+            return false;
+        }
+
+        guild.useFullRestore();
+
+        for (Map.Entry<Adventurer, Integer> entry : healedAmounts.entrySet()) {
+            showHealNumber(partySpriteMap.get(entry.getKey()), entry.getValue());
+        }
+
+        return true;
+    }
+
+    private void showHealNumber(StackPane sprite, int amount) {
+        if (sprite == null || amount <= 0) {
+            return;
+        }
+
+        Label healLabel = new Label("+" + amount);
+        healLabel.setTextFill(Color.LIMEGREEN);
+        healLabel.setStyle(
+                "-fx-font-size: 28px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-effect: dropshadow(gaussian, black, 8, 0.8, 0, 0);"
+        );
+
+        StackPane.setAlignment(healLabel, Pos.TOP_CENTER);
+        healLabel.setTranslateY(-10);
+
+        sprite.getChildren().add(healLabel);
+
+        FadeTransition fade = new FadeTransition(Duration.seconds(0.9), healLabel);
+        fade.setFromValue(1.0);
+        fade.setToValue(0.0);
+
+        TranslateTransition move = new TranslateTransition(Duration.seconds(0.9), healLabel);
+        move.setFromY(-10);
+        move.setToY(-45);
+
+        ParallelTransition animation = new ParallelTransition(fade, move);
+        animation.setOnFinished(e -> sprite.getChildren().remove(healLabel));
+        animation.play();
     }
 
     // ----------------------------- Player attack result -----------------------------
 
     private void resolvePlayerAttack(boolean success) {
         memoryArea.getChildren().clear();
+        updatePotionDisplay(false);
 
         int bossHpBefore = currentFight.getBoss().getCurrentHealth();
         int damage = currentFight.playerAttack(currentAttacker, success, false, guild);
@@ -719,6 +1081,7 @@ public class Quest1Controller {
     private void showBigCenterText(String text) {
         statusLabel.setText("");
         memoryArea.getChildren().clear();
+        updatePotionDisplay(false);
 
         Label label = new Label(text);
         label.setTextFill(Color.GOLD);
@@ -772,6 +1135,7 @@ public class Quest1Controller {
 
     private void finishCurrentFight() {
         stopAllTimers();
+        updatePotionDisplay(false);
 
         setupPartyDisplay();
         setupBossDisplay();
@@ -803,14 +1167,18 @@ public class Quest1Controller {
         activePauseTransition = new PauseTransition(Duration.seconds(1.5));
         activePauseTransition.setOnFinished(e -> prepareNextAttacker());
         activePauseTransition.play();
+        guild.healMainPartyToFull();
     }
 
     private void finishQuest1() {
         stopAllTimers();
+        updatePotionDisplay(false);
 
         quest1.runEvents(guild);
         quest1.updateCharacters(guild);
         game.advanceToNextQuest();
+
+        guild.healMainPartyToFull();
 
         memoryArea.getChildren().clear();
         timerLabel.setText("");
@@ -830,6 +1198,7 @@ public class Quest1Controller {
         attackButtonEnabledBeforePause = !attackButton.isDisable();
 
         inputEnabled = false;
+        updatePotionDisplay(false);
 
         if (countdownTimeline != null) {
             countdownTimeline.pause();
@@ -867,6 +1236,8 @@ public class Quest1Controller {
         if (attackButtonEnabledBeforePause) {
             attackButton.setDisable(false);
         }
+
+        updatePotionDisplay(inputEnabled);
     }
 
     @FXML
@@ -877,7 +1248,7 @@ public class Quest1Controller {
     @FXML
     public void onPauseMainMenu() {
         stopAllTimers();
-        restoreQuestStartState();
+        guild.healMainPartyToFull();
         goToMainMenu();
     }
 
