@@ -15,7 +15,8 @@
             prefHeight="600.0"
             xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="seng201.team0.controller.Quest2Controller">
+            fx:controller="seng201.team0.controller.Quest2Controller"
+            style="-fx-background-color: black;">
 
     <Pane fx:id="contentPane"
           prefWidth="900.0"
