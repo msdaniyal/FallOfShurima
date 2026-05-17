@@ -29,12 +29,12 @@ public class MainWindow extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
 
-        boolean DEBUG_MAIN_MENU = true;
-
-        if (DEBUG_MAIN_MENU) {
-            startDebugMainMenu(primaryStage);
-            return;
-        }
+//        boolean DEBUG_MAIN_MENU = true;
+//
+//        if (DEBUG_MAIN_MENU) {
+//            startDebugMainMenu(primaryStage);
+//            return;
+//        }
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/start.fxml"));
         Parent root = loader.load();

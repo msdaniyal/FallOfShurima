@@ -3,13 +3,13 @@ package seng201.team0.controller;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import seng201.team0.models.Adventurer;
@@ -17,44 +17,57 @@ import seng201.team0.models.Difficulty;
 import seng201.team0.models.Faction;
 import seng201.team0.models.Game;
 import seng201.team0.models.Guild;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
-
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Controller for the main menu.
- * This screen is used as the character selection screen.
+ * Controller for the character selection screen.
+ * Uses a carousel layout so the player views one warrior at a time.
  * The player can choose up to 5 warriors to join the guild.
+ *
+ * Displayed character information:
+ *  - Name
+ *  - HP
+ *  - Attack
+ *  - Defence
+ *  - Description
+ *
  * @author Mohammed, Xinyi
  */
 public class CharacterSelectController {
 
-    // ── Setup screen fields ───────────────────────────────────────────────────
-    @FXML private GridPane characterGrid;
+    // ── FXML fields ───────────────────────────────────────────────────────────
     @FXML private Label titleLabel;
     @FXML private Label instructionLabel;
     @FXML private Label selectedCountLabel;
     @FXML private Label warningLabel;
     @FXML private Label goldLabel;
+
     @FXML private AnchorPane rootPane;
     @FXML private ImageView backgroundImage;
     @FXML private Pane contentPane;
+
+    @FXML private Button prevButton;
+    @FXML private Button nextButton;
+    @FXML private Button selectButton;
+
+    @FXML private ImageView characterImage;
+    @FXML private javafx.scene.layout.StackPane characterImageFrame;
+    @FXML private Label characterNameLabel;
+    @FXML private Label characterStatsLabel;
+    @FXML private Label characterDescriptionLabel;
 
     // ── State ─────────────────────────────────────────────────────────────────
     private Guild guild;
     private Difficulty difficulty;
     private Game game;
     private int availableGold;
+    private int currentCharacterIndex = 0;
 
-
-    // ── Show all characters ───────────────────────────────────────────────────
+    // ── Character lists ───────────────────────────────────────────────────────
     private final List<Adventurer> allCharacters = new ArrayList<>();
     private final List<Adventurer> selectedCharacters = new ArrayList<>();
-    private final List<VBox> characterCards = new ArrayList<>();
-
 
     // ── Display ───────────────────────────────────────────────────────────────
     private static final int MAX_SELECTED = 5;
@@ -65,6 +78,15 @@ public class CharacterSelectController {
 
         selectedCountLabel.setText("Selected: 0 / " + MAX_SELECTED);
         warningLabel.setText("");
+
+        // Keep the carousel image area consistent for every character.
+        if (characterImage != null) {
+            characterImage.setFitWidth(240);
+            characterImage.setFitHeight(230);
+            characterImage.setPreserveRatio(true);
+            characterImage.setSmooth(true);
+            characterImage.setCache(true);
+        }
     }
 
     /**
@@ -107,13 +129,13 @@ public class CharacterSelectController {
         allCharacters.add(new Adventurer(
                 "Horazi", 90, 20, 5, 25,
                 Faction.XOLAANI, playerFaction,
-                "A celestial marksman with high damage but lower defense."
+                "A celestial marksman with high damage but lower defence."
         ));
 
         allCharacters.add(new Adventurer(
                 "Ibaaros", 130, 14, 12, 20,
                 Faction.AATROX, playerFaction,
-                "A tough frontline fighter with high health and defense."
+                "A tough frontline fighter with high health and defence."
         ));
 
         allCharacters.add(new Adventurer(
@@ -125,7 +147,7 @@ public class CharacterSelectController {
         allCharacters.add(new Adventurer(
                 "Naafiri", 85, 22, 4, 25,
                 Faction.XOLAANI, playerFaction,
-                "A fast assassin with very high attack but low defense."
+                "A fast assassin with very high attack but low defence."
         ));
 
         allCharacters.add(new Adventurer(
@@ -137,7 +159,7 @@ public class CharacterSelectController {
         allCharacters.add(new Adventurer(
                 "Taarosh", 150, 12, 14, 20,
                 Faction.AATROX, playerFaction,
-                "A heavy tank with high health and strong defense."
+                "A heavy tank with high health and strong defence."
         ));
 
         allCharacters.add(new Adventurer(
@@ -154,34 +176,207 @@ public class CharacterSelectController {
     }
 
     private void displayCharacters() {
-        characterGrid.getChildren().clear();
-        characterCards.clear();
         selectedCharacters.clear();
 
-        for (int i = 0; i < allCharacters.size(); i++) {
-            Adventurer adventurer = allCharacters.get(i);
-            VBox card = createCharacterCard(adventurer);
-
-            int column = i % 3;
-            int row = i / 3;
-
-            characterGrid.add(card, column, row);
-            characterCards.add(card);
-
+        for (Adventurer adventurer : allCharacters) {
             if (isAlreadyInParty(adventurer)) {
                 selectedCharacters.add(adventurer);
-                highlightCard(card);
             }
+        }
+
+        currentCharacterIndex = 0;
+        updateSelectedCount();
+        updateGoldLabel();
+        updateCarouselDisplay();
+    }
+
+    private void updateCarouselDisplay() {
+        if (allCharacters.isEmpty()) {
+            characterNameLabel.setText("");
+            characterStatsLabel.setText("");
+            characterDescriptionLabel.setText("");
+            characterImage.setImage(null);
+            selectButton.setDisable(true);
+            return;
+        }
+
+        Adventurer adventurer = allCharacters.get(currentCharacterIndex);
+        Adventurer displayAdventurer = getRealPartyMember(adventurer);
+
+        characterNameLabel.setText(displayAdventurer.getName());
+
+        characterStatsLabel.setText(
+                "HP: " + displayAdventurer.getMaxHealth() +
+                        "    ATK: " + displayAdventurer.getAttack() +
+                        "    DEF: " + displayAdventurer.getDefense()
+        );
+
+        characterDescriptionLabel.setText(displayAdventurer.getDescription());
+
+        try {
+            String imagePath = "/images/" + displayAdventurer.getName() + ".png";
+            Image image = new Image(getClass().getResource(imagePath).toExternalForm());
+            characterImage.setImage(image);
+            normalizeCharacterImage(displayAdventurer.getName());
+        } catch (Exception e) {
+            characterImage.setImage(null);
+        }
+
+        applyImageGlow();
+        updateSelectButton();
+    }
+
+    private void normalizeCharacterImage(String characterName) {
+        // A fixed fit box prevents the UI from resizing when images have different dimensions.
+        characterImage.setFitWidth(240);
+        characterImage.setFitHeight(230);
+        characterImage.setPreserveRatio(true);
+        characterImage.setSmooth(true);
+
+        // Reset any previous character-specific transform before applying the new one.
+        characterImage.setScaleX(1.0);
+        characterImage.setScaleY(1.0);
+        characterImage.setTranslateX(0);
+        characterImage.setTranslateY(0);
+
+        applyCharacterImageTransform(characterName);
+    }
+
+    /**
+     * Some character PNGs have more transparent padding than others.
+     * This method lets us visually balance each character without editing image files.
+     */
+    private void applyCharacterImageTransform(String characterName) {
+        characterImage.setScaleX(1.0);
+        characterImage.setScaleY(1.0);
+        characterImage.setTranslateX(0);
+        characterImage.setTranslateY(0);
+    }
+
+    private void applyImageGlow() {
+        DropShadow glow = new DropShadow();
+        glow.setColor(Color.color(0.95, 0.72, 0.18, 0.65));
+        glow.setRadius(30);
+        glow.setSpread(0.25);
+        characterImage.setEffect(glow);
+    }
+
+    @FXML
+    public void onPreviousCharacter() {
+        if (allCharacters.isEmpty()) {
+            return;
+        }
+
+        currentCharacterIndex--;
+
+        if (currentCharacterIndex < 0) {
+            currentCharacterIndex = allCharacters.size() - 1;
+        }
+
+        warningLabel.setText("");
+        updateCarouselDisplay();
+    }
+
+    @FXML
+    public void onNextCharacter() {
+        if (allCharacters.isEmpty()) {
+            return;
+        }
+
+        currentCharacterIndex++;
+
+        if (currentCharacterIndex >= allCharacters.size()) {
+            currentCharacterIndex = 0;
+        }
+
+        warningLabel.setText("");
+        updateCarouselDisplay();
+    }
+
+    @FXML
+    public void onSelectCurrentCharacter() {
+        if (allCharacters.isEmpty()) {
+            return;
+        }
+
+        Adventurer adventurer = allCharacters.get(currentCharacterIndex);
+        toggleCharacterSelection(adventurer);
+    }
+
+    private void toggleCharacterSelection(Adventurer adventurer) {
+        warningLabel.setText("");
+
+        if (selectedCharacters.contains(adventurer)) {
+            selectedCharacters.remove(adventurer);
+            availableGold += adventurer.getPay();
+        } else {
+            if (selectedCharacters.size() >= MAX_SELECTED) {
+                warningLabel.setTextFill(Color.RED);
+                warningLabel.setText("You can choose up to 5 warriors only.");
+                return;
+            }
+
+            if (availableGold < adventurer.getPay()) {
+                warningLabel.setTextFill(Color.RED);
+                warningLabel.setText("Not enough gold to hire " + adventurer.getName() + ".");
+                return;
+            }
+
+            availableGold -= adventurer.getPay();
+            selectedCharacters.add(adventurer);
         }
 
         updateSelectedCount();
         updateGoldLabel();
+        updateSelectButton();
+    }
+
+    private void updateSelectButton() {
+        if (allCharacters.isEmpty()) {
+            return;
+        }
+
+        Adventurer adventurer = allCharacters.get(currentCharacterIndex);
+
+        if (selectedCharacters.contains(adventurer)) {
+            selectButton.setText("Remove");
+            selectButton.setStyle(getRemoveButtonStyle());
+        } else {
+            selectButton.setText("Select");
+            selectButton.setStyle(getSelectButtonStyle());
+        }
+    }
+
+    private String getSelectButtonStyle() {
+        return "-fx-font-size: 15px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-color: #d6b63f;" +
+                "-fx-text-fill: black;" +
+                "-fx-background-radius: 8;" +
+                "-fx-border-color: #fff1a8;" +
+                "-fx-border-radius: 8;" +
+                "-fx-cursor: hand;";
+    }
+
+    private String getRemoveButtonStyle() {
+        return "-fx-font-size: 15px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-color: #7a1f1f;" +
+                "-fx-text-fill: white;" +
+                "-fx-background-radius: 8;" +
+                "-fx-border-color: #ff9999;" +
+                "-fx-border-radius: 8;" +
+                "-fx-cursor: hand;";
     }
 
     private void updateGoldLabel() {
         if (goldLabel != null) {
             goldLabel.setText("Gold: " + availableGold);
         }
+    }
+
+    private void updateSelectedCount() {
+        selectedCountLabel.setText("Selected: " + selectedCharacters.size() + " / " + MAX_SELECTED);
     }
 
     private boolean isAlreadyInParty(Adventurer adventurer) {
@@ -198,63 +393,6 @@ public class CharacterSelectController {
         return false;
     }
 
-    private VBox createCharacterCard(Adventurer adventurer) {
-        VBox card = new VBox(5);
-        card.setPrefWidth(200);
-        card.setMinWidth(200);
-        card.setMaxWidth(200);
-        card.setPrefHeight(105);
-        card.setMinHeight(105);
-        card.setMaxHeight(105);
-        card.setStyle(getNormalCardStyle());
-
-        javafx.scene.layout.HBox content = new javafx.scene.layout.HBox(6);
-        content.setStyle("-fx-alignment: center;");
-
-        VBox leftBox = new VBox(4);
-        leftBox.setStyle("-fx-alignment: center;");
-        leftBox.setPrefWidth(60);
-
-        ImageView imageView = new ImageView();
-        imageView.setFitWidth(75);
-        imageView.setFitHeight(75);
-        imageView.setPreserveRatio(true);
-
-        String imagePath = "/images/" + adventurer.getName() + ".png";
-        Image image = new Image(getClass().getResource(imagePath).toExternalForm());
-        imageView.setImage(image);
-
-        Label nameLabel = new Label(adventurer.getName());
-        nameLabel.setTextFill(Color.GOLD);
-        nameLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
-
-        leftBox.getChildren().addAll(imageView, nameLabel);
-
-        VBox rightBox = new VBox(4);
-        rightBox.setStyle("-fx-alignment: center-left;");
-
-        Adventurer displayAdventurer = getRealPartyMember(adventurer);
-
-        Label statsLabel = new Label(
-                "HP: " + displayAdventurer.getCurrentHealth() + " / " + displayAdventurer.getMaxHealth() + "\n" +
-                        "ATK: " + displayAdventurer.getAttack() + "\n" +
-                        "DEF: " + displayAdventurer.getDefense() + "\n" +
-                        "Pay: " + displayAdventurer.getPay() + "\n" +
-                        "Loyalty: " + displayAdventurer.getLoyalty()
-        );
-        statsLabel.setTextFill(Color.WHITE);
-        statsLabel.setStyle("-fx-font-size: 11px;");
-
-        rightBox.getChildren().add(statsLabel);
-
-        content.getChildren().addAll(leftBox, rightBox);
-        card.getChildren().add(content);
-
-        card.setOnMouseClicked(event -> toggleCharacterSelection(adventurer, card));
-
-        return card;
-    }
-
     private Adventurer getRealPartyMember(Adventurer adventurer) {
         if (guild == null) {
             return adventurer;
@@ -267,79 +405,6 @@ public class CharacterSelectController {
         }
 
         return adventurer;
-    }
-
-    private void toggleCharacterSelection(Adventurer adventurer, VBox card) {
-        warningLabel.setText("");
-
-        if (selectedCharacters.contains(adventurer)) {
-            selectedCharacters.remove(adventurer);
-            unhighlightCard(card);
-
-            // Refund when any selected character is removed
-            availableGold += adventurer.getPay();
-
-        } else {
-            if (selectedCharacters.size() >= MAX_SELECTED) {
-                warningLabel.setTextFill(Color.RED);
-                warningLabel.setText("You can choose up to 5 warriors only.");
-                return;
-            }
-
-            if (availableGold < adventurer.getPay()) {
-                warningLabel.setTextFill(Color.RED);
-                warningLabel.setText("Not enough gold to hire " + adventurer.getName() + ".");
-                return;
-            }
-
-            // Pay when any character is selected
-            availableGold -= adventurer.getPay();
-
-            selectedCharacters.add(adventurer);
-            highlightCard(card);
-        }
-
-        updateSelectedCount();
-        updateGoldLabel();
-    }
-
-    private void highlightCard(VBox card) {
-        DropShadow glow = new DropShadow();
-        glow.setColor(Color.GOLD);
-        glow.setRadius(25);
-        glow.setSpread(0.5);
-
-        card.setEffect(glow);
-        card.setStyle(getSelectedCardStyle());
-    }
-
-    private void unhighlightCard(VBox card) {
-        card.setEffect(null);
-        card.setStyle(getNormalCardStyle());
-    }
-
-    private String getNormalCardStyle() {
-        return "-fx-background-color: rgba(30, 25, 20, 0.85);" +
-                "-fx-border-color: #6b5a2b;" +
-                "-fx-border-width: 2;" +
-                "-fx-border-radius: 10;" +
-                "-fx-background-radius: 10;" +
-                "-fx-padding: 7;" +
-                "-fx-alignment: center;";
-    }
-
-    private String getSelectedCardStyle() {
-        return "-fx-background-color: rgba(60, 45, 20, 0.95);" +
-                "-fx-border-color: gold;" +
-                "-fx-border-width: 3;" +
-                "-fx-border-radius: 10;" +
-                "-fx-background-radius: 10;" +
-                "-fx-padding: 7;" +
-                "-fx-alignment: center;";
-    }
-
-    private void updateSelectedCount() {
-        selectedCountLabel.setText("Selected: " + selectedCharacters.size() + " / " + MAX_SELECTED);
     }
 
     @FXML
@@ -394,7 +459,7 @@ public class CharacterSelectController {
             MainMenuController mainMenuController = loader.getController();
             mainMenuController.setGameData(game);
 
-            Stage stage = (Stage) characterGrid.getScene().getWindow();
+            Stage stage = (Stage) rootPane.getScene().getWindow();
             ScreenUtil.switchScene(stage, root);
             stage.setTitle("The Fall of Shurima — Main Menu");
 
@@ -410,7 +475,7 @@ public class CharacterSelectController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/setup.fxml"));
             Parent root = loader.load();
 
-            Stage stage = (Stage) characterGrid.getScene().getWindow();
+            Stage stage = (Stage) rootPane.getScene().getWindow();
             ScreenUtil.switchScene(stage, root);
             stage.setTitle("The Fall of Shurima — Setup");
 
