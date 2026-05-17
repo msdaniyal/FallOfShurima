@@ -17,10 +17,12 @@ public class Game {
     private boolean gameOver;
     private boolean playerWon;
     private Adventurer adventurer;
+    private boolean isCompleted;
 
     /**
      * Constructs a Game.
-     * @param guild The player's guild created during setup
+     *
+     * @param guild      The player's guild created during setup
      * @param difficulty The chosen difficulty
      */
     public Game(Guild guild, Difficulty difficulty) {
@@ -36,29 +38,52 @@ public class Game {
         this.currentQuestIndex = 0;
         this.gameOver = false;
         this.playerWon = false;
+        this.isCompleted = false;
     }
 
     /**
      * Returns the current active quest.
+     *
      * @return The quest at currentQuestIndex
      */
-    public Quest getCurrentQuest() { return quests.get(currentQuestIndex); }
+    public Quest getCurrentQuest() {
+        return quests.get(currentQuestIndex);
+    }
 
     /**
      * Advances to the next quest after the current one is completed.
      */
-    public void advanceToNextQuest() {
-        currentQuestIndex++;
-        if (currentQuestIndex >= 5) {
-            if (getCurrentLoyalty() >= getLoyaltyThreshold()) {
-                playerWon = true;
-                gameOver = true;
-            } else {
-                quests.get(5).unlock();
-            }
-        } else {
-            quests.get(currentQuestIndex).unlock();
+    /**
+     * Advances to the next quest after a specific quest is completed.
+     * Replaying an already completed quest will not unlock more quests.
+     *
+     * @param completedQuestIndex The index of the quest that was just completed, starting from 0.
+     */
+    public void advanceToNextQuest(int completedQuestIndex) {
+        if (completedQuestIndex < 0 || completedQuestIndex >= quests.size()) {
+            return;
         }
+
+        Quest completedQuest = quests.get(completedQuestIndex);
+
+        // If this quest has already been completed before, do not unlock anything new.
+        if (completedQuest.isCompleted()) {
+            return;
+        }
+
+        completedQuest.markCompleted();
+
+        // Only unlock the next quest if the player completed the highest unlocked quest.
+        if (completedQuestIndex == currentQuestIndex) {
+            int nextQuestIndex = completedQuestIndex + 1;
+
+            if (nextQuestIndex < quests.size()) {
+                quests.get(nextQuestIndex).unlock();
+                currentQuestIndex = nextQuestIndex;
+            }
+        }
+
+        checkEndCondition();
     }
 
     /**
@@ -81,38 +106,66 @@ public class Game {
         }
     }
 
+    public boolean isCompleted() {
+        return isCompleted;
+    }
+
+    public void markCompleted() {
+        this.isCompleted = true;
+    }
+
     /**
      * @return The player's guild
      */
-    public Guild getGuild() { return guild; }
+    public Guild getGuild() {
+        return guild;
+    }
 
     /**
      * @return The list of all quests
      */
-    public List<Quest> getQuests() { return quests; }
+    public List<Quest> getQuests() {
+        return quests;
+    }
 
     /**
      * @return The chosen difficulty
      */
-    public Difficulty getDifficulty() { return difficulty; }
+    public Difficulty getDifficulty() {
+        return difficulty;
+    }
 
     /**
      * @return True if the game is over
      */
-    public boolean isGameOver() { return gameOver; }
+    public boolean isGameOver() {
+        return gameOver;
+    }
 
     /**
      * @return True if the player won
      */
-    public boolean isPlayerWon() { return playerWon; }
+    public boolean isPlayerWon() {
+        return playerWon;
+    }
 
     /**
      * @return The loyalty threshold for this difficulty
      */
-    public int getLoyaltyThreshold() { return difficulty.getLoyaltyThreshold(); }
+    public int getLoyaltyThreshold() {
+        return difficulty.getLoyaltyThreshold();
+    }
 
     /**
      * @return The current loyalty points of the adventurer
      */
-    public int getCurrentLoyalty() { return adventurer.getLoyalty(); }
+    public int getCurrentLoyalty() {
+        int totalLoyalty = 0;
+
+        for (Adventurer adventurer : guild.getMainParty()) {
+            totalLoyalty += adventurer.getLoyalty();
+        }
+
+        return totalLoyalty;
+    }
 }

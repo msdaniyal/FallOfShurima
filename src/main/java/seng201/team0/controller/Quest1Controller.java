@@ -1462,7 +1462,7 @@ public class Quest1Controller {
         // Quest 1 event still gives extra gold and loyalty.
         quest1.runEvents(guild);
         quest1.updateCharacters(guild);
-        game.advanceToNextQuest();
+        game.advanceToNextQuest(0);
 
         guild.healMainPartyToFull();
 

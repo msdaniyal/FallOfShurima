@@ -14,6 +14,7 @@ public abstract class Quest {
     private String name;
     private String loreIntroduction;
     private boolean isUnlocked;
+    private boolean isCompleted;
     private int madnessAffliction;
     private Difficulty difficulty;
     private List<BossFight> bossFights;
@@ -33,6 +34,7 @@ public abstract class Quest {
         this.madnessAffliction = madnessAffliction;
         this.difficulty = difficulty;
         this.isUnlocked = (id == 1); // Only Quest 1 starts unlocked
+        this.isCompleted = false;
         this.bossFights = initialiseBossFights();
     }
 
@@ -51,11 +53,6 @@ public abstract class Quest {
      * Each subclass hardcodes its own branching choices and outcomes here.
      * Choices directly update adventurer loyalty, health and gold on the guild.
      * @param guild The player's guild
-     * TODO: Hook this up to the ExpeditionController to display choices in the GUI.
-     * TODO: Each choice should call guild.getMainParty() and update each adventurer.
-     * TODO: Example: adventurer.adjustLoyalty(+10) for a good leadership choice.
-     * TODO: Example: adventurer.adjustLoyalty(-10) for a selfish or cowardly choice.
-     * TODO: Gold changes should call guild.addGold() or guild.spendGold().
      */
     public abstract void runEvents(Guild guild);
 
@@ -66,9 +63,6 @@ public abstract class Quest {
      * Applies madness affliction to all main party members.
      * Called after all boss fights are resolved.
      * @param guild The player's guild
-     * TODO: Also call guild.removeAbandoned() after this to clean out any loyalty=0 adventurers.
-     * TODO: If this is Quest 5, call guild.collapseOpposingFaction() before updateCharacters.
-     * TODO: If this is Quest 5, call guild.lockParty() after collapseOpposingFaction.
      */
     public void updateCharacters(Guild guild) {
         for (Adventurer adventurer : guild.getMainParty()) {
@@ -85,52 +79,45 @@ public abstract class Quest {
         this.isUnlocked = true;
     }
 
+    /**
+     * Marks this quest as completed.
+     * This should only happen when the player wins this quest.
+     */
+    public void markCompleted() {
+        this.isCompleted = true;
+    }
+
     // ── Getters ───────────────────────────────────────────────────────────
 
-    /**
-     * @return The quest's id number
-     */
     public int getId() {
         return id;
     }
 
-    /**
-     * @return The quest's display name
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * @return The lore introduction text shown at the start of the quest
-     */
     public String getLoreIntroduction() {
         return loreIntroduction;
     }
 
-    /**
-     * @return Whether this quest is currently unlocked
-     */
     public boolean isUnlocked() {
         return isUnlocked;
     }
 
-    /**
-     * @return The madness affliction value applied to party members after this quest
-     */
+    public boolean isCompleted() {
+        return isCompleted;
+    }
+
     public int getMadnessAffliction() {
         return madnessAffliction;
     }
 
-    /**
-     * @return The game difficulty (used by subclasses to construct BossFights)
-     */
     public Difficulty getDifficulty() {
         return difficulty;
     }
 
-    /**
-     * @return The ordered list of boss fights for this quest
-     */
-    public List<BossFight> getBossFights() { return bossFights; }
+    public List<BossFight> getBossFights() {
+        return bossFights;
+    }
 }

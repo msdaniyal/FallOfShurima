@@ -1398,7 +1398,7 @@ public class Quest3Controller {
 
         quest3.runEvents(guild);
         quest3.updateCharacters(guild);
-        game.advanceToNextQuest();
+        game.advanceToNextQuest(2);
 
         guild.healMainPartyToFull();
 

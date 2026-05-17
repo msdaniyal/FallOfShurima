@@ -1695,7 +1695,7 @@ public class Quest2Controller {
         updatePotionDisplay(false);
 
         quest2.updateCharacters(guild);
-        game.advanceToNextQuest();
+        game.advanceToNextQuest(1);
 
         guild.addGold(150);
         guild.healMainPartyToFull();
