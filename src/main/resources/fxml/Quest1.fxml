@@ -35,7 +35,7 @@
 
         <!-- Pause button only, no back button -->
         <Button fx:id="pauseButton"
-                text="Ⅱ"
+                text="+"
                 layoutX="20.0"
                 layoutY="20.0"
                 prefWidth="45.0"

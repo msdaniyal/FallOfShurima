@@ -82,19 +82,19 @@ public class MainMenuController {
     @FXML
     public void onStartQuest() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/quest1.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/map.fxml"));
             Parent root = loader.load();
 
-            Quest1Controller controller = loader.getController();
+            MapController controller = loader.getController();
             controller.setGameData(game);
 
             Stage stage = (Stage) guildNameLabel.getScene().getWindow();
             ScreenUtil.switchScene(stage, root);
-            stage.setTitle("The Fall of Shurima — Quest 1");
+            stage.setTitle("Quest Map");
 
         } catch (Exception e) {
             e.printStackTrace();
-            messageLabel.setText("Error loading Quest 1.");
+            messageLabel.setText("Error loading quest map.");
         }
     }
 

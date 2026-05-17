@@ -132,13 +132,21 @@ public class BossFight {
      * @return Damage dealt (0 if dodged)
      */
     public int calcBossDamage(Adventurer target) {
-        int hitPower = random.nextInt(6) + 1;
+        int bossRoll = random.nextInt(6) + 1;
+        int targetRoll = random.nextInt(6) + 1;
+
+        // Player blocks / dodges successfully.
+        if (bossRoll <= targetRoll) {
+            return 0;
+        }
+
+        int difference = bossRoll - targetRoll;
         int damage;
 
         if (boss.getAbility() == BossAbility.TRUE_DAMAGE) {
-            damage = boss.getAttack() * hitPower;
+            damage = boss.getAttack() * difference;
         } else {
-            damage = (boss.getAttack() * hitPower) - target.getDefense();
+            damage = (boss.getAttack() * difference) - target.getDefense();
         }
 
         damage = Math.max(1, damage);

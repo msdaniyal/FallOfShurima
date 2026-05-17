@@ -110,13 +110,13 @@
               spacing="18"
               alignment="CENTER">
 
-            <Button text="START QUEST"
+            <Button text="QUEST"
                     onAction="#onStartQuest"
                     prefWidth="250"
                     prefHeight="50"
                     styleClass="main-menu-button" />
 
-            <Button text="MY PARTY"
+            <Button text="PARTY"
                     onAction="#onMyParty"
                     prefWidth="250"
                     prefHeight="50"
