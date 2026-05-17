@@ -5,9 +5,10 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.Rectangle?>
 
 <AnchorPane fx:id="rootPane"
             prefHeight="600.0"
@@ -31,63 +32,154 @@
             </image>
         </ImageView>
 
+        <!-- Main panel -->
+        <Rectangle layoutX="80"
+                   layoutY="30"
+                   width="740"
+                   height="525"
+                   arcWidth="28"
+                   arcHeight="28"
+                   fill="rgba(0,0,0,0.42)"
+                   stroke="#6b5a2b"
+                   strokeWidth="2" />
+
         <Label fx:id="titleLabel"
-               layoutX="300"
+               layoutX="250"
                layoutY="45"
+               prefWidth="400"
+               alignment="CENTER"
                text="Choose Your Warriors"
                textFill="GOLD"
-               style="-fx-font-size: 30px; -fx-font-weight: bold;" />
+               style="-fx-font-size: 31px; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, black, 8, 0.8, 0, 0);" />
 
         <Label fx:id="instructionLabel"
-               layoutX="320"
-               layoutY="100"
+               layoutX="250"
+               layoutY="92"
+               prefWidth="400"
+               alignment="CENTER"
                text="Choose up to 5 warriors to join your guild."
                textFill="WHITE"
-               style="-fx-font-size: 15px;" />
+               style="-fx-font-size: 15px; -fx-effect: dropshadow(gaussian, black, 5, 0.8, 0, 0);" />
 
         <Label fx:id="goldLabel"
-               layoutX="405"
-               layoutY="130"
+               layoutX="290"
+               layoutY="126"
+               prefWidth="140"
+               alignment="CENTER"
                text="Gold: 0"
                textFill="GOLD"
-               style="-fx-font-size: 15px; -fx-font-weight: bold;" />
+               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, black, 5, 0.8, 0, 0);" />
 
         <Label fx:id="selectedCountLabel"
-               layoutX="405"
-               layoutY="160"
+               layoutX="470"
+               layoutY="126"
+               prefWidth="150"
+               alignment="CENTER"
                text="Selected: 0 / 5"
                textFill="WHITE"
-               style="-fx-font-size: 14px;" />
+               style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, black, 5, 0.8, 0, 0);" />
 
-        <GridPane fx:id="characterGrid"
-                  layoutX="140"
-                  layoutY="195"
-                  hgap="10"
-                  vgap="10"
-                  alignment="CENTER" />
+        <!-- Carousel left arrow -->
+        <Button fx:id="prevButton"
+                text="&lt;"
+                layoutX="125"
+                layoutY="285"
+                prefWidth="58"
+                prefHeight="58"
+                onAction="#onPreviousCharacter"
+                style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-background-color: rgba(0,0,0,0.65); -fx-text-fill: gold; -fx-border-color: gold; -fx-border-width: 2; -fx-background-radius: 30; -fx-border-radius: 30; -fx-cursor: hand;" />
+
+        <!-- Fixed character frame. This keeps every image in the same visual space. -->
+        <StackPane fx:id="characterImageFrame"
+                   layoutX="315"
+                   layoutY="145"
+                   prefWidth="270"
+                   prefHeight="250"
+                   maxWidth="270"
+                   maxHeight="250"
+                   alignment="CENTER"
+                   style="-fx-background-color: rgba(0,0,0,0.20); -fx-border-color: rgba(214,182,63,0.45); -fx-border-width: 1.5; -fx-background-radius: 16; -fx-border-radius: 16;">
+
+            <ImageView fx:id="characterImage"
+                       fitWidth="240"
+                       fitHeight="230"
+                       preserveRatio="true"
+                       smooth="true" />
+        </StackPane>
+
+        <!-- Carousel right arrow -->
+        <Button fx:id="nextButton"
+                text="&gt;"
+                layoutX="717"
+                layoutY="285"
+                prefWidth="58"
+                prefHeight="58"
+                onAction="#onNextCharacter"
+                style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-background-color: rgba(0,0,0,0.65); -fx-text-fill: gold; -fx-border-color: gold; -fx-border-width: 2; -fx-background-radius: 30; -fx-border-radius: 30; -fx-cursor: hand;" />
+
+        <!-- Character info panel -->
+        <Label fx:id="characterNameLabel"
+               layoutX="250"
+               layoutY="405"
+               prefWidth="400"
+               alignment="CENTER"
+               text="Character Name"
+               textFill="GOLD"
+               style="-fx-font-size: 27px; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, black, 8, 0.8, 0, 0);" />
+
+        <Label fx:id="characterStatsLabel"
+               layoutX="230"
+               layoutY="445"
+               prefWidth="440"
+               alignment="CENTER"
+               text="HP: 0    ATK: 0    DEF: 0"
+               textFill="WHITE"
+               style="-fx-font-size: 17px; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, black, 5, 0.8, 0, 0);" />
+
+        <Label fx:id="characterDescriptionLabel"
+               layoutX="210"
+               layoutY="477"
+               prefWidth="480"
+               prefHeight="43"
+               wrapText="true"
+               alignment="CENTER"
+               text="Character description goes here."
+               textFill="WHITE"
+               style="-fx-font-size: 14px; -fx-effect: dropshadow(gaussian, black, 5, 0.8, 0, 0);" />
+
+        <Button fx:id="selectButton"
+                text="Select"
+                layoutX="380"
+                layoutY="522"
+                prefWidth="140"
+                prefHeight="32"
+                onAction="#onSelectCurrentCharacter"
+                style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-background-color: #d6b63f; -fx-text-fill: black; -fx-background-radius: 8; -fx-border-color: #fff1a8; -fx-border-radius: 8; -fx-cursor: hand;" />
 
         <Label fx:id="warningLabel"
-               layoutX="340"
-               layoutY="535"
+               layoutX="210"
+               layoutY="556"
+               prefWidth="480"
+               alignment="CENTER"
                textFill="RED"
-               style="-fx-font-size: 13px;" />
+               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, black, 4, 0.8, 0, 0);" />
 
         <HBox spacing="18"
               alignment="CENTER"
               layoutX="306"
-              layoutY="558">
+              layoutY="570">
 
             <Button text="Back"
                     onAction="#onBack"
                     prefWidth="120"
-                    prefHeight="28"
-                    style="-fx-font-size: 13px;" />
+                    prefHeight="26"
+                    style="-fx-font-size: 13px; -fx-background-color: rgba(0,0,0,0.65); -fx-text-fill: white; -fx-border-color: #d6b63f;" />
 
             <Button text="Confirm Party"
                     onAction="#onConfirmSelection"
                     prefWidth="150"
-                    prefHeight="28"
-                    style="-fx-font-size: 13px; -fx-background-color: gold;" />
+                    prefHeight="26"
+                    style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-background-color: gold;" />
 
         </HBox>
 
