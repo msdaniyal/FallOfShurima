@@ -39,6 +39,7 @@ public class BossFight {
     private Adventurer sleepingTarget;
     private Adventurer isolatedTarget;
     private int isolationRoundsRemaining;
+    private boolean abilityTriggeredThisRound;
 
     // ------------------------------------- CONSTRUCTORS -------------------------------------
 
@@ -59,6 +60,7 @@ public class BossFight {
         this.sleepingTarget = null;
         this.isolatedTarget = null;
         this.isolationRoundsRemaining = 0;
+        this.abilityTriggeredThisRound = false;
     }
 
     // ------------------------------------- ADVENTURER ATTACK -------------------------------------
@@ -117,13 +119,11 @@ public class BossFight {
      * Calculates damage the boss deals to a target using opposing D6 dice rolls.
      *
      * Both roll a D6.
-     * If targetRoll >= bossRoll → full dodge, returns 0.
      * Otherwise:
      *   difference = bossRoll - targetRoll
      *   TRUE_DAMAGE: damage = bossAttack * difference         (ignores defense)
      *   Default:     damage = (bossAttack * difference) - target.defense
      *   SLEEP active on target: damage *= 10, then sleep is cleared.
-     *   Minimum 1 damage if not a dodge.
      *
      * NOTE: For HEAL_ON_HIT (Vladimir), call applyVladimirHeal(damage) after this.
      * NOTE: For AOE (Bel'Veth), call applyAoe(guild) instead — this method is not used.
@@ -132,27 +132,20 @@ public class BossFight {
      * @return Damage dealt (0 if dodged)
      */
     public int calcBossDamage(Adventurer target) {
-        int bossRoll = random.nextInt(6) + 1;
-        int targetRoll = random.nextInt(6) + 1;
-
-        if (targetRoll >= bossRoll) {
-            return 0; // full dodge
-        }
-
-        int difference = bossRoll - targetRoll;
+        int hitPower = random.nextInt(6) + 1;
         int damage;
 
         if (boss.getAbility() == BossAbility.TRUE_DAMAGE) {
-            damage = boss.getAttack() * difference;
+            damage = boss.getAttack() * hitPower;
         } else {
-            damage = (boss.getAttack() * difference) - target.getDefense();
+            damage = (boss.getAttack() * hitPower) - target.getDefense();
         }
 
         damage = Math.max(1, damage);
 
         if (target.equals(sleepingTarget)) {
             damage *= 10;
-            sleepingTarget = null; // sleep consumed after 10x hit
+            sleepingTarget = null;
         }
 
         return damage;
@@ -345,6 +338,7 @@ public class BossFight {
                 isolatedTarget = null;
             }
         }
+        abilityTriggeredThisRound = false;
     }
 
     // ------------------------------------- FULL COMBAT LOOP -------------------------------------
@@ -375,7 +369,6 @@ public class BossFight {
      * @param guild The player's guild
      * @param mcAdventurer The MC adventurer
      *
-     * TODO: Coordinate with BossFightController for memory game UI per adventurer turn.
      * TODO: Coordinate with BossFightController for special move button (calls activateSpecialMove()).
      * TODO: BossFightController should call isImmuneThisRound() before applying attack damage.
      */
@@ -404,9 +397,9 @@ public class BossFight {
                     continue;
                 }
 
-                // TODO: Show memory game UI via BossFightController, get playerInput
+
                 List<Integer> correctSequence = memoryGame.generateSequence();
-                boolean correct = false; // TODO: Replace with memoryGame.checkSequence(playerInput)
+                boolean correct = false;
 
                 if (correct && !isImmuneThisRound()) {
                     int damage = calcAdventurerDamage(adventurer);
@@ -540,6 +533,13 @@ public class BossFight {
         }
     }
 
+    private void triggerBossAbilityIfNeeded(Guild guild) {
+        if (!abilityTriggeredThisRound && boss.shouldTriggerAbility(roundNumber)) {
+            applyBossAbility(guild);
+            abilityTriggeredThisRound = true;
+        }
+    }
+
     /**
      * Executes the boss's attack phase for this round.
      * Called by BossFightController after the player's attack resolves.
@@ -555,27 +555,23 @@ public class BossFight {
      * @param guild The player's guild
      */
     public void bossTurn(Guild guild) {
-        if (boss.getAbility() == BossAbility.AOE && boss.shouldTriggerAbility(roundNumber)) {
-            applyBossAbility(guild);
-        } else {
-            Adventurer target = findWeakestTarget(guild.getMainParty());
-            if (target != null && !target.isDead()) {
-                boolean guaranteedDodge = specialMoveUsed;
-                if (!guaranteedDodge) {
-                    int bossRoll = random.nextInt(6) + 1;
-                    int targetRoll = random.nextInt(6) + 1;
+        triggerBossAbilityIfNeeded(guild);
 
-                    if (bossRoll > targetRoll) {
-                        int difference = bossRoll - targetRoll;
-                        int damage = calcBossDamage(target); // handles TRUE_DAMAGE and SLEEP internally
-                        if (damage > 0) {
-                            target.setCurrentHealth(target.getCurrentHealth() - damage);
-                            applyHitPenalties(target, difference);
-                            applyVladimirHeal(damage);
-                        }
-                    }
-                }
-            }
+        if (boss.getAbility() == BossAbility.AOE && boss.shouldTriggerAbility(roundNumber)) {
+            guild.removeDeadAdventurers();
+            nextRound();
+            return;
+        }
+
+        Adventurer target = findWeakestTarget(guild.getMainParty());
+
+        if (target != null && !target.isDead()) {
+            int difference = rollDiceDifference();
+            int damage = calcBossDamage(target);
+
+            target.setCurrentHealth(target.getCurrentHealth() - damage);
+            applyHitPenalties(target, difference);
+            applyVladimirHeal(damage);
         }
 
         guild.removeDeadAdventurers();
@@ -638,13 +634,6 @@ public class BossFight {
      */
     public int getSequence() {
         return sequence;
-    }
-
-    /**
-     * @return The current round number
-     */
-    public int getRoundNumber() {
-        return roundNumber;
     }
 
     /**

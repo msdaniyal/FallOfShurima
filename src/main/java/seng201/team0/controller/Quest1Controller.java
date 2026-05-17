@@ -32,7 +32,7 @@ import seng201.team0.models.Game;
 import seng201.team0.models.Guild;
 import seng201.team0.models.Quest;
 import seng201.team0.models.Quest1;
-
+import javafx.application.Platform;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -78,6 +78,7 @@ public class Quest1Controller {
     private int fightIndex = 0;
     private int attackerIndex = 0;
     private int timeRemaining;
+    private boolean battleResultShown = false;
 
     // ----------------------------- Potion state -----------------------------
 
@@ -154,6 +155,143 @@ public class Quest1Controller {
         }
     }
 
+    private void showQuestStartPopup() {
+        StackPane overlay = new StackPane();
+        overlay.setPrefSize(rootPane.getPrefWidth(), rootPane.getPrefHeight());
+        overlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.45);");
+        overlay.setLayoutX(0);
+        overlay.setLayoutY(0);
+
+        VBox box = new VBox(15);
+        box.setAlignment(Pos.CENTER);
+        box.setPrefWidth(360);
+        box.setPrefHeight(160);
+        box.setMaxWidth(360);
+        box.setMaxHeight(160);
+        box.setStyle(
+                "-fx-background-color: rgba(40, 30, 20, 0.95);" +
+                        "-fx-background-radius: 22;" +
+                        "-fx-border-color: gold;" +
+                        "-fx-border-width: 3;" +
+                        "-fx-border-radius: 22;" +
+                        "-fx-padding: 25;"
+        );
+
+        Label titleLabel = new Label("Quest 1: Icathia");
+        titleLabel.setStyle(
+                "-fx-text-fill: gold;" +
+                        "-fx-font-size: 34px;" +
+                        "-fx-font-weight: bold;"
+        );
+
+        box.getChildren().add(titleLabel);
+        overlay.getChildren().add(box);
+
+        rootPane.getChildren().add(overlay);
+
+        PauseTransition delay = new PauseTransition(Duration.seconds(1.5));
+        delay.setOnFinished(event -> {
+            rootPane.getChildren().remove(overlay);
+            prepareNextAttacker();
+        });
+        delay.play();
+    }
+
+    private void showBattleResultPopup(boolean playerWon) {
+        if (battleResultShown) {
+            return;
+        }
+
+        battleResultShown = true;
+
+        StackPane overlay = new StackPane();
+        overlay.setPrefSize(rootPane.getPrefWidth(), rootPane.getPrefHeight());
+        overlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.55);");
+        overlay.setLayoutX(0);
+        overlay.setLayoutY(0);
+
+        VBox box = new VBox(18);
+        box.setAlignment(Pos.CENTER);
+        box.setPrefWidth(380);
+        box.setPrefHeight(playerWon ? 220 : 280);
+        box.setMaxWidth(380);
+        box.setMaxHeight(playerWon ? 220 : 280);
+        box.setStyle(
+                "-fx-background-color: rgba(35, 25, 20, 0.96);" +
+                        "-fx-background-radius: 24;" +
+                        "-fx-border-color: gold;" +
+                        "-fx-border-width: 3;" +
+                        "-fx-border-radius: 24;" +
+                        "-fx-padding: 30;"
+        );
+
+        Label resultLabel = new Label(playerWon ? "You win!" : "You lose!");
+        resultLabel.setStyle(
+                "-fx-text-fill: gold;" +
+                        "-fx-font-size: 38px;" +
+                        "-fx-font-weight: bold;"
+        );
+
+        Button mainMenuButton = createPopupButton("Return to Main Menu");
+        mainMenuButton.setOnAction(event -> goToMainMenu());
+
+        box.getChildren().add(resultLabel);
+
+        if (!playerWon) {
+            Button retryButton = createPopupButton("Retry");
+            retryButton.setOnAction(event -> {
+                rootPane.getChildren().remove(overlay);
+                onRetry();
+            });
+            box.getChildren().add(retryButton);
+        }
+
+        box.getChildren().add(mainMenuButton);
+
+        overlay.getChildren().add(box);
+        rootPane.getChildren().add(overlay);
+    }
+
+    private Button createPopupButton(String text) {
+        Button button = new Button(text);
+        button.setPrefWidth(220);
+        button.setPrefHeight(45);
+        button.setStyle(
+                "-fx-background-color: rgba(120, 80, 20, 0.85);" +
+                        "-fx-background-radius: 16;" +
+                        "-fx-border-color: gold;" +
+                        "-fx-border-width: 2;" +
+                        "-fx-border-radius: 16;" +
+                        "-fx-text-fill: gold;" +
+                        "-fx-font-size: 18px;" +
+                        "-fx-font-weight: bold;"
+        );
+
+        button.setOnMouseEntered(event -> button.setStyle(
+                "-fx-background-color: gold;" +
+                        "-fx-background-radius: 16;" +
+                        "-fx-border-color: gold;" +
+                        "-fx-border-width: 2;" +
+                        "-fx-border-radius: 16;" +
+                        "-fx-text-fill: black;" +
+                        "-fx-font-size: 18px;" +
+                        "-fx-font-weight: bold;"
+        ));
+
+        button.setOnMouseExited(event -> button.setStyle(
+                "-fx-background-color: rgba(120, 80, 20, 0.85);" +
+                        "-fx-background-radius: 16;" +
+                        "-fx-border-color: gold;" +
+                        "-fx-border-width: 2;" +
+                        "-fx-border-radius: 16;" +
+                        "-fx-text-fill: gold;" +
+                        "-fx-font-size: 18px;" +
+                        "-fx-font-weight: bold;"
+        ));
+
+        return button;
+    }
+
     private void loadPotionImages() {
         try {
             smallPotionImage.setImage(new Image(
@@ -187,7 +325,8 @@ public class Quest1Controller {
 
         setupPartyDisplay();
         setupBossDisplay();
-        prepareNextAttacker();
+
+        Platform.runLater(this::showQuestStartPopup);
     }
 
     // ----------------------------- Save / restore state -----------------------------
@@ -225,6 +364,8 @@ public class Quest1Controller {
         this.fightIndex = 0;
         this.attackerIndex = 0;
         this.currentFight = quest1.getBossFights().get(fightIndex);
+
+        battleResultShown = false;
 
         correctPattern.clear();
         playerInput.clear();
@@ -634,6 +775,7 @@ public class Quest1Controller {
 
         card.getChildren().addAll(imageView, numberLabel);
         card.setUserData(numberLabel);
+        card.getProperties().put("imageIndex", imageIndex);
 
         return card;
     }
@@ -644,6 +786,8 @@ public class Quest1Controller {
         }
 
         if (playerInput.contains(clickedIndex)) {
+            playerInput.remove(Integer.valueOf(clickedIndex));
+            refreshMemoryCardSelectionStyles();
             return;
         }
 
@@ -652,29 +796,62 @@ public class Quest1Controller {
         }
 
         playerInput.add(clickedIndex);
+        refreshMemoryCardSelectionStyles();
+    }
 
-        Label numberLabel = (Label) card.getUserData();
-        numberLabel.setText(String.valueOf(playerInput.size()));
-        numberLabel.setVisible(true);
+    private void refreshMemoryCardSelectionStyles() {
+        for (javafx.scene.Node node : memoryArea.getChildren()) {
+            if (!(node instanceof StackPane)) {
+                continue;
+            }
 
-        DropShadow glow = new DropShadow();
-        glow.setColor(Color.GOLD);
-        glow.setRadius(25);
-        glow.setSpread(0.5);
+            StackPane card = (StackPane) node;
+            Object imageIndexObject = card.getProperties().get("imageIndex");
 
-        card.setEffect(glow);
-        card.setStyle(
-                "-fx-background-color: rgba(80,60,20,0.65);" +
-                        "-fx-border-color: gold;" +
-                        "-fx-border-width: 3;" +
-                        "-fx-border-radius: 10;" +
-                        "-fx-background-radius: 10;" +
-                        "-fx-padding: 5;"
-        );
+            if (!(imageIndexObject instanceof Integer)) {
+                continue;
+            }
 
-        if (playerInput.size() == PATTERN_LENGTH) {
-            attackButton.setDisable(false);
+            int imageIndex = (Integer) imageIndexObject;
+            Label numberLabel = (Label) card.getUserData();
+
+            int selectedPosition = playerInput.indexOf(imageIndex);
+
+            if (selectedPosition >= 0) {
+                numberLabel.setText(String.valueOf(selectedPosition + 1));
+                numberLabel.setVisible(true);
+
+                DropShadow glow = new DropShadow();
+                glow.setColor(Color.GOLD);
+                glow.setRadius(25);
+                glow.setSpread(0.5);
+
+                card.setEffect(glow);
+                card.setStyle(
+                        "-fx-background-color: rgba(80,60,20,0.65);" +
+                                "-fx-border-color: gold;" +
+                                "-fx-border-width: 3;" +
+                                "-fx-border-radius: 10;" +
+                                "-fx-background-radius: 10;" +
+                                "-fx-padding: 5;"
+                );
+            } else {
+                numberLabel.setText("");
+                numberLabel.setVisible(false);
+
+                card.setEffect(null);
+                card.setStyle(
+                        "-fx-background-color: rgba(0,0,0,0.45);" +
+                                "-fx-border-color: #d6b63f;" +
+                                "-fx-border-width: 2;" +
+                                "-fx-border-radius: 10;" +
+                                "-fx-background-radius: 10;" +
+                                "-fx-padding: 5;"
+                );
+            }
         }
+
+        attackButton.setDisable(playerInput.size() != PATTERN_LENGTH);
     }
 
     @FXML
@@ -1036,7 +1213,7 @@ public class Quest1Controller {
             }
         }
 
-        String resultText = bossHit ? "Successful" : "Blocked";
+        String resultText = bossHit ? "Successful" : "Fail";
 
         showBigCenterText(resultText);
 
@@ -1142,14 +1319,14 @@ public class Quest1Controller {
 
         if (guild.isWiped()) {
             memoryArea.getChildren().clear();
-            statusLabel.setText("Defeat... your party has been wiped.");
+            timerLabel.setText("");
+            statusLabel.setText("");
+
             attackButton.setVisible(false);
             attackButton.setDisable(true);
-            return;
-        }
 
-        if (currentFight.isPlayerWon()) {
-            statusLabel.setText("You defeated " + currentFight.getBoss().getName() + "!");
+            showBattleResultPopup(false);
+            return;
         }
 
         fightIndex++;
@@ -1167,6 +1344,7 @@ public class Quest1Controller {
         activePauseTransition = new PauseTransition(Duration.seconds(1.5));
         activePauseTransition.setOnFinished(e -> prepareNextAttacker());
         activePauseTransition.play();
+
         guild.healMainPartyToFull();
     }
 
@@ -1182,10 +1360,12 @@ public class Quest1Controller {
 
         memoryArea.getChildren().clear();
         timerLabel.setText("");
-        statusLabel.setText("Quest 1 complete! You survived Icathia.");
+        statusLabel.setText("");
 
         attackButton.setVisible(false);
         attackButton.setDisable(true);
+
+        showBattleResultPopup(true);
     }
 
     // ----------------------------- Pause popup -----------------------------
