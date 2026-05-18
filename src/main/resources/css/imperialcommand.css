@@ -1,0 +1,58 @@
+.imperial-root {
+    -fx-background-color: #070403;
+}
+
+.imperial-content {
+    -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, #150d05, #050302);
+}
+
+.dialogue-panel {
+    -fx-background-color: rgba(30, 20, 10, 0.78);
+    -fx-border-color: rgba(214, 179, 90, 0.95);
+    -fx-border-width: 3;
+    -fx-border-radius: 14;
+    -fx-background-radius: 14;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.80), 16, 0.38, 0, 4);
+}
+
+.speaker-label {
+    -fx-text-fill: #ffd86a;
+    -fx-font-family: Georgia;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, black, 4, 0.8, 0, 0);
+}
+
+.dialogue-label {
+    -fx-text-fill: #f8e7bc;
+    -fx-font-family: Georgia;
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, black, 4, 0.65, 0, 0);
+}
+
+.next-arrow {
+    -fx-text-fill: #ffd86a;
+    -fx-font-family: Georgia;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, black, 4, 0.8, 0, 0);
+}
+
+.dialogue-button {
+    -fx-background-color: linear-gradient(#f7d36a, #b8860b);
+    -fx-text-fill: #2b1900;
+    -fx-font-family: Georgia;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-border-color: #6b3f00;
+    -fx-border-width: 2;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.dialogue-button:hover {
+    -fx-background-color: linear-gradient(#ffe995, #d6a72c);
+    -fx-effect: dropshadow(gaussian, rgba(255,215,0,0.75), 14, 0.55, 0, 0);
+}

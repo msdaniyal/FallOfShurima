@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.shape.Rectangle?>
+
+<?import java.net.URL?>
+<AnchorPane fx:id="rootPane"
+            prefWidth="900.0"
+            prefHeight="600.0"
+            styleClass="imperial-root"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="seng201.team0.controller.ImperialCommandController">
+
+    <children>
+        <Pane fx:id="contentPane"
+              prefWidth="900.0"
+              prefHeight="600.0"
+              styleClass="imperial-content">
+
+            <children>
+
+                <!-- Full-screen dark base so no white background appears -->
+                <Rectangle layoutX="0.0"
+                           layoutY="0.0"
+                           width="900.0"
+                           height="600.0"
+                           fill="#090604" />
+
+                <!-- Top image area -->
+                <ImageView fx:id="backgroundImage"
+                           layoutX="0.0"
+                           layoutY="0.0"
+                           fitWidth="900.0"
+                           fitHeight="415.0"
+                           preserveRatio="false"
+                           smooth="true" />
+
+                <!-- subtle image overlay -->
+                <Rectangle layoutX="0.0"
+                           layoutY="0.0"
+                           width="900.0"
+                           height="415.0"
+                           fill="rgba(0,0,0,0.10)" />
+
+                <!-- Dark gold lower background behind dialogue -->
+                <Rectangle layoutX="0.0"
+                           layoutY="415.0"
+                           width="900.0"
+                           height="185.0"
+                           fill="linear-gradient(from 0% 0% to 0% 100%, #1b1208, #070403)" />
+
+                <!-- Thin gold divider -->
+                <Rectangle layoutX="0.0"
+                           layoutY="415.0"
+                           width="900.0"
+                           height="8.0"
+                           fill="rgba(194,149,58,0.90)" />
+
+                <!-- Dialogue section underneath the image -->
+                <AnchorPane layoutX="20.0"
+                            layoutY="435.0"
+                            prefWidth="860.0"
+                            prefHeight="135.0"
+                            styleClass="dialogue-panel">
+
+                    <children>
+                        <Label fx:id="speakerLabel"
+                               layoutX="20.0"
+                               layoutY="10.0"
+                               prefWidth="260.0"
+                               prefHeight="24.0"
+                               text="Speaker"
+                               styleClass="speaker-label" />
+
+                        <Label fx:id="dialogueLabel"
+                               layoutX="20.0"
+                               layoutY="40.0"
+                               prefWidth="690.0"
+                               prefHeight="76.0"
+                               wrapText="true"
+                               text="Dialogue text appears here."
+                               styleClass="dialogue-label" />
+
+                        <Label fx:id="nextArrowLabel"
+                               layoutX="705.0"
+                               layoutY="96.0"
+                               prefWidth="30.0"
+                               prefHeight="24.0"
+                               text="▼"
+                               styleClass="next-arrow" />
+
+                        <Button fx:id="continueButton"
+                                layoutX="735.0"
+                                layoutY="82.0"
+                                prefWidth="105.0"
+                                prefHeight="32.0"
+                                text="Next"
+                                onAction="#onContinue"
+                                styleClass="dialogue-button" />
+                    </children>
+                </AnchorPane>
+            </children>
+        </Pane>
+    </children>
+
+    <stylesheets>
+        <URL value="@../css/imperialcommand.css" />
+    </stylesheets>
+</AnchorPane>

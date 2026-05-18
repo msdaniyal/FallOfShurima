@@ -1,0 +1,134 @@
+.map-hud {
+    -fx-background-color: rgba(0, 0, 0, 0.58);
+    -fx-border-color: #d6b63f;
+    -fx-border-width: 2;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.9), 12, 0.45, 0, 3);
+}
+
+.hud-title {
+    -fx-font-family: Georgia;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, black, 5, 0.8, 0, 0);
+}
+
+.hud-small {
+    -fx-font-family: Georgia;
+    -fx-font-size: 13px;
+    -fx-effect: dropshadow(gaussian, black, 4, 0.8, 0, 0);
+}
+
+.hud-stat {
+    -fx-font-family: Georgia;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, black, 5, 0.8, 0, 0);
+}
+
+.map-location-button {
+    -fx-background-color: rgba(0,0,0,0.08);
+    -fx-background-radius: 18;
+    -fx-border-color: transparent;
+    -fx-text-fill: #f4d06f;
+    -fx-font-family: Georgia;
+    -fx-font-size: 19px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.95), 7, 0.9, 0, 0);
+}
+
+.map-location-button:hover {
+    -fx-background-color: rgba(255, 215, 0, 0.16);
+    -fx-text-fill: #fff2a8;
+    -fx-border-color: rgba(255, 215, 0, 0.75);
+    -fx-border-width: 1.4;
+    -fx-border-radius: 18;
+    -fx-effect: dropshadow(gaussian, rgba(255,215,0,0.9), 18, 0.65, 0, 0);
+}
+
+.locked-location {
+    -fx-opacity: 0.72;
+}
+
+.message-label {
+    -fx-font-family: Georgia;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-background-color: rgba(0,0,0,0.52);
+    -fx-border-color: rgba(214,182,63,0.85);
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, black, 7, 0.75, 0, 0);
+}
+
+.potion-strip {
+    -fx-background-color: rgba(0,0,0,0.55);
+    -fx-border-color: #d6b63f;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+
+.potion-label {
+    -fx-font-family: Georgia;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, black, 4, 0.85, 0, 0);
+}
+
+.institute-popup {
+    -fx-background-color: rgba(18, 13, 8, 0.94);
+    -fx-border-color: gold;
+    -fx-border-width: 2.5;
+    -fx-border-radius: 18;
+    -fx-background-radius: 18;
+    -fx-padding: 22;
+    -fx-effect: dropshadow(gaussian, rgba(255,215,0,0.45), 28, 0.35, 0, 0);
+}
+
+.popup-title {
+    -fx-font-family: Georgia;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, black, 6, 0.85, 0, 0);
+}
+
+.popup-subtitle {
+    -fx-font-family: Georgia;
+    -fx-font-size: 14px;
+}
+
+.popup-button {
+    -fx-background-color: rgba(214, 182, 63, 0.9);
+    -fx-text-fill: black;
+    -fx-font-family: Georgia;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+.popup-button:hover {
+    -fx-background-color: #fff2a8;
+    -fx-effect: dropshadow(gaussian, gold, 16, 0.5, 0, 0);
+}
+
+.popup-back-button {
+    -fx-background-color: rgba(0,0,0,0.45);
+    -fx-text-fill: #f4d06f;
+    -fx-font-family: Georgia;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-border-color: #d6b63f;
+    -fx-border-radius: 9;
+    -fx-background-radius: 9;
+    -fx-cursor: hand;
+}
+
+.popup-back-button:hover {
+    -fx-text-fill: #fff2a8;
+    -fx-border-color: #fff2a8;
+}

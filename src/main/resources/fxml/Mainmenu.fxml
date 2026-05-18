@@ -1,198 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
 
-<AnchorPane fx:id="rootPane"
-            prefHeight="600.0"
-            prefWidth="900.0"
-            xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="seng201.team0.controller.MainMenuController"
-            stylesheets="@../css/mainmenu.css"
-            style="-fx-background-color: black;">
+<AnchorPane fx:id="rootPane" prefHeight="600.0" prefWidth="900.0" style="-fx-background-color: black;" stylesheets="@../css/maphub.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng201.team0.controller.MainMenuController">
 
-    <Pane fx:id="contentPane"
-          prefWidth="900"
-          prefHeight="600">
+    <Pane fx:id="contentPane" prefHeight="600" prefWidth="900">
 
-        <ImageView fx:id="backgroundImage"
-                   preserveRatio="false"
-                   mouseTransparent="true">
+        <ImageView fx:id="backgroundImage" fitHeight="600" fitWidth="900" mouseTransparent="true" preserveRatio="false">
             <image>
-                <Image url="@../images/mainmenu.png" />
+                <Image url="@../images/map.png" />
             </image>
         </ImageView>
 
-        <!-- Top info bar -->
-        <Pane layoutX="35"
-              layoutY="20"
-              prefWidth="830"
-              prefHeight="45"
-              style="-fx-background-color: rgba(0,0,0,0.55);
-             -fx-border-color: gold;
-             -fx-border-width: 2;">
+        <!-- Dark edge overlay to make HUD readable -->
+        <!-- Dark edge overlay to make HUD readable -->
+        <Pane layoutX="-14.0"
+              mouseTransparent="true"
+              prefHeight="600"
+              prefWidth="900"
+              style="-fx-background-color: linear-gradient(to bottom, rgba(0,0,0,0.45), rgba(0,0,0,0.05), rgba(0,0,0,0.55));" />
 
-            <!-- Left: party members -->
-            <HBox layoutX="25"
-                  layoutY="5"
-                  spacing="8"
-                  alignment="CENTER_LEFT">
+        <!-- Institute of War button -->
+        <Button layoutX="411.0"
+                layoutY="241.0"
+                onAction="#onInstituteOfWar"
+                onMouseEntered="#onHubAreaHover"
+                prefHeight="16"
+                prefWidth="200"
+                styleClass="map-location-button"
+                text="Institute of War" />
 
-                <ImageView fitWidth="33"
-                           fitHeight="32"
-                           preserveRatio="true"
-                           mouseTransparent="true">
-                    <image>
-                        <Image url="@../images/sword.png" />
-                    </image>
-                </ImageView>
+        <!-- Top HUD -->
+        <Pane layoutX="30" layoutY="18" prefHeight="62" prefWidth="840" styleClass="map-hud">
+            <Label fx:id="guildNameLabel" layoutX="25" layoutY="8" prefWidth="300" styleClass="hud-title" text="Guild Name" textFill="GOLD" />
 
-                <Label fx:id="partyCountLabel"
-                       text="0 / 5"
-                       textFill="WHITE"
-                       style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+            <Label fx:id="currentQuestLabel" layoutX="25" layoutY="36" prefHeight="16" prefWidth="330" styleClass="hud-small" text="Current Quest: Icathia" textFill="WHITE" />
 
+            <HBox alignment="CENTER_RIGHT" layoutX="455" layoutY="10" prefWidth="350" spacing="22">
+                <Label fx:id="partyCountLabel" styleClass="hud-stat" text="0 / 5" textFill="WHITE" />
+                <Label fx:id="goldLabel" styleClass="hud-stat" text="0" textFill="WHITE" />
             </HBox>
-
-            <!-- Center: guild name -->
-            <Label fx:id="guildNameLabel"
-                   layoutX="265"
-                   layoutY="9"
-                   prefWidth="300"
-                   alignment="CENTER"
-                   text="Guild Name"
-                   textFill="GOLD"
-                   style="-fx-font-size: 23px; -fx-font-weight: bold;" />
-
-            <!-- Right: gold -->
-            <HBox layoutX="675"
-                  layoutY="5"
-                  spacing="8"
-                  alignment="CENTER_RIGHT"
-                  prefWidth="130">
-
-                <ImageView fitWidth="40"
-                           fitHeight="32"
-                           preserveRatio="true"
-                           mouseTransparent="true">
-                    <image>
-                        <Image url="@../images/gold.png" />
-                    </image>
-                </ImageView>
-
-                <Label fx:id="goldLabel"
-                       text="0"
-                       textFill="WHITE"
-                       style="-fx-font-size: 18px; -fx-font-weight: bold;" />
-
-            </HBox>
-
         </Pane>
 
-        <!-- Title -->
-        <Label text="Main Menu"
-               layoutX="370"
-               layoutY="130"
-               textFill="GOLD"
-               style="-fx-font-size: 38px; -fx-font-weight: bold;" />
-
-        <!-- Buttons -->
-        <VBox layoutX="350"
-              layoutY="270"
-              spacing="18"
-              alignment="CENTER">
-
-            <Button text="QUEST"
-                    onAction="#onStartQuest"
-                    prefWidth="250"
-                    prefHeight="50"
-                    styleClass="main-menu-button" />
-
-            <Button text="PARTY"
-                    onAction="#onMyParty"
-                    prefWidth="250"
-                    prefHeight="50"
-                    styleClass="main-menu-button" />
-
-            <Button text="SHOP"
-                    onAction="#onShop"
-                    prefWidth="250"
-                    prefHeight="50"
-                    styleClass="main-menu-button" />
-
-        </VBox>
-
-        <Label fx:id="messageLabel"
-               layoutX="250"
-               layoutY="520"
-               prefWidth="400"
-               textAlignment="CENTER"
-               textFill="LIGHTGREEN"
-               style="-fx-font-size: 15px;" />
-
-        <HBox fx:id="potionInventoryBar"
-              layoutX="365"
-              layoutY="505"
-              spacing="28"
-              alignment="CENTER"
-              prefWidth="220"
-              prefHeight="70"
-              style="-fx-background-color: rgba(0,0,0,0.45);
-             -fx-border-color: #d6b63f;
-             -fx-border-width: 2;
-             -fx-border-radius: 14;
-             -fx-background-radius: 14;
-             -fx-padding: 8;">
-
-            <VBox alignment="CENTER" spacing="3">
-                <ImageView fx:id="smallPotionInventoryImage"
-                           fitWidth="34"
-                           fitHeight="34"
-                           preserveRatio="true" />
-                <Label fx:id="smallPotionInventoryLabel"
-                       text="x0"
-                       textFill="WHITE"
-                       style="-fx-font-size: 16px;
-                      -fx-font-weight: bold;
-                      -fx-effect: dropshadow(gaussian, black, 5, 0.8, 0, 0);" />
-            </VBox>
-
-            <VBox alignment="CENTER" spacing="3">
-                <ImageView fx:id="partyPotionInventoryImage"
-                           fitWidth="34"
-                           fitHeight="34"
-                           preserveRatio="true" />
-                <Label fx:id="partyPotionInventoryLabel"
-                       text="x0"
-                       textFill="WHITE"
-                       style="-fx-font-size: 16px;
-                      -fx-font-weight: bold;
-                      -fx-effect: dropshadow(gaussian, black, 5, 0.8, 0, 0);" />
-            </VBox>
-
-            <VBox alignment="CENTER" spacing="3">
-                <ImageView fx:id="fullRestoreInventoryImage"
-                           fitWidth="34"
-                           fitHeight="34"
-                           preserveRatio="true" />
-                <Label fx:id="fullRestoreInventoryLabel"
-                       text="x0"
-                       textFill="WHITE"
-                       style="-fx-font-size: 16px;
-                      -fx-font-weight: bold;
-                      -fx-effect: dropshadow(gaussian, black, 5, 0.8, 0, 0);" />
-            </VBox>
-
+        <!-- Potion strip -->
+        <HBox alignment="CENTER" layoutX="300" layoutY="525" prefHeight="42" prefWidth="300" spacing="12" styleClass="potion-strip">
+            <Label fx:id="smallPotionInventoryLabel" styleClass="potion-label" text="Silver x0" textFill="WHITE" />
+            <Label fx:id="partyPotionInventoryLabel" styleClass="potion-label" text="Gold x0" textFill="WHITE" />
+            <Label fx:id="fullRestoreInventoryLabel" styleClass="potion-label" text="Purple x0" textFill="WHITE" />
         </HBox>
 
-    </Pane>
+        <Button layoutX="655" layoutY="330" onAction="#onIcathia" onMouseEntered="#onQuestAreaHover" prefHeight="20" prefWidth="110" styleClass="map-location-button" text="Icathia" />
 
+        <!-- Message bar -->
+        <Label fx:id="messageLabel" alignment="CENTER" layoutX="170" layoutY="480" prefHeight="32" prefWidth="560" styleClass="message-label" text="Click a map location." textFill="WHITE" />
+
+        <!-- Popup overlay -->
+        <Pane fx:id="darkOverlay" layoutX="0" layoutY="0" prefHeight="600" prefWidth="900" style="-fx-background-color: rgba(0,0,0,0.55);" visible="false" />
+
+        <VBox fx:id="institutePopup" alignment="CENTER" layoutX="300" layoutY="165" prefHeight="260" prefWidth="300" spacing="15" styleClass="institute-popup" visible="false">
+
+            <Label styleClass="popup-title" text="Institute of War" textFill="GOLD" />
+
+            <Label styleClass="popup-subtitle" text="Prepare before travelling." textFill="WHITE" />
+
+            <Button onAction="#onOpenShop" prefHeight="42" prefWidth="210" styleClass="popup-button" text="Shop" />
+
+            <Button onAction="#onOpenBarracks" prefHeight="42" prefWidth="210" styleClass="popup-button" text="Barracks / Edit Guild" />
+
+            <Button onAction="#onCloseInstitutePopup" prefHeight="36" prefWidth="210" styleClass="popup-back-button" text="Back to Map" />
+        </VBox>
+
+    </Pane>
 </AnchorPane>

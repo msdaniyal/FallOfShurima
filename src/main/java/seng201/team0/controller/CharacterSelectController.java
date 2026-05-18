@@ -435,11 +435,18 @@ public class CharacterSelectController {
             guild.addToMainParty(adventurer);
         }
 
+        boolean firstGameCreation = false;
+
         if (game == null) {
             game = new Game(guild, difficulty);
+            firstGameCreation = true;
         }
 
-        navigateToMainMenu();
+        if (firstGameCreation) {
+            navigateToImperialCommand();
+        } else {
+            navigateToMainMenu();
+        }
     }
 
     @FXML
@@ -448,6 +455,25 @@ public class CharacterSelectController {
             navigateToMainMenu();
         } else {
             navigateToSetup();
+        }
+    }
+
+    private void navigateToImperialCommand() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/imperialcommand.fxml"));
+            Parent root = loader.load();
+
+            ImperialCommandController controller = loader.getController();
+            controller.setGameData(game);
+
+            Stage stage = (Stage) rootPane.getScene().getWindow();
+            ScreenUtil.switchScene(stage, root);
+            stage.setTitle("The Fall of Shurima — Imperial Command");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            warningLabel.setTextFill(Color.RED);
+            warningLabel.setText("Error loading imperial command scene.");
         }
     }
 
