@@ -13,6 +13,7 @@ public class Guild {
     private String name;
     private int gold;
     private Faction playerFaction;
+    private Adventurer mainCharacter;
     private boolean partyLocked;
     private List<Adventurer> mainParty;
     private List<Adventurer> reserves;
@@ -35,10 +36,12 @@ public class Guild {
         this.name = name;
         this.gold = startingGold;
         this.playerFaction = playerFaction;
+        this.mainCharacter = createMainCharacter(playerFaction);
         this.partyLocked = false;
         this.mainParty = new ArrayList<>();
         this.reserves = new ArrayList<>();
         this.recruitPool = new ArrayList<>();
+        this.mainParty.add(mainCharacter);
         this.smallPotionCount = 0;
         this.partyPotionCount = 0;
         this.fullRestoreCount = 0;
@@ -63,6 +66,63 @@ public class Guild {
      */
     public Faction getPlayerFaction() {
         return playerFaction;
+    }
+
+    /**
+     * @return The chosen main character for this guild.
+     */
+    public Adventurer getMainCharacter() {
+        if (mainCharacter == null) {
+            mainCharacter = createMainCharacter(playerFaction);
+        }
+        return mainCharacter;
+    }
+
+    /**
+     * @return True if the given adventurer is the chosen Aatrox/Xolaani main character.
+     */
+    public boolean isMainCharacter(Adventurer adventurer) {
+        return adventurer != null && isMainCharacterName(adventurer.getName());
+    }
+
+    /**
+     * @return True if this name belongs to the chosen main character.
+     */
+    public boolean isMainCharacterName(String name) {
+        return name != null && getMainCharacter().getName().equals(name);
+    }
+
+    /**
+     * Creates the player's fixed main character from the setup faction choice.
+     * The player then adds 1 to 4 companions around this character.
+     */
+    private Adventurer createMainCharacter(Faction faction) {
+        if (faction == Faction.XOLAANI) {
+            return new Adventurer(
+                    "Xolaani", 135, 18, 10, 0,
+                    Faction.XOLAANI, faction,
+                    "Your chosen main character. A blood-weaving Darkin leader who anchors the guild."
+            );
+        }
+
+        return new Adventurer(
+                "Aatrox", 145, 19, 9, 0,
+                Faction.AATROX, faction,
+                "Your chosen main character. The World Ender leads the guild into battle."
+        );
+    }
+
+    /**
+     * Makes sure the main character is present at the front of the main party.
+     */
+    public void ensureMainCharacterInParty() {
+        Adventurer mc = getMainCharacter();
+        mainParty.removeIf(member -> member.getName().equals(mc.getName()));
+        mainParty.add(0, mc);
+
+        while (mainParty.size() > MAX_PARTY_SIZE) {
+            mainParty.remove(mainParty.size() - 1);
+        }
     }
 
     /**
@@ -165,6 +225,19 @@ public class Guild {
         }
     }
 
+    public boolean hasAnyHealingPotions() {
+        return smallPotionCount > 0 || partyPotionCount > 0 || fullRestoreCount > 0;
+    }
+
+    public boolean hasInjuredMainPartyMember() {
+        for (Adventurer adventurer : mainParty) {
+            if (!adventurer.isDead() && adventurer.getCurrentHealth() < adventurer.getMaxHealth()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Adds gold to the guild's treasury.
      * @param amount The amount of gold to add
@@ -193,8 +266,16 @@ public class Guild {
      * @return True if added successfully, false if party is full
      */
     public boolean addToMainParty(Adventurer adventurer) {
+        if (adventurer == null || isInCurrentMainParty(adventurer)) {
+            return false;
+        }
+
         if (mainParty.size() < MAX_PARTY_SIZE) {
-            mainParty.add(adventurer);
+            if (isMainCharacter(adventurer)) {
+                mainParty.add(0, getMainCharacter());
+            } else {
+                mainParty.add(adventurer);
+            }
             return true;
         }
         return false;
@@ -287,6 +368,89 @@ public class Guild {
             reserves.remove(adventurer);
             return true;
         }
+        return false;
+    }
+
+    /**
+     * Calculates the gold required to confirm a new main-party selection.
+     * Adventurers already in the current main party are free to keep; newly selected
+     * adventurers cost their pay value. This keeps spending logic in the model.
+     * @param selectedParty The proposed main party
+     * @return Total recruitment cost for newly added adventurers
+     */
+    public int calculatePartySelectionCost(List<Adventurer> selectedParty) {
+        int totalCost = 0;
+
+        for (Adventurer adventurer : selectedParty) {
+            if (!isMainCharacter(adventurer) && !isInCurrentMainParty(adventurer)) {
+                totalCost += adventurer.getPay();
+            }
+        }
+
+        return totalCost;
+    }
+
+    /**
+     * @param selectedParty Proposed party selection
+     * @return The gold remaining if this selection is confirmed
+     */
+    public int previewGoldAfterPartySelection(List<Adventurer> selectedParty) {
+        return gold - calculatePartySelectionCost(selectedParty);
+    }
+
+    /**
+     * Replaces the current main party and spends gold only for newly hired members.
+     * This method is the single source of truth for party confirmation spending.
+     * @param selectedParty The proposed main party
+     * @return True if the party was replaced and payment succeeded
+     */
+    public boolean replaceMainPartyWithSelection(List<Adventurer> selectedParty) {
+        if (partyLocked || selectedParty == null || !containsMainCharacter(selectedParty)) {
+            return false;
+        }
+
+        int selectedSize = selectedParty.size();
+        if (selectedSize < 2 || selectedSize > MAX_PARTY_SIZE) {
+            return false;
+        }
+
+        int cost = calculatePartySelectionCost(selectedParty);
+        if (!spendGold(cost)) {
+            return false;
+        }
+
+        mainParty.clear();
+        mainParty.add(getMainCharacter());
+
+        for (Adventurer adventurer : selectedParty) {
+            if (!isMainCharacter(adventurer)) {
+                addToMainParty(adventurer);
+            }
+        }
+
+        return mainParty.size() >= 2 && mainParty.size() <= MAX_PARTY_SIZE;
+    }
+
+    private boolean containsMainCharacter(List<Adventurer> selectedParty) {
+        for (Adventurer adventurer : selectedParty) {
+            if (isMainCharacter(adventurer)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isInCurrentMainParty(Adventurer adventurer) {
+        if (adventurer == null) {
+            return false;
+        }
+
+        for (Adventurer member : mainParty) {
+            if (member.getName().equals(adventurer.getName())) {
+                return true;
+            }
+        }
+
         return false;
     }
 

@@ -1,262 +1,155 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.URL?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Rectangle?>
 
 <AnchorPane fx:id="rootPane"
             prefWidth="900.0"
             prefHeight="600.0"
-            xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="seng201.team0.controller.Quest1Controller"
-            style="-fx-background-color: black;">
+            styleClass="quest-root"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="seng201.team0.controller.Quest1Controller">
 
-    <Pane fx:id="contentPane"
-          prefWidth="900.0"
-          prefHeight="600.0">
+    <children>
+        <Pane fx:id="contentPane"
+              prefWidth="900.0"
+              prefHeight="600.0"
+              styleClass="quest-content">
 
-        <!-- Background -->
-        <ImageView fx:id="backgroundImage"
-                   fitWidth="900.0"
-                   fitHeight="600.0"
-                   preserveRatio="false"
-                   mouseTransparent="true">
-            <image>
-                <Image url="@../images/quest1_bg.png" />
-            </image>
-        </ImageView>
+            <children>
+                <!-- Dark base prevents white gaps while images change -->
+                <Rectangle layoutX="0"
+                           layoutY="0"
+                           width="900"
+                           height="600"
+                           fill="#080403" />
 
-        <!-- Pause button only, no back button -->
-        <Button fx:id="pauseButton"
-                text="+"
-                layoutX="20.0"
-                layoutY="20.0"
-                prefWidth="45.0"
-                prefHeight="45.0"
-                onAction="#onPause"
-                style="-fx-background-color: rgba(0,0,0,0.45);
-                       -fx-text-fill: gold;
-                       -fx-font-size: 24px;
-                       -fx-font-weight: bold;
-                       -fx-border-color: gold;
-                       -fx-border-width: 2;
-                       -fx-border-radius: 10;
-                       -fx-background-radius: 10;
-                       -fx-cursor: hand;" />
+                <!-- Story background image area -->
+                <ImageView fx:id="backgroundImage"
+                           layoutX="0.0"
+                           layoutY="0.0"
+                           fitWidth="900.0"
+                           fitHeight="390.0"
+                           preserveRatio="false"
+                           smooth="true" />
 
-        <!-- Main battle status text:
-             Are you ready?
-             Remember!
-             Choose the cards in order.
-             Player Attack
-             Attack Successful / Attack Fail / Attack Blocked
-             Boss Attack
-        -->
-        <Label fx:id="statusLabel"
-               layoutX="200.0"
-               layoutY="22.0"
-               prefWidth="500.0"
-               prefHeight="42.0"
-               alignment="CENTER"
-               text="Ready?"
-               textFill="GOLD"
-               style="-fx-font-size: 28px;
-                      -fx-font-weight: bold;
-                      -fx-effect: dropshadow(gaussian, black, 8, 0.8, 0, 0);" />
+                <Rectangle layoutX="0"
+                           layoutY="0"
+                           width="900"
+                           height="390"
+                           fill="rgba(0,0,0,0.12)" />
 
-        <!-- Countdown text -->
-        <Label fx:id="timerLabel"
-               layoutX="405.0"
-               layoutY="65.0"
-               prefWidth="90.0"
-               prefHeight="38.0"
-               alignment="CENTER"
-               text=""
-               textFill="WHITE"
-               style="-fx-font-size: 32px;
-                      -fx-font-weight: bold;
-                      -fx-effect: dropshadow(gaussian, black, 8, 0.8, 0, 0);" />
+                <Rectangle layoutX="0"
+                           layoutY="390"
+                           width="900"
+                           height="210"
+                           fill="linear-gradient(from 0% 0% to 0% 100%, #1b1208, #070403)" />
 
-        <!-- Memory pictures / six options / battle text area -->
-        <HBox fx:id="memoryArea"
-              layoutX="105.0"
-              layoutY="105.0"
-              prefWidth="690.0"
-              prefHeight="105.0"
-              spacing="10.0"
-              style="-fx-alignment: center;" />
+                <Rectangle layoutX="0"
+                           layoutY="390"
+                           width="900"
+                           height="8"
+                           fill="rgba(214,179,90,0.90)" />
 
-        <!-- Attack button.
-             The controller enables it only after player selects enough cards. -->
-        <Button fx:id="attackButton"
-                text="Attack"
-                layoutX="360.0"
-                layoutY="220.0"
-                prefWidth="180.0"
-                prefHeight="42.0"
-                disable="true"
-                onAction="#onConfirmAttack"
-                style="-fx-background-color: rgba(0,0,0,0.55);
-                       -fx-text-fill: gold;
-                       -fx-font-size: 20px;
-                       -fx-font-weight: bold;
-                       -fx-border-color: gold;
-                       -fx-border-width: 2;
-                       -fx-border-radius: 8;
-                       -fx-background-radius: 8;
-                       -fx-cursor: hand;" />
+                <Label fx:id="eventTitleLabel"
+                       layoutX="40"
+                       layoutY="18"
+                       prefWidth="820"
+                       prefHeight="38"
+                       alignment="CENTER"
+                       text="Event Title"
+                       styleClass="event-title" />
 
-        <!-- Player characters are dynamically added here by Quest1Controller.
-             They will stand directly on the background, not inside cards. -->
-        <Pane fx:id="partyPane"
-              layoutX="35.0"
-              layoutY="270.0"
-              prefWidth="390.0"
-              prefHeight="300.0"
-              style="-fx-background-color: transparent;" />
+                <!-- Pokemon-style dialogue panel -->
+                <AnchorPane layoutX="20"
+                            layoutY="410"
+                            prefWidth="860"
+                            prefHeight="170"
+                            styleClass="dialogue-panel">
 
-        <!-- Boss is dynamically added here by Quest1Controller. -->
-        <Pane fx:id="bossPane"
-              layoutX="530.0"
-              layoutY="245.0"
-              prefWidth="340.0"
-              prefHeight="330.0"
-              style="-fx-background-color: transparent;" />
+                    <children>
+                        <Label fx:id="speakerLabel"
+                               layoutX="20"
+                               layoutY="10"
+                               prefWidth="240"
+                               prefHeight="24"
+                               text="Speaker"
+                               styleClass="speaker-label" />
 
-        <HBox fx:id="potionBar"
-              layoutX="270.0"
-              layoutY="500.0"
-              prefWidth="360.0"
-              prefHeight="55.0"
-              spacing="15.0"
-              style="-fx-alignment: center;
-             -fx-background-color: rgba(0,0,0,0.35);
-             -fx-border-color: #d6b63f;
-             -fx-border-width: 2;
-             -fx-border-radius: 14;
-             -fx-background-radius: 14;">
+                        <Label fx:id="dialogueLabel"
+                               layoutX="20"
+                               layoutY="40"
+                               prefWidth="555"
+                               prefHeight="72"
+                               wrapText="true"
+                               text="Dialogue text appears here."
+                               styleClass="dialogue-label" />
 
-            <VBox fx:id="smallPotionBox"
-                  spacing="2.0"
-                  style="-fx-alignment: center;">
-                <ImageView fx:id="smallPotionImage"
-                           fitWidth="32.0"
-                           fitHeight="32.0"
-                           preserveRatio="true" />
-                <Label fx:id="smallPotionCountLabel"
-                       text="x0"
-                       textFill="WHITE"
-                       style="-fx-font-size: 13px; -fx-font-weight: bold;" />
-            </VBox>
+                        <Label fx:id="choicePreviewLabel"
+                               layoutX="20"
+                               layoutY="116"
+                               prefWidth="555"
+                               prefHeight="40"
+                               wrapText="true"
+                               text="Hover over a command to read the full order."
+                               styleClass="choice-preview-label" />
 
-            <VBox fx:id="partyPotionBox"
-                  spacing="2.0"
-                  style="-fx-alignment: center;">
-                <ImageView fx:id="partyPotionImage"
-                           fitWidth="32.0"
-                           fitHeight="32.0"
-                           preserveRatio="true" />
-                <Label fx:id="partyPotionCountLabel"
-                       text="x0"
-                       textFill="WHITE"
-                       style="-fx-font-size: 13px; -fx-font-weight: bold;" />
-            </VBox>
+                        <Label fx:id="nextArrowLabel"
+                               layoutX="548"
+                               layoutY="130"
+                               prefWidth="30"
+                               prefHeight="24"
+                               text="▼"
+                               styleClass="next-arrow" />
 
-            <VBox fx:id="fullRestoreBox"
-                  spacing="2.0"
-                  style="-fx-alignment: center;">
-                <ImageView fx:id="fullRestoreImage"
-                           fitWidth="32.0"
-                           fitHeight="32.0"
-                           preserveRatio="true" />
-                <Label fx:id="fullRestoreCountLabel"
-                       text="x0"
-                       textFill="WHITE"
-                       style="-fx-font-size: 13px; -fx-font-weight: bold;" />
-            </VBox>
+                        <Button fx:id="continueButton"
+                                layoutX="610"
+                                layoutY="126"
+                                prefWidth="220"
+                                prefHeight="30"
+                                text="Next"
+                                onAction="#onContinue"
+                                styleClass="continue-button" />
 
-        </HBox>
+                        <Button fx:id="choiceAButton"
+                                layoutX="600"
+                                layoutY="22"
+                                prefWidth="235"
+                                prefHeight="36"
+                                text="Choice A"
+                                onAction="#onChoiceA"
+                                styleClass="choice-button" />
 
-        <!-- Pause overlay -->
-        <Rectangle fx:id="pauseOverlay"
-                   width="900.0"
-                   height="600.0"
-                   fill="#00000088"
-                   visible="false"
-                   mouseTransparent="false" />
+                        <Button fx:id="choiceBButton"
+                                layoutX="600"
+                                layoutY="68"
+                                prefWidth="235"
+                                prefHeight="36"
+                                text="Choice B"
+                                onAction="#onChoiceB"
+                                styleClass="choice-button" />
 
-        <!-- Pause popup -->
-        <VBox fx:id="pausePopup"
-              layoutX="310.0"
-              layoutY="155.0"
-              prefWidth="280.0"
-              prefHeight="290.0"
-              spacing="18.0"
-              visible="false"
-              style="-fx-alignment: center;
-                     -fx-background-color: rgba(20, 16, 10, 0.95);
-                     -fx-border-color: gold;
-                     -fx-border-width: 3;
-                     -fx-border-radius: 18;
-                     -fx-background-radius: 18;
-                     -fx-padding: 25;">
+                        <Button fx:id="choiceCButton"
+                                layoutX="600"
+                                layoutY="114"
+                                prefWidth="235"
+                                prefHeight="36"
+                                text="Choice C"
+                                onAction="#onChoiceC"
+                                styleClass="choice-button" />
+                    </children>
+                </AnchorPane>
+            </children>
+        </Pane>
+    </children>
 
-            <Label text="Game Paused"
-                   textFill="GOLD"
-                   style="-fx-font-size: 28px;
-                          -fx-font-weight: bold;
-                          -fx-effect: dropshadow(gaussian, black, 7, 0.8, 0, 0);" />
-
-            <Button text="Resume"
-                    onAction="#onResume"
-                    prefWidth="190.0"
-                    prefHeight="42.0"
-                    style="-fx-background-color: rgba(0,0,0,0.45);
-                           -fx-text-fill: gold;
-                           -fx-font-size: 18px;
-                           -fx-font-weight: bold;
-                           -fx-border-color: gold;
-                           -fx-border-width: 2;
-                           -fx-border-radius: 8;
-                           -fx-background-radius: 8;
-                           -fx-cursor: hand;" />
-
-            <Button text="Retry"
-                    onAction="#onRetry"
-                    prefWidth="190.0"
-                    prefHeight="42.0"
-                    style="-fx-background-color: rgba(0,0,0,0.45);
-                           -fx-text-fill: gold;
-                           -fx-font-size: 18px;
-                           -fx-font-weight: bold;
-                           -fx-border-color: gold;
-                           -fx-border-width: 2;
-                           -fx-border-radius: 8;
-                           -fx-background-radius: 8;
-                           -fx-cursor: hand;" />
-
-            <Button text="Main Menu"
-                    onAction="#onPauseMainMenu"
-                    prefWidth="190.0"
-                    prefHeight="42.0"
-                    style="-fx-background-color: rgba(0,0,0,0.45);
-                           -fx-text-fill: gold;
-                           -fx-font-size: 18px;
-                           -fx-font-weight: bold;
-                           -fx-border-color: gold;
-                           -fx-border-width: 2;
-                           -fx-border-radius: 8;
-                           -fx-background-radius: 8;
-                           -fx-cursor: hand;" />
-
-        </VBox>
-
-    </Pane>
+    <stylesheets>
+        <URL value="@../css/quest1.css" />
+    </stylesheets>
 </AnchorPane>

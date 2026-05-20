@@ -12,7 +12,7 @@
             prefHeight="600.0"
             xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="seng201.team0.controller.Quest3Controller"
+            fx:controller="seng201.team0.controller.Quest6Controller"
             styleClass="quest-root">
     <children>
         <Pane fx:id="contentPane" prefWidth="900" prefHeight="600" styleClass="quest-content">
@@ -30,7 +30,7 @@
                        layoutY="25"
                        prefWidth="835"
                        prefHeight="42"
-                       text="Quest Event"
+                       text="Twilight of Sleep"
                        styleClass="event-title" />
 
                 <Pane layoutX="25" layoutY="392" prefWidth="850" prefHeight="185" styleClass="dialogue-panel">
@@ -46,51 +46,24 @@
                         <Label fx:id="dialogueLabel"
                                layoutX="22"
                                layoutY="44"
-                               prefWidth="500"
+                               prefWidth="620"
                                prefHeight="100"
                                wrapText="true"
                                text="Dialogue"
                                styleClass="dialogue-label" />
 
-                        <Label fx:id="choicePreviewLabel"
-                               layoutX="545"
-                               layoutY="20"
-                               prefWidth="270"
-                               prefHeight="46"
-                               wrapText="true"
-                               text="Hover over a command."
-                               styleClass="choice-preview-label" />
-
-                        <Button fx:id="choiceAButton"
-                                layoutX="545"
-                                layoutY="76"
-                                prefWidth="270"
-                                prefHeight="38"
-                                text="Choice A"
-                                onAction="#onChoiceA"
-                                styleClass="choice-button" />
-
-                        <Button fx:id="choiceBButton"
-                                layoutX="545"
-                                layoutY="122"
-                                prefWidth="270"
-                                prefHeight="38"
-                                text="Choice B"
-                                onAction="#onChoiceB"
-                                styleClass="choice-button" />
-
                         <Button fx:id="continueButton"
-                                layoutX="690"
-                                layoutY="125"
-                                prefWidth="125"
-                                prefHeight="36"
-                                text="Continue"
+                                layoutX="685"
+                                layoutY="110"
+                                prefWidth="140"
+                                prefHeight="42"
+                                text="Face Zoe"
                                 onAction="#onContinue"
                                 styleClass="continue-button" />
 
                         <Label fx:id="nextArrowLabel"
-                               layoutX="820"
-                               layoutY="132"
+                               layoutX="835"
+                               layoutY="122"
                                text="▼"
                                styleClass="next-arrow" />
                     </children>

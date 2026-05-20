@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * Controller for the character selection screen.
  * Uses a carousel layout so the player views one warrior at a time.
- * The player can choose up to 5 warriors to join the guild.
+ * The guild always includes the chosen main character, then the player chooses 1 to 4 companions.
  *
  * Displayed character information:
  *  - Name
@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @author Mohammed, Xinyi
  */
-public class CharacterSelectController {
+public class CharacterSelectController implements GameDataReceiver {
 
     // ── FXML fields ───────────────────────────────────────────────────────────
     @FXML private Label titleLabel;
@@ -70,13 +70,15 @@ public class CharacterSelectController {
     private final List<Adventurer> selectedCharacters = new ArrayList<>();
 
     // ── Display ───────────────────────────────────────────────────────────────
-    private static final int MAX_SELECTED = 5;
+    private static final int MIN_COMPANIONS = 1;
+    private static final int MAX_COMPANIONS = 4;
+    private static final int MAX_SELECTED = 1 + MAX_COMPANIONS;
 
     @FXML
     public void initialize() {
         ScreenUtil.setupStretch(rootPane, backgroundImage, contentPane);
 
-        selectedCountLabel.setText("Selected: 0 / " + MAX_SELECTED);
+        selectedCountLabel.setText("Companions: 0 / " + MAX_COMPANIONS);
         warningLabel.setText("");
 
         // Keep the carousel image area consistent for every character.
@@ -119,6 +121,8 @@ public class CharacterSelectController {
         allCharacters.clear();
 
         Faction playerFaction = guild.getPlayerFaction();
+
+        allCharacters.add(guild.getMainCharacter());
 
         allCharacters.add(new Adventurer(
                 "Baalkux", 110, 18, 8, 20,
@@ -180,8 +184,17 @@ public class CharacterSelectController {
 
         for (Adventurer adventurer : allCharacters) {
             if (isAlreadyInParty(adventurer)) {
-                selectedCharacters.add(adventurer);
+                selectedCharacters.add(getRealPartyMember(adventurer));
             }
+        }
+
+        Adventurer mainCharacter = guild.getMainCharacter();
+        if (findSelectedByName(mainCharacter.getName()) == null) {
+            selectedCharacters.add(0, mainCharacter);
+        }
+
+        if (instructionLabel != null) {
+            instructionLabel.setText("Your guild starts with " + mainCharacter.getName() + ". Choose 1 to 4 companions.");
         }
 
         currentCharacterIndex = 0;
@@ -306,24 +319,34 @@ public class CharacterSelectController {
     private void toggleCharacterSelection(Adventurer adventurer) {
         warningLabel.setText("");
 
-        if (selectedCharacters.contains(adventurer)) {
-            selectedCharacters.remove(adventurer);
-            availableGold += adventurer.getPay();
+        if (guild.isMainCharacter(adventurer)) {
+            warningLabel.setTextFill(Color.GOLD);
+            warningLabel.setText(adventurer.getName() + " is your main character and must stay in the guild.");
+            return;
+        }
+
+        Adventurer selected = findSelectedByName(adventurer.getName());
+
+        if (selected != null) {
+            selectedCharacters.remove(selected);
         } else {
             if (selectedCharacters.size() >= MAX_SELECTED) {
                 warningLabel.setTextFill(Color.RED);
-                warningLabel.setText("You can choose up to 5 warriors only.");
+                warningLabel.setText("You can choose up to 4 companions with your main character.");
                 return;
             }
 
-            if (availableGold < adventurer.getPay()) {
+            Adventurer actualSelection = getRealPartyMember(adventurer);
+            List<Adventurer> previewSelection = new ArrayList<>(selectedCharacters);
+            previewSelection.add(actualSelection);
+
+            if (guild.previewGoldAfterPartySelection(previewSelection) < 0) {
                 warningLabel.setTextFill(Color.RED);
                 warningLabel.setText("Not enough gold to hire " + adventurer.getName() + ".");
                 return;
             }
 
-            availableGold -= adventurer.getPay();
-            selectedCharacters.add(adventurer);
+            selectedCharacters.add(actualSelection);
         }
 
         updateSelectedCount();
@@ -338,7 +361,16 @@ public class CharacterSelectController {
 
         Adventurer adventurer = allCharacters.get(currentCharacterIndex);
 
-        if (selectedCharacters.contains(adventurer)) {
+        if (guild != null && guild.isMainCharacter(adventurer)) {
+            selectButton.setDisable(true);
+            selectButton.setText("Main Character");
+            selectButton.setStyle(getMainCharacterButtonStyle());
+            return;
+        }
+
+        selectButton.setDisable(false);
+
+        if (findSelectedByName(adventurer.getName()) != null) {
             selectButton.setText("Remove");
             selectButton.setStyle(getRemoveButtonStyle());
         } else {
@@ -369,14 +401,50 @@ public class CharacterSelectController {
                 "-fx-cursor: hand;";
     }
 
+    private String getMainCharacterButtonStyle() {
+        return "-fx-font-size: 15px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-color: #4d3a14;" +
+                "-fx-text-fill: #ffd86a;" +
+                "-fx-background-radius: 8;" +
+                "-fx-border-color: gold;" +
+                "-fx-border-radius: 8;";
+    }
+
     private void updateGoldLabel() {
-        if (goldLabel != null) {
-            goldLabel.setText("Gold: " + availableGold);
+        if (goldLabel != null && guild != null) {
+            int previewGold = guild.previewGoldAfterPartySelection(selectedCharacters);
+            goldLabel.setText("Gold: " + previewGold);
         }
     }
 
     private void updateSelectedCount() {
-        selectedCountLabel.setText("Selected: " + selectedCharacters.size() + " / " + MAX_SELECTED);
+        selectedCountLabel.setText("Companions: " + getCompanionCount() + " / " + MAX_COMPANIONS);
+    }
+
+    private int getCompanionCount() {
+        int count = 0;
+        for (Adventurer selected : selectedCharacters) {
+            if (!guild.isMainCharacter(selected)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private boolean hasValidPartySize() {
+        int companionCount = getCompanionCount();
+        return companionCount >= MIN_COMPANIONS && companionCount <= MAX_COMPANIONS
+                && findSelectedByName(guild.getMainCharacter().getName()) != null;
+    }
+
+    private Adventurer findSelectedByName(String name) {
+        for (Adventurer selected : selectedCharacters) {
+            if (selected.getName().equals(name)) {
+                return selected;
+            }
+        }
+        return null;
     }
 
     private boolean isAlreadyInParty(Adventurer adventurer) {
@@ -398,6 +466,10 @@ public class CharacterSelectController {
             return adventurer;
         }
 
+        if (guild.isMainCharacter(adventurer)) {
+            return guild.getMainCharacter();
+        }
+
         for (Adventurer partyMember : guild.getMainParty()) {
             if (partyMember.getName().equals(adventurer.getName())) {
                 return partyMember;
@@ -409,30 +481,19 @@ public class CharacterSelectController {
 
     @FXML
     public void onConfirmSelection() {
-        if (selectedCharacters.isEmpty()) {
+        if (!hasValidPartySize()) {
             warningLabel.setTextFill(Color.RED);
-            warningLabel.setText("Choose at least 1 warrior.");
+            warningLabel.setText("Choose " + guild.getMainCharacter().getName() + " plus at least 1 companion. Maximum is 4 companions.");
             return;
         }
 
-        int goldDifference = availableGold - guild.getGold();
+        boolean updated = guild.replaceMainPartyWithSelection(new ArrayList<>(selectedCharacters));
 
-        if (goldDifference > 0) {
-            guild.addGold(goldDifference);
-        } else if (goldDifference < 0) {
-            boolean paid = guild.spendGold(-goldDifference);
-
-            if (!paid) {
-                warningLabel.setTextFill(Color.RED);
-                warningLabel.setText("Payment failed.");
-                return;
-            }
-        }
-
-        guild.getMainParty().clear();
-
-        for (Adventurer adventurer : selectedCharacters) {
-            guild.addToMainParty(adventurer);
+        if (!updated) {
+            warningLabel.setTextFill(Color.RED);
+            warningLabel.setText("Payment failed or party changes are locked.");
+            updateGoldLabel();
+            return;
         }
 
         boolean firstGameCreation = false;

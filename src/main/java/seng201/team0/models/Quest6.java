@@ -21,6 +21,8 @@ import java.util.List;
  */
 public class Quest6 extends Quest {
 
+    private boolean realityDistortionApplied;
+
     // ------------------------------------- CONSTRUCTORS -------------------------------------
 
     /**
@@ -36,6 +38,7 @@ public class Quest6 extends Quest {
                 25,
                 difficulty
         );
+        this.realityDistortionApplied = false;
     }
 
     // ------------------------------------- ABSTRACT METHOD IMPLEMENTATIONS -------------------------------------
@@ -78,8 +81,17 @@ public class Quest6 extends Quest {
      */
     @Override
     public void runEvents(Guild guild) {
+        if (realityDistortionApplied) {
+            return;
+        }
+
+        realityDistortionApplied = true;
         for (Adventurer member : guild.getMainParty()) {
             member.increaseMadness(15);
         }
+    }
+
+    public String getFinalIntroText() {
+        return "Zoe appears only when the party is too fractured for the true ending. Win here, or lose everything.";
     }
 }

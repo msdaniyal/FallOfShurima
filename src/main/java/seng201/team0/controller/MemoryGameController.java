@@ -3,15 +3,15 @@ package seng201.team0.controller;
 import javafx.animation.KeyFrame;
 import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.geometry.HPos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import seng201.team0.models.Adventurer;
@@ -21,9 +21,14 @@ import seng201.team0.models.MemoryGame;
 
 import java.util.ArrayList;
 import java.util.List;
-import javafx.scene.effect.DropShadow;
+import java.util.function.Consumer;
 import javafx.scene.paint.Color;
 
+/**
+ * Popup controller for the memory attack.
+ * The controller owns only the JavaFX display/timer.
+ * MemoryGame owns the sequence and success/failure logic.
+ */
 public class MemoryGameController {
 
     @FXML private GridPane imageContainer;
@@ -33,7 +38,6 @@ public class MemoryGameController {
     @FXML private Button endButton;
 
     private final List<ImageView> images = new ArrayList<>();
-    private final List<Integer> playerInput = new ArrayList<>();
     private List<Integer> pattern = new ArrayList<>();
 
     private boolean inputEnabled = false;
@@ -44,12 +48,9 @@ public class MemoryGameController {
     private Guild guild;
     private Adventurer currentAttacker;
 
-    /**
-     * Controller for the fight screen.
-     * Shows several random pictures in the fight and let the player choose the pictures shown by order.
-     * Only if the player's choices are right, the attack is successful.
-     * @author Mohammed, Xinyi
-     */
+    private Consumer<Boolean> resultHandler;
+    private boolean resultDelivered = false;
+
     public void setFightData(BossFight bossFight, Guild guild, Adventurer currentAttacker) {
         this.bossFight = bossFight;
         this.guild = guild;
@@ -57,61 +58,69 @@ public class MemoryGameController {
         buildImageViews(bossFight.getMemoryGame().getSequenceLength());
     }
 
-    @FXML
-    public void initialize() {
-        // Layout built in setFightData() once difficulty is known.
+    public void setResultHandler(Consumer<Boolean> resultHandler) {
+        this.resultHandler = resultHandler;
     }
 
-    /**
-     * Builds a 3-column grid for all difficulties:
-     *   Easy   (3) → 3×1
-     *   Normal (6) → 3×2
-     *   Hard   (9) → 3×3
-     */
+    @FXML
+    public void initialize() {
+        if (endButton != null) {
+            endButton.setVisible(false);
+            endButton.setDisable(true);
+        }
+        if (timerLabel != null) {
+            timerLabel.setText("");
+        }
+    }
+
     private void buildImageViews(int count) {
         images.clear();
         imageContainer.getChildren().clear();
         imageContainer.getColumnConstraints().clear();
         imageContainer.getRowConstraints().clear();
 
-        // Always 3 columns — works cleanly for 3, 6, and 9
         for (int c = 0; c < 3; c++) {
-            ColumnConstraints cc = new ColumnConstraints(120);
-            imageContainer.getColumnConstraints().add(cc);
+            imageContainer.getColumnConstraints().add(new ColumnConstraints(95));
         }
 
         for (int i = 0; i < count; i++) {
-            ImageView iv = new ImageView(
-                    new Image(getClass().getResource("/images/img" + i + ".png").toExternalForm())
-            );
-            iv.setVisible(false);
-            iv.setFitWidth(100);
-            iv.setFitHeight(100);
-            iv.setPreserveRatio(true);
-
+            ImageView imageView = createMemoryImage(i);
             final int index = i;
-            iv.setOnMouseClicked(e -> handlePlayerClick(index));
+            imageView.setOnMouseClicked(event -> handlePlayerClick(index));
 
-            imageContainer.add(iv, i % 3, i / 3);
-            images.add(iv);
+            imageContainer.add(imageView, i % 3, i / 3);
+            images.add(imageView);
         }
     }
 
-    // ----------------------------- Game flow ----------------------------------
+    private ImageView createMemoryImage(int index) {
+        ImageView imageView = new ImageView();
+        try {
+            imageView.setImage(new Image(getClass().getResource("/images/img" + index + ".png").toExternalForm()));
+        } catch (Exception ignored) {
+            imageView.setImage(null);
+        }
 
-    /**
-     * Called when the player clicks "Ready to Remember!".
-     * Hides the button immediately so it cannot be clicked again,
-     * then starts the sequence playback.
-     */
+        imageView.setVisible(false);
+        imageView.setFitWidth(80);
+        imageView.setFitHeight(80);
+        imageView.setPreserveRatio(true);
+        return imageView;
+    }
+
     @FXML
     public void startMemoryAttack() {
-        startButton.setDisable(true);
+        if (bossFight == null) {
+            finishAttack(false);
+            return;
+        }
 
-        playerInput.clear();
+        startButton.setDisable(true);
+        startButton.setVisible(false);
+        resultDelivered = false;
         inputEnabled = false;
 
-        pattern = bossFight.getMemoryGame().generateSequence();
+        pattern = bossFight.getMemoryGame().startRound();
 
         statusLabel.setText("Remember the sequence!");
         playPattern(0);
@@ -128,10 +137,10 @@ public class MemoryGameController {
         hideAllImages();
         images.get(pattern.get(index)).setVisible(true);
 
-        PauseTransition showPause = new PauseTransition(Duration.seconds(0.8));
+        PauseTransition showPause = new PauseTransition(Duration.seconds(0.65));
         showPause.setOnFinished(event -> {
             hideAllImages();
-            PauseTransition gapPause = new PauseTransition(Duration.seconds(0.3));
+            PauseTransition gapPause = new PauseTransition(Duration.seconds(0.20));
             gapPause.setOnFinished(e -> playPattern(index + 1));
             gapPause.play();
         });
@@ -140,146 +149,123 @@ public class MemoryGameController {
 
     private void startInputPhase() {
         inputEnabled = true;
-        playerInput.clear();
         startTimer();
     }
 
     private void startTimer() {
-        // Timer scales with difficulty: Easy=15s, Normal=30s, Hard=45s
-        timeRemaining = bossFight.getMemoryGame().getSequenceLength() * 5;
-        timerLabel.setText("Time Remaining: " + timeRemaining);
+        timeRemaining = Math.max(8, bossFight.getMemoryGame().getSequenceLength() * 4);
+        timerLabel.setText("Time: " + timeRemaining);
 
-        countdownTimeline = new Timeline(
-                new KeyFrame(Duration.seconds(1), event -> {
-                    timeRemaining--;
-                    timerLabel.setText("Time Remaining: " + timeRemaining);
-                    if (timeRemaining <= 0) {
-                        countdownTimeline.stop();
-                        failAttack();
-                    }
-                })
-        );
-        countdownTimeline.setCycleCount(timeRemaining);
+        countdownTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
+            timeRemaining--;
+            timerLabel.setText("Time: " + timeRemaining);
+
+            if (timeRemaining <= 0) {
+                bossFight.getMemoryGame().failRound();
+                finishAttack(false);
+            }
+        }));
+
+        countdownTimeline.setCycleCount(Timeline.INDEFINITE);
         countdownTimeline.play();
     }
 
-    // ----------------------------- Click handling -----------------------------
-
     private void handlePlayerClick(int clickedIndex) {
-        if (!inputEnabled) return;
-
-        highlightSelectedImage(clickedIndex);
-        playerInput.add(clickedIndex);
-
-        int currentPos = playerInput.size() - 1;
-
-        if (clickedIndex != pattern.get(currentPos)) {
-            failAttack();
+        if (!inputEnabled || bossFight == null) {
             return;
         }
 
-        if (playerInput.size() == pattern.size()) {
-            if (bossFight.getMemoryGame().checkSequence(playerInput)) {
-                successAttack();
-            } else {
-                failAttack();
-            }
+        highlightSelectedImage(clickedIndex);
+
+        MemoryGame.SelectionResult result = bossFight.getMemoryGame().selectImage(clickedIndex);
+        if (result.isComplete()) {
+            finishAttack(result.isSuccessful());
         }
     }
 
-    // ----------------------------- Visual helpers -----------------------------
+    private void finishAttack(boolean success) {
+        if (resultDelivered) {
+            return;
+        }
+
+        resultDelivered = true;
+        clearImageEffects();
+        inputEnabled = false;
+        stopTimer();
+
+        if (success) {
+            statusLabel.setText("Successful attack!");
+        } else {
+            statusLabel.setText("Attack failed!");
+        }
+
+        if (resultHandler != null) {
+            closeWindow();
+            Platform.runLater(() -> resultHandler.accept(success));
+            return;
+        }
+
+        if (endButton != null) {
+            endButton.setVisible(true);
+            endButton.setDisable(false);
+            endButton.setText("Return");
+        }
+    }
 
     private void highlightSelectedImage(int index) {
         clearImageEffects();
+
         ImageView selected = images.get(index);
         DropShadow glow = new DropShadow();
         glow.setColor(Color.GOLD);
-        glow.setRadius(25);
-        glow.setSpread(0.6);
+        glow.setRadius(18);
+        glow.setSpread(0.55);
         selected.setEffect(glow);
-        selected.setScaleX(1.1);
-        selected.setScaleY(1.1);
+        selected.setScaleX(1.08);
+        selected.setScaleY(1.08);
     }
 
     private void clearImageEffects() {
-        for (ImageView iv : images) {
-            iv.setEffect(null);
-            iv.setScaleX(1.0);
-            iv.setScaleY(1.0);
+        for (ImageView imageView : images) {
+            imageView.setEffect(null);
+            imageView.setScaleX(1.0);
+            imageView.setScaleY(1.0);
         }
     }
 
     private void hideAllImages() {
-        for (ImageView iv : images) { iv.setVisible(false); }
+        for (ImageView imageView : images) {
+            imageView.setVisible(false);
+        }
     }
 
     private void showAllImages() {
-        for (ImageView iv : images) { iv.setVisible(true); }
-    }
-
-    // ----------------------------- Attack resolution --------------------------
-
-    private void successAttack() {
-        clearImageEffects();
-        inputEnabled = false;
-        stopTimer();
-
-        if (bossFight == null || guild == null || currentAttacker == null) {
-            statusLabel.setText("Attack success! (Fight data not connected yet)");
-            return;
+        for (ImageView imageView : images) {
+            imageView.setVisible(true);
         }
-
-        int damage = bossFight.playerAttack(currentAttacker, true);
-        statusLabel.setText("Successful attack! Dealt " + damage + " damage.");
-
-        if (!bossFight.isFightOver(guild)) bossFight.bossTurn(guild);
-        bossFight.finishFightIfOver(guild);
-        showFightResultIfOver();
-    }
-
-    private void failAttack() {
-        clearImageEffects();
-        inputEnabled = false;
-        stopTimer();
-
-        if (bossFight == null || guild == null || currentAttacker == null) {
-            statusLabel.setText("Attack failed!");
-            return;
-        }
-
-        int damage = bossFight.playerAttack(currentAttacker, false);
-        statusLabel.setText("Attack failed! Dealt " + damage + " damage.");
-        startButton.setVisible(true);
-        startButton.setDisable(false);
-        startButton.setText("Try Again?");
-
-        endButton.setVisible(true);
-        endButton.setDisable(false);
-        endButton.setText("Return");
-
-        if (!bossFight.isFightOver(guild)) bossFight.bossTurn(guild);
-        bossFight.finishFightIfOver(guild);
-        showFightResultIfOver();
     }
 
     private void stopTimer() {
-        if (countdownTimeline != null) countdownTimeline.stop();
-        timerLabel.setText("");
-    }
+        if (countdownTimeline != null) {
+            countdownTimeline.stop();
+        }
 
-    private void showFightResultIfOver() {
-        if (bossFight != null && guild != null && bossFight.isFightOver(guild)) {
-            String result = bossFight.isPlayerWon() ? "\nYou won!" : "\nYou lost!";
-            statusLabel.setText(statusLabel.getText() + result);
+        if (timerLabel != null) {
+            timerLabel.setText("");
         }
     }
 
-    // ----------------------------- End attack move --------------------------
-
     @FXML
     public void endGame() {
-        // Close the memory game window
-        Stage stage = (Stage) statusLabel.getScene().getWindow();
-        stage.close();
+        finishAttack(false);
+    }
+
+    private void closeWindow() {
+        if (statusLabel != null && statusLabel.getScene() != null) {
+            Stage stage = (Stage) statusLabel.getScene().getWindow();
+            if (stage != null) {
+                stage.close();
+            }
+        }
     }
 }

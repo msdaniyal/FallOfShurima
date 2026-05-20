@@ -51,7 +51,40 @@ public class Game {
     }
 
     /**
+     * Selects an unlocked quest as the active quest before opening its screen.
+     * Controllers use this instead of guessing from UI state.
+     * @param questIndex zero-based quest index
+     * @return true if the quest exists and is unlocked
+     */
+    public boolean selectQuest(int questIndex) {
+        if (questIndex < 0 || questIndex >= quests.size()) {
+            return false;
+        }
+
+        Quest quest = quests.get(questIndex);
+        if (!quest.isUnlocked()) {
+            return false;
+        }
+
+        currentQuestIndex = questIndex;
+        return true;
+    }
+
+    /**
+     * @return zero-based active quest index
+     */
+    public int getCurrentQuestIndex() {
+        return currentQuestIndex;
+    }
+
+    /**
      * Advances to the next quest after the current one is completed.
+     */
+    /**
+     * Advances to the next quest after a specific quest is completed.
+     * Replaying an already completed quest will not unlock more quests.
+     *
+     * @param completedQuestIndex The index of the quest that was just completed, starting from 0.
      */
     /**
      * Advances to the next quest after a specific quest is completed.
@@ -66,18 +99,41 @@ public class Game {
 
         Quest completedQuest = quests.get(completedQuestIndex);
 
-        // If this quest has already been completed before, do not unlock anything new.
-        if (completedQuest.isCompleted()) {
+        if (!completedQuest.isCompleted()) {
+            completedQuest.markCompleted();
+        }
+
+        // Quest 5 decides the ending path. If loyalty is high enough, the
+        // player wins immediately. If not, Zoe/Quest 6 unlocks.
+        if (completedQuestIndex == 4) {
+            if (guild.checkLoyaltyThreshold(getLoyaltyThreshold())) {
+                gameOver = true;
+                playerWon = true;
+                isCompleted = true;
+                currentQuestIndex = 4;
+            } else {
+                quests.get(5).unlock();
+                currentQuestIndex = 5;
+                gameOver = false;
+                playerWon = false;
+            }
             return;
         }
 
-        completedQuest.markCompleted();
+        // Quest 6 is the hard-path final ending. Winning its boss fight wins
+        // the game; losing it loses the game.
+        if (completedQuestIndex == 5) {
+            BossFight finalFight = quests.get(5).getBossFights().get(0);
+            gameOver = true;
+            playerWon = finalFight.isPlayerWon();
+            isCompleted = playerWon;
+            currentQuestIndex = 5;
+            return;
+        }
 
-        // Only unlock the next quest if the player completed the highest unlocked quest.
         if (completedQuestIndex == currentQuestIndex) {
             int nextQuestIndex = completedQuestIndex + 1;
-
-            if (nextQuestIndex < quests.size()) {
+            if (nextQuestIndex < 5) {
                 quests.get(nextQuestIndex).unlock();
                 currentQuestIndex = nextQuestIndex;
             }
@@ -93,16 +149,25 @@ public class Game {
         if (guild.isWiped()) {
             gameOver = true;
             playerWon = false;
-        } else if (getCurrentLoyalty() >= getLoyaltyThreshold() && currentQuestIndex == 5) {
-            gameOver = true;
-            playerWon = true;
-        } else if (currentQuestIndex == 5) {
-            Quest quest6 = quests.get(5);
-            BossFight zoeFight = quest6.getBossFights().get(0);
-            if (zoeFight.isFightOver(guild) && !zoeFight.isPlayerWon()) {
+            return;
+        }
+
+        if (quests.get(4).isCompleted()) {
+            if (guild.checkLoyaltyThreshold(getLoyaltyThreshold())) {
                 gameOver = true;
-                playerWon = false;
+                playerWon = true;
+                isCompleted = true;
+            } else if (!quests.get(5).isCompleted()) {
+                quests.get(5).unlock();
+                currentQuestIndex = 5;
             }
+        }
+
+        if (quests.get(5).isCompleted()) {
+            BossFight finalFight = quests.get(5).getBossFights().get(0);
+            gameOver = true;
+            playerWon = finalFight.isPlayerWon();
+            isCompleted = playerWon;
         }
     }
 
@@ -167,5 +232,46 @@ public class Game {
         }
 
         return totalLoyalty;
+    }
+
+    /**
+     * @return True if the true-ending loyalty threshold has been met by every living main-party member.
+     */
+    public boolean hasMetLoyaltyThreshold() {
+        return guild.checkLoyaltyThreshold(getLoyaltyThreshold());
+    }
+
+    /**
+     * @return A short ending message for the result screen.
+     */
+    public String getEndingTitle() {
+        if (playerWon && quests.get(4).isCompleted() && !quests.get(5).isCompleted()) {
+            return "True Ending: The Guild Holds";
+        }
+
+        if (playerWon) {
+            return "Victory: Twilight Survived";
+        }
+
+        return "Defeat: The Guild Falls";
+    }
+
+    /**
+     * @return Longer ending text for the result screen.
+     */
+    public String getEndingDescription() {
+        if (playerWon && quests.get(4).isCompleted() && !quests.get(5).isCompleted()) {
+            return "Your party survived the faction war with enough loyalty to avoid Zoe's punishment path.";
+        }
+
+        if (playerWon) {
+            return "Your party failed the loyalty threshold, but survived Zoe and claimed the hard-path victory.";
+        }
+
+        if (guild.isWiped()) {
+            return "Every adventurer in the main party has fallen.";
+        }
+
+        return "Zoe broke the party that was already fractured.";
     }
 }

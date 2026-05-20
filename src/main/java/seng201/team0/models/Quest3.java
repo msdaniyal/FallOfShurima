@@ -4,28 +4,13 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Quest 3: Void Depths
- *
- * A four-boss survival gauntlet in the deepest part of the void tunnels.
- * Each boss introduces a unique mechanic — surviving all four is a significant milestone.
- *
- * Boss 1: Kha'Zix   — ISOLATE every 2 rounds (hunts the weakest alone).
- * Boss 2: Vel'Koz   — TRUE_DAMAGE passive (defense is ignored entirely).
- * Boss 3: Cho'Gath  — DEVOUR every 3 rounds (instantly kills lowest-HP member).
- * Boss 4: Bel'Veth  — AOE every round (hits every party member each turn).
- *
- * Events: Madness spikes rapidly in the depths. No choice — just survival.
- *
- * @author Mohammed, Xinyi
+ * Quest 3: Void Depths.
+ * Four-boss gauntlet with story choices before the fight.
  */
-public class Quest3 extends Quest {
+public class Quest3 extends Quest implements StoryDrivenQuest {
 
-    // ------------------------------------- CONSTRUCTORS -------------------------------------
+    private boolean storyCompleted;
 
-    /**
-     * Constructs Quest 3.
-     * @param difficulty The game difficulty
-     */
     public Quest3(Difficulty difficulty) {
         super(
                 3,
@@ -35,32 +20,9 @@ public class Quest3 extends Quest {
                 20,
                 difficulty
         );
+        this.storyCompleted = false;
     }
 
-    // ------------------------------------- ABSTRACT METHOD IMPLEMENTATIONS -------------------------------------
-
-    /**
-     * Initialises the four-boss gauntlet.
-     *
-     * Kha'Zix (ISOLATE, freq=2):
-     *   Every 2 rounds, isolates the lowest-HP adventurer.
-     *   That adventurer fights alone for 2 rounds; others cannot attack.
-     *   Isolation clears after 2 rounds or when the isolated member dies.
-     *
-     * Vel'Koz (TRUE_DAMAGE, freq=0):
-     *   Passive — boss damage always ignores defense entirely.
-     *   damage = bossAttack * diceDifference (no defense subtraction).
-     *
-     * Cho'Gath (DEVOUR, freq=3):
-     *   Every 3 rounds, instantly kills the lowest-HP party member (sets HP to 0).
-     *   Guild removes the dead member at end of round.
-     *
-     * Bel'Veth (AOE, freq=1):
-     *   Every round, deals flat bossAttack damage to every living party member.
-     *   Does not use dice rolls — pure pressure damage.
-     *
-     * @return Ordered list of boss fights
-     */
     @Override
     protected List<BossFight> initialiseBossFights() {
         Boss khazix = new Boss(
@@ -76,8 +38,7 @@ public class Quest3 extends Quest {
                 "Vel'Koz",
                 150, 20, 5,
                 180, 6, -6,
-                "It seeks to understand all life by tearing it apart. " +
-                        "Armor means nothing to eyes that see through matter itself.",
+                "It seeks to understand all life by tearing it apart. Armor means nothing to eyes that see through matter itself.",
                 BossAbility.TRUE_DAMAGE,
                 0
         );
@@ -86,39 +47,159 @@ public class Quest3 extends Quest {
                 "Cho'Gath",
                 200, 22, 12,
                 250, 8, -10,
-                "The Terror of the Void grows larger with every life it consumes. " +
-                        "It will feast on the weakest among you first.",
+                "The Terror of the Void grows larger with every life it consumes.",
                 BossAbility.DEVOUR,
                 3
         );
 
         Boss belveth = new Boss(
                 "Bel'Veth",
-                220, 18, 10,
+                240, 18, 10,
                 300, 10, -12,
-                "The Empress of the Void does not fight — she drowns. " +
-                        "There is no single blow to block when everything strikes at once.",
+                "The Empress of the Void does not rage. She consumes worlds with perfect calm.",
                 BossAbility.AOE,
                 1
         );
 
         return Arrays.asList(
-                new BossFight(khazix,  1, getDifficulty()),
-                new BossFight(velkoz,  2, getDifficulty()),
+                new BossFight(khazix, 1, getDifficulty()),
+                new BossFight(velkoz, 2, getDifficulty()),
                 new BossFight(chogath, 3, getDifficulty()),
                 new BossFight(belveth, 4, getDifficulty())
         );
     }
 
-    /**
-     * Runs expedition events for Quest 3.
-     * The depths inflict madness on the entire party — no choices, just consequences.
-     * @param guild The player's guild
-     */
+    @Override
+    public List<QuestStoryEvent> getStoryEvents() {
+        return Arrays.asList(
+                new QuestStoryEvent(
+                        "The First Echo",
+                        "Narrator",
+                        "Deep below Icathia, the walls begin repeating your party's voices before anyone speaks.",
+                        "/images/Quest3/quest3_echo.png",
+                        Arrays.asList(
+                                new QuestStoryChoice(
+                                        "Answer Back",
+                                        "Call into the dark and challenge whatever is listening.",
+                                        "The echo answers with names it should not know. The party steels itself, but madness rises."),
+                                new QuestStoryChoice(
+                                        "Stay Silent",
+                                        "Order the party to stay silent and mark the walls instead.",
+                                        "The group keeps discipline. Progress is slower, but nobody feeds the echo with fear.")
+                        )
+                ),
+                new QuestStoryEvent(
+                        "The Split Passage",
+                        "Scout",
+                        "Two routes descend: one narrow and safe-looking, one wide and covered in claw marks.",
+                        "/images/Quest3/quest3_split_passage.png",
+                        Arrays.asList(
+                                new QuestStoryChoice(
+                                        "Narrow Route",
+                                        "Take the narrow route where the creatures cannot surround you.",
+                                        "The party squeezes through safely, but the pressure and darkness fray their nerves."),
+                                new QuestStoryChoice(
+                                        "Claw Route",
+                                        "Take the claw-marked route and search for loot from earlier victims.",
+                                        "You find abandoned coin and gear, but the signs of slaughter disturb the party.")
+                        )
+                ),
+                new QuestStoryEvent(
+                        "The Living Door",
+                        "Narrator",
+                        "A membrane of purple flesh blocks the final chamber. It opens and closes like an eye.",
+                        "/images/Quest3/quest3_living_door.png",
+                        Arrays.asList(
+                                new QuestStoryChoice(
+                                        "Cut It Open",
+                                        "Cut through before it can react.",
+                                        "The door shrieks and the party rushes in together. The sound follows them into the fight."),
+                                new QuestStoryChoice(
+                                        "Burn Incense",
+                                        "Use supplies to dull the thing's senses before entering.",
+                                        "The door relaxes and opens quietly. The party enters shaken, but prepared.")
+                        )
+                )
+        );
+    }
+
+    @Override
+    public String applyStoryChoice(Guild guild, int eventIndex, int choiceIndex) {
+        boolean optionA = choiceIndex == 0;
+
+        switch (eventIndex) {
+            case 0:
+                if (optionA) {
+                    for (Adventurer member : guild.getMainParty()) {
+                        member.adjustLoyalty(6);
+                        member.increaseMadness(10);
+                    }
+                } else {
+                    guild.spendGold(15);
+                    for (Adventurer member : guild.getMainParty()) {
+                        member.adjustLoyalty(4);
+                    }
+                }
+                break;
+            case 1:
+                if (optionA) {
+                    for (Adventurer member : guild.getMainParty()) {
+                        member.increaseMadness(8);
+                    }
+                } else {
+                    guild.addGold(45);
+                    for (Adventurer member : guild.getMainParty()) {
+                        member.increaseMadness(6);
+                        member.adjustLoyalty(-3);
+                    }
+                }
+                break;
+            case 2:
+                if (optionA) {
+                    for (Adventurer member : guild.getMainParty()) {
+                        member.adjustLoyalty(8);
+                        member.increaseMadness(8);
+                    }
+                } else {
+                    guild.spendGold(25);
+                    for (Adventurer member : guild.getMainParty()) {
+                        member.adjustLoyalty(6);
+                        member.setCurrentHealth(member.getCurrentHealth() + 10);
+                    }
+                }
+                break;
+            default:
+                return "The party descends into the void.";
+        }
+
+        return getStoryEvents().get(eventIndex).getChoices().get(choiceIndex).getResultText();
+    }
+
+    @Override
+    public String getBattleIntroText() {
+        return "The chamber opens into a living arena. Four predators wait in the dark.";
+    }
+
+    @Override
+    public boolean isStoryCompleted() {
+        return storyCompleted;
+    }
+
+    @Override
+    public void markStoryCompleted() {
+        this.storyCompleted = true;
+    }
+
     @Override
     public void runEvents(Guild guild) {
-        for (Adventurer member : guild.getMainParty()) {
-            member.increaseMadness(10);
+        if (storyCompleted) {
+            return;
         }
+
+        // Fallback for direct testing without the story controller.
+        for (int i = 0; i < getStoryEvents().size(); i++) {
+            applyStoryChoice(guild, i, 0);
+        }
+        markStoryCompleted();
     }
 }

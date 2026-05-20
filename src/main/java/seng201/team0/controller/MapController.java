@@ -15,7 +15,6 @@ import seng201.team0.models.Game;
 import seng201.team0.models.Quest;
 import javafx.scene.image.ImageView;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 /**
@@ -25,7 +24,7 @@ import java.util.List;
  *
  * @author Mohammed, Xinyi
  */
-public class MapController {
+public class MapController implements GameDataReceiver {
 
     @FXML private AnchorPane rootPane;
     @FXML private Pane contentPane;
@@ -205,6 +204,12 @@ public class MapController {
 
     private void openQuest(int questNumber) {
         try {
+            int questIndex = questNumber - 1;
+            if (!game.selectQuest(questIndex)) {
+                messageLabel.setText("Quest " + questNumber + " is locked.");
+                return;
+            }
+
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/fxml/quest" + questNumber + ".fxml")
             );
@@ -212,14 +217,12 @@ public class MapController {
             Parent root = loader.load();
 
             Object controller = loader.getController();
-
-            try {
-                Method setGameDataMethod = controller.getClass().getMethod("setGameData", Game.class);
-                setGameDataMethod.invoke(controller, game);
-            } catch (NoSuchMethodException e) {
-                messageLabel.setText("Quest " + questNumber + " controller needs setGameData(Game game).");
+            if (!(controller instanceof GameDataReceiver)) {
+                messageLabel.setText("Quest " + questNumber + " controller must implement GameDataReceiver.");
                 return;
             }
+
+            ((GameDataReceiver) controller).setGameData(game);
 
             Stage stage = (Stage) rootPane.getScene().getWindow();
             ScreenUtil.switchScene(stage, root);

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane fx:id="rootPane"
+            prefWidth="900.0"
+            prefHeight="600.0"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="seng201.team0.controller.EndController"
+            style="-fx-background-color: black;">
+    <children>
+        <Pane fx:id="contentPane" prefWidth="900" prefHeight="600">
+            <children>
+                <ImageView fx:id="backgroundImage"
+                           layoutX="0"
+                           layoutY="0"
+                           fitWidth="900"
+                           fitHeight="600"
+                           preserveRatio="false"
+                           smooth="true" />
+                <Pane layoutX="0" layoutY="0" prefWidth="900" prefHeight="600"
+                      style="-fx-background-color: rgba(0,0,0,0.62);" />
+
+                <Label fx:id="titleLabel"
+                       layoutX="60"
+                       layoutY="55"
+                       prefWidth="780"
+                       prefHeight="58"
+                       alignment="CENTER"
+                       text="Ending"
+                       styleClass="ending-title" />
+
+                <Label fx:id="descriptionLabel"
+                       layoutX="125"
+                       layoutY="130"
+                       prefWidth="650"
+                       prefHeight="70"
+                       alignment="CENTER"
+                       wrapText="true"
+                       text="Ending description"
+                       styleClass="ending-description" />
+
+                <Label fx:id="statsLabel"
+                       layoutX="105"
+                       layoutY="220"
+                       prefWidth="690"
+                       prefHeight="34"
+                       alignment="CENTER"
+                       text="Stats"
+                       styleClass="ending-stats" />
+
+                <VBox fx:id="partyStatsBox"
+                      layoutX="185"
+                      layoutY="275"
+                      prefWidth="530"
+                      prefHeight="190"
+                      spacing="8"
+                      styleClass="ending-party-box" />
+
+                <Button layoutX="355"
+                        layoutY="505"
+                        prefWidth="190"
+                        prefHeight="48"
+                        text="Return to Map"
+                        onAction="#onReturnToMenu"
+                        styleClass="ending-button" />
+            </children>
+        </Pane>
+    </children>
+    <stylesheets>
+        <URL value="@../css/end.css" />
+    </stylesheets>
+</AnchorPane>

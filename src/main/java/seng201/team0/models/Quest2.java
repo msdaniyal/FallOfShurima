@@ -23,7 +23,9 @@ import java.util.List;
  *
  * @author Mohammed, Xinyi
  */
-public class Quest2 extends Quest {
+public class Quest2 extends Quest implements StoryDrivenQuest {
+
+    private boolean storyCompleted;
 
     // ------------------------------------- CONSTRUCTORS -------------------------------------
 
@@ -40,6 +42,7 @@ public class Quest2 extends Quest {
                 15,
                 difficulty
         );
+        this.storyCompleted = false;
     }
 
     // ------------------------------------- BOSS FIGHTS -------------------------------------
@@ -290,6 +293,137 @@ public class Quest2 extends Quest {
         }
     }
 
+
+    // ------------------------------------- STORY SCREEN DATA -------------------------------------
+
+    @Override
+    public List<QuestStoryEvent> getStoryEvents() {
+        return Arrays.asList(
+                new QuestStoryEvent(
+                        "The Sealed Tunnel",
+                        "Scout",
+                        "A sealed tunnel offers a faster route deeper into the void, but the runes around it pulse with unstable energy.",
+                        "/images/Quest2/quest2_tunnel.png",
+                        Arrays.asList(
+                                new QuestStoryChoice(
+                                        "Break the Seal",
+                                        "Break the seal and take the faster route.",
+                                        "You break through and find a hidden cache, but void energy bleeds into the party's minds."),
+                                new QuestStoryChoice(
+                                        "Long Route",
+                                        "Take the long route and avoid the runes.",
+                                        "The party avoids the worst of the void energy, but the delay costs supplies and morale.")
+                        )
+                ),
+                new QuestStoryEvent(
+                        "A Lost Companion",
+                        "Narrator",
+                        "Your scout has not returned. Sounds echo from a side passage — they are trapped, but alive.",
+                        "/images/Quest2/quest2_lost_companion.png",
+                        Arrays.asList(
+                                new QuestStoryChoice(
+                                        "Go Back",
+                                        "Go back for them. Nobody gets left behind.",
+                                        "You spend time and supplies on the rescue. The party is shaken, but they trust you more."),
+                                new QuestStoryChoice(
+                                        "Press On",
+                                        "Press on. The mission matters more than one scout.",
+                                        "The party moves forward, but guilt spreads through the line like rot.")
+                        )
+                ),
+                new QuestStoryEvent(
+                        "The Corrupted Member",
+                        "Scout",
+                        "One adventurer is losing their mind to the void. Their breath shakes, and they keep answering voices nobody else hears.",
+                        "/images/Quest2/quest2_corruption.png",
+                        Arrays.asList(
+                                new QuestStoryChoice(
+                                        "Restrain Them",
+                                        "Restrain them and carry them out if needed.",
+                                        "You keep them with the party, but the decision slows everyone and the whispers grow louder."),
+                                new QuestStoryChoice(
+                                        "Leave Them",
+                                        "Leave them behind before they endanger everyone.",
+                                        "The party survives the moment, but the choice leaves a scar that will not close.")
+                        )
+                ),
+                new QuestStoryEvent(
+                        "The Supply Cache",
+                        "Narrator",
+                        "A supply cache sits untouched in the dust — food, torches, equipment, and coin.",
+                        "/images/Quest2/quest2_cache.png",
+                        Arrays.asList(
+                                new QuestStoryChoice(
+                                        "Share It",
+                                        "Share everything equally. The party needs strength.",
+                                        "The party eats properly for the first time in days, and the fear eases briefly."),
+                                new QuestStoryChoice(
+                                        "Sell Surplus",
+                                        "Ration carefully and sell the surplus later.",
+                                        "The guild gains coin, but the party notices the stinginess.")
+                        )
+                ),
+                new QuestStoryEvent(
+                        "The Scout's Warning",
+                        "Scout",
+                        "More voidlings than expected wait ahead, and the tunnel narrows before the nest.",
+                        "/images/Quest2/quest2_warning.png",
+                        Arrays.asList(
+                                new QuestStoryChoice(
+                                        "Push Through",
+                                        "Push through now and hit them before they are ready.",
+                                        "You strike first and find loot in the nest, but the chaos burns into everyone's mind."),
+                                new QuestStoryChoice(
+                                        "Regroup",
+                                        "Fall back and regroup before entering the choke point.",
+                                        "The delay costs supplies, and the party wonders whether fear is guiding you.")
+                        )
+                )
+        );
+    }
+
+    @Override
+    public String applyStoryChoice(Guild guild, int eventIndex, int choiceIndex) {
+        boolean optionA = choiceIndex == 0;
+
+        switch (eventIndex) {
+            case 0:
+                event1SealedTunnel(guild, optionA);
+                break;
+            case 1:
+                event2LostCompanion(guild, optionA);
+                break;
+            case 2:
+                event3CorruptedMember(guild, optionA);
+                break;
+            case 3:
+                event4SupplyCache(guild, optionA);
+                break;
+            case 4:
+                event5ScoutsWarning(guild, optionA);
+                break;
+            default:
+                return "The party presses deeper into the void.";
+        }
+
+        return getStoryEvents().get(eventIndex).getChoices().get(choiceIndex).getResultText();
+    }
+
+    @Override
+    public String getBattleIntroText() {
+        return "The tunnels open into a nest. Voidlings pour from the cracks. There is no more room to retreat.";
+    }
+
+    @Override
+    public boolean isStoryCompleted() {
+        return storyCompleted;
+    }
+
+    @Override
+    public void markStoryCompleted() {
+        this.storyCompleted = true;
+    }
+
     // ------------------------------------- RUN EVENTS -------------------------------------
 
     /**
@@ -312,7 +446,11 @@ public class Quest2 extends Quest {
      */
     @Override
     public void runEvents(Guild guild) {
-        // TODO: Replace each `true` with real player input from ExpeditionController
+        if (storyCompleted) {
+            return;
+        }
+
+        // Fallback for tests or direct battle loading: choose Option A for each event.
         event1SealedTunnel(guild,    true);
         event2LostCompanion(guild,   true);
         event3CorruptedMember(guild, true);

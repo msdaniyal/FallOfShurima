@@ -4,32 +4,13 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Quest 5: Faction War
- *
- * The political fracture arrives. Guild meets guild on open ground.
- * The enemy party is scaled to match the player's party size —
- * represented here as a single Enemy Captain with boosted stats.
- *
- * Boss: Enemy Captain — NONE ability (straight combat, no gimmicks).
- *   The fight is meant to feel like a pure test of what the player has built.
- *
- * After the quest:
- *   - guild.collapseOpposingFaction() is called by updateCharacters
- *     (adventurers from the opposing faction abandon the guild).
- *   - guild.lockParty() is called — no further recruitment or roster changes.
- *
- * Events: Victory in the war briefly unifies the remaining party.
- *
- * @author Mohammed, Xinyi
+ * Quest 5: Faction War.
+ * Final required quest before the true-ending loyalty check.
  */
-public class Quest5 extends Quest {
+public class Quest5 extends Quest implements StoryDrivenQuest {
 
-    // ------------------------------------- CONSTRUCTORS -------------------------------------
+    private boolean storyCompleted;
 
-    /**
-     * Constructs Quest 5.
-     * @param difficulty The game difficulty
-     */
     public Quest5(Difficulty difficulty) {
         super(
                 5,
@@ -39,30 +20,16 @@ public class Quest5 extends Quest {
                 15,
                 difficulty
         );
+        this.storyCompleted = false;
     }
 
-    // ------------------------------------- ABSTRACT METHOD IMPLEMENTATIONS -------------------------------------
-
-    /**
-     * Initialises the enemy captain boss fight.
-     *
-     * Enemy Captain represents the rival guild as a single high-stat opponent.
-     * No special ability — this fight is a straight power check.
-     * High gold drop and loyalty effects reflect the scale of the conflict.
-     *
-     * TODO: In a future iteration, scale enemy captain stats to match
-     *       the player's average party attack/defense for a true mirror fight.
-     *
-     * @return Ordered list of boss fights
-     */
     @Override
     protected List<BossFight> initialiseBossFights() {
         Boss enemyCaptain = new Boss(
                 "Enemy Captain",
                 250, 24, 12,
                 400, 12, -15,
-                "The rival captain built their guild the same way you did. " +
-                        "One of you made better choices.",
+                "The rival captain built their guild the same way you did. One of you made better choices.",
                 BossAbility.NONE,
                 0
         );
@@ -70,33 +37,203 @@ public class Quest5 extends Quest {
         return Arrays.asList(new BossFight(enemyCaptain, 1, getDifficulty()));
     }
 
-    /**
-     * Runs expedition events for Quest 5.
-     * Victory in the war unifies whoever is still standing — loyalty boost across the board.
-     * @param guild The player's guild
-     */
     @Override
-    public void runEvents(Guild guild) {
-        for (Adventurer member : guild.getMainParty()) {
-            member.adjustLoyalty(10);
-        }
+    public List<QuestStoryEvent> getStoryEvents() {
+        return Arrays.asList(
+                new QuestStoryEvent(
+                        "The War Council",
+                        "Commander",
+                        "Your followers gather around the map. The rival faction is moving before sunrise.",
+                        "/images/Quest5/quest5_war_council.png",
+                        Arrays.asList(
+                                new QuestStoryChoice(
+                                        "Direct Assault",
+                                        "Promise a direct assault. End the split with strength.",
+                                        "Your warriors cheer the certainty, but some fear the cost of pride."),
+                                new QuestStoryChoice(
+                                        "Measured Plan",
+                                        "Build a careful plan with scouts and reserves.",
+                                        "The party trusts the planning, but preparations consume gold and time.")
+                        )
+                ),
+                new QuestStoryEvent(
+                        "The Rival Envoy",
+                        "Rival Envoy",
+                        "A rival envoy offers terms: abandon your chosen warrior and the war ends tonight.",
+                        "/images/Quest5/quest5_envoy.png",
+                        Arrays.asList(
+                                new QuestStoryChoice(
+                                        "Reject Terms",
+                                        "Reject the offer publicly and stand by your main character.",
+                                        "The guild sees you refuse betrayal. Loyalty hardens around your banner."),
+                                new QuestStoryChoice(
+                                        "Hear Them Out",
+                                        "Hear the envoy out and learn the rival army's thinking.",
+                                        "You gain useful information, but the party dislikes even entertaining the offer.")
+                        )
+                ),
+                new QuestStoryEvent(
+                        "Night Saboteurs",
+                        "Scout",
+                        "Saboteurs are spotted near the supply carts. You can chase them or protect the camp.",
+                        "/images/Quest5/quest5_saboteurs.png",
+                        Arrays.asList(
+                                new QuestStoryChoice(
+                                        "Chase Them",
+                                        "Chase the saboteurs into the dark before they escape.",
+                                        "You recover stolen coin, but the chase leaves the camp tense and tired."),
+                                new QuestStoryChoice(
+                                        "Guard Camp",
+                                        "Hold formation and protect the whole camp.",
+                                        "The saboteurs escape with some supplies, but the party respects the discipline.")
+                        )
+                ),
+                new QuestStoryEvent(
+                        "The Duel Challenge",
+                        "Rival Captain",
+                        "The rival captain challenges your champion to single combat before the armies clash.",
+                        "/images/Quest5/quest5_duel.png",
+                        Arrays.asList(
+                                new QuestStoryChoice(
+                                        "Accept Duel",
+                                        "Accept the duel and let your champion inspire the army.",
+                                        "The duel wounds your champion, but the party rallies behind the courage."),
+                                new QuestStoryChoice(
+                                        "Refuse Duel",
+                                        "Refuse the theatre. This is war, not a performance.",
+                                        "You deny the rival their spectacle. Some call it wisdom; others call it fear.")
+                        )
+                ),
+                new QuestStoryEvent(
+                        "The Final Rally",
+                        "Narrator",
+                        "The field goes quiet. Every faction mark, every old resentment, every promise now stands in one line.",
+                        "/images/Quest5/quest5_final_rally.png",
+                        Arrays.asList(
+                                new QuestStoryChoice(
+                                        "Mercy Speech",
+                                        "Tell the party that the goal is victory, not slaughter.",
+                                        "The party remembers why they followed you, though mercy may slow the blade."),
+                                new QuestStoryChoice(
+                                        "No Mercy",
+                                        "Order the party to end the rival faction completely.",
+                                        "Fear sharpens the army. The order wins obedience, not love.")
+                        )
+                )
+        );
     }
 
-    /**
-     * Override updateCharacters to handle Quest 5 post-quest special logic.
-     * Collapses opposing faction loyalty, then locks the party.
-     * Then runs standard madness affliction and abandoned cleanup.
-     * @param guild The player's guild
-     */
+    @Override
+    public String applyStoryChoice(Guild guild, int eventIndex, int choiceIndex) {
+        boolean optionA = choiceIndex == 0;
+        Adventurer main = guild.getMainCharacter();
+
+        switch (eventIndex) {
+            case 0:
+                if (optionA) {
+                    for (Adventurer member : guild.getMainParty()) {
+                        member.adjustLoyalty(6);
+                        member.increaseMadness(5);
+                    }
+                } else {
+                    guild.spendGold(35);
+                    for (Adventurer member : guild.getMainParty()) {
+                        member.adjustLoyalty(8);
+                    }
+                }
+                break;
+            case 1:
+                if (optionA) {
+                    for (Adventurer member : guild.getMainParty()) {
+                        member.adjustLoyalty(10);
+                    }
+                } else {
+                    guild.addGold(25);
+                    for (Adventurer member : guild.getMainParty()) {
+                        member.adjustLoyalty(-4);
+                    }
+                }
+                break;
+            case 2:
+                if (optionA) {
+                    guild.addGold(45);
+                    for (Adventurer member : guild.getMainParty()) {
+                        member.increaseMadness(4);
+                    }
+                } else {
+                    guild.spendGold(25);
+                    for (Adventurer member : guild.getMainParty()) {
+                        member.adjustLoyalty(6);
+                    }
+                }
+                break;
+            case 3:
+                if (optionA) {
+                    if (main != null) {
+                        main.setCurrentHealth(main.getCurrentHealth() - 18);
+                    }
+                    for (Adventurer member : guild.getMainParty()) {
+                        member.adjustLoyalty(8);
+                    }
+                } else {
+                    for (Adventurer member : guild.getMainParty()) {
+                        member.adjustLoyalty(-5);
+                    }
+                    guild.addGold(20);
+                }
+                break;
+            case 4:
+                if (optionA) {
+                    for (Adventurer member : guild.getMainParty()) {
+                        member.adjustLoyalty(12);
+                    }
+                } else {
+                    for (Adventurer member : guild.getMainParty()) {
+                        member.adjustLoyalty(-6);
+                        member.increaseMadness(6);
+                    }
+                    guild.addGold(30);
+                }
+                break;
+            default:
+                return "The armies take their positions.";
+        }
+
+        return getStoryEvents().get(eventIndex).getChoices().get(choiceIndex).getResultText();
+    }
+
+    @Override
+    public String getBattleIntroText() {
+        return "The rival captain steps through the dust. The faction war begins now.";
+    }
+
+    @Override
+    public boolean isStoryCompleted() {
+        return storyCompleted;
+    }
+
+    @Override
+    public void markStoryCompleted() {
+        this.storyCompleted = true;
+    }
+
+    @Override
+    public void runEvents(Guild guild) {
+        if (storyCompleted) {
+            return;
+        }
+
+        // Fallback for direct testing without the story controller.
+        for (int i = 0; i < getStoryEvents().size(); i++) {
+            applyStoryChoice(guild, i, 0);
+        }
+        markStoryCompleted();
+    }
+
     @Override
     public void updateCharacters(Guild guild) {
-        // Opposing faction members abandon the guild after the war
         guild.collapseOpposingFaction();
-
-        // Party is now locked — no further changes allowed
         guild.lockParty();
-
-        // Apply standard madness and remove any zero-loyalty adventurers
         super.updateCharacters(guild);
     }
 }

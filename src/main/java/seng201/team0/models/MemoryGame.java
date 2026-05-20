@@ -7,72 +7,162 @@ import java.util.Random;
 
 /**
  * Manages the memory picture game used during boss fights.
- * A sequence of images is shown to the player who must recall them in order.
+ * The controller displays images and timers; this model owns the sequence,
+ * player input validation, and success/failure state.
+ *
  * Sequence length depends on difficulty:
  * Easy = 3, Normal = 6, Hard = 9.
+ *
  * @author Mohammed, Xinyi
  */
 public class MemoryGame {
 
-    private Difficulty difficulty;
-    private List<Integer> correctSequence;
-    private int sequenceLength;
-    private Random random;
+    private final Difficulty difficulty;
+    private final List<Integer> correctSequence;
+    private final List<Integer> playerInput;
+    private final int sequenceLength;
+    private final Random random;
+    private boolean active;
+    private boolean complete;
+    private boolean successful;
 
-    /**
-     * Constructs a MemoryGame for the given difficulty.
-     * @param difficulty The game difficulty
-     */
     public MemoryGame(Difficulty difficulty) {
         this.difficulty = difficulty;
         this.random = new Random();
         this.correctSequence = new ArrayList<>();
-        if (difficulty.equals(Difficulty.EASY)) {
-            this.sequenceLength = 3;
-        } else if (difficulty.equals(Difficulty.NORMAL)) {
-            this.sequenceLength = 6;
-        } else if (difficulty.equals(Difficulty.HARD)) {
-            this.sequenceLength = 9;
+        this.playerInput = new ArrayList<>();
+        this.sequenceLength = determineSequenceLength(difficulty);
+        this.active = false;
+        this.complete = false;
+        this.successful = false;
+    }
+
+    private int determineSequenceLength(Difficulty difficulty) {
+        if (difficulty == Difficulty.EASY) {
+            return 3;
         }
+        if (difficulty == Difficulty.HARD) {
+            return 9;
+        }
+        return 6;
     }
 
     /**
-     * Generates a new random sequence of image indices without repeats.
-     * Indices are in range [0, sequenceLength) so they map directly to
-     * the ImageViews shown in the controller.
-     * Stores result in correctSequence for later comparison.
-     * @return The generated sequence as a list of image indices
+     * Starts a new memory round and returns the generated sequence.
+     * Indices are in range [0, sequenceLength).
      */
-    public List<Integer> generateSequence() {
+    public List<Integer> startRound() {
         List<Integer> allIndices = new ArrayList<>();
         for (int i = 0; i < sequenceLength; i++) {
             allIndices.add(i);
         }
+
         Collections.shuffle(allIndices, random);
-        correctSequence = new ArrayList<>(allIndices);
-        return new ArrayList<>(correctSequence);
+        correctSequence.clear();
+        correctSequence.addAll(allIndices);
+        playerInput.clear();
+        active = true;
+        complete = false;
+        successful = false;
+
+        return getCorrectSequence();
     }
 
     /**
-     * Checks whether the player's input matches the correct sequence in order.
-     * @param playerInput The list of image indices the player selected in order
-     * @return True if playerInput exactly matches correctSequence
+     * Backwards-compatible name used by older code.
      */
+    public List<Integer> generateSequence() {
+        return startRound();
+    }
+
+    /**
+     * Records one clicked image and validates it immediately.
+     * The model, not the controller, decides whether the attack has failed or succeeded.
+     */
+    public SelectionResult selectImage(int imageIndex) {
+        if (!active || complete) {
+            return new SelectionResult(false, complete, successful);
+        }
+
+        int position = playerInput.size();
+        playerInput.add(imageIndex);
+
+        if (position >= correctSequence.size() || imageIndex != correctSequence.get(position)) {
+            completeRound(false);
+            return new SelectionResult(false, true, false);
+        }
+
+        if (playerInput.size() == correctSequence.size()) {
+            completeRound(true);
+            return new SelectionResult(true, true, true);
+        }
+
+        return new SelectionResult(true, false, false);
+    }
+
+    public void failRound() {
+        completeRound(false);
+    }
+
+    private void completeRound(boolean successful) {
+        this.active = false;
+        this.complete = true;
+        this.successful = successful;
+    }
+
     public boolean checkSequence(List<Integer> playerInput) {
         return correctSequence.equals(playerInput);
     }
 
-    /**
-     * @return The current correct sequence
-     */
     public List<Integer> getCorrectSequence() {
-        return correctSequence;
+        return new ArrayList<>(correctSequence);
     }
 
-    /**
-     * @return The sequence length for this difficulty
-     */
+    public List<Integer> getPlayerInput() {
+        return new ArrayList<>(playerInput);
+    }
+
     public int getSequenceLength() {
         return sequenceLength;
+    }
+
+    public Difficulty getDifficulty() {
+        return difficulty;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public boolean isComplete() {
+        return complete;
+    }
+
+    public boolean wasSuccessful() {
+        return successful;
+    }
+
+    public static class SelectionResult {
+        private final boolean correctSoFar;
+        private final boolean complete;
+        private final boolean successful;
+
+        public SelectionResult(boolean correctSoFar, boolean complete, boolean successful) {
+            this.correctSoFar = correctSoFar;
+            this.complete = complete;
+            this.successful = successful;
+        }
+
+        public boolean isCorrectSoFar() {
+            return correctSoFar;
+        }
+
+        public boolean isComplete() {
+            return complete;
+        }
+
+        public boolean isSuccessful() {
+            return successful;
+        }
     }
 }

@@ -87,6 +87,22 @@ public abstract class Quest {
         this.isCompleted = true;
     }
 
+    /**
+     * Finds the first boss fight that is not over. This lets the UI return to the
+     * battlefield without resetting boss health or replaying completed fights.
+     * @param guild The player's guild
+     * @return zero-based fight index to resume from
+     */
+    public int getFirstUnfinishedFightIndex(Guild guild) {
+        for (int i = 0; i < bossFights.size(); i++) {
+            if (!bossFights.get(i).isFightOver(guild)) {
+                return i;
+            }
+        }
+
+        return bossFights.isEmpty() ? 0 : bossFights.size() - 1;
+    }
+
     // ── Getters ───────────────────────────────────────────────────────────
 
     public int getId() {

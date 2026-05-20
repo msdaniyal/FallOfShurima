@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.shape.Ellipse?>
+
+<AnchorPane fx:id="rootPane"
+            prefWidth="900.0"
+            prefHeight="600.0"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="seng201.team0.controller.BossFightController">
+
+    <children>
+        <Pane fx:id="contentPane" prefWidth="900.0" prefHeight="600.0">
+            <children>
+                <Rectangle layoutX="0" layoutY="0" width="900" height="600" fill="#070403" />
+
+                <ImageView fx:id="backgroundImage"
+                           layoutX="0"
+                           layoutY="0"
+                           fitWidth="900"
+                           fitHeight="405"
+                           preserveRatio="false"
+                           smooth="true" />
+
+                <Rectangle layoutX="0" layoutY="0" width="900" height="405" fill="rgba(0,0,0,0.18)" />
+
+                <VBox fx:id="partyBox"
+                      layoutX="18"
+                      layoutY="100"
+                      prefWidth="178"
+                      spacing="7" />
+
+                <Label fx:id="activeMemberLabel"
+                       layoutX="235"
+                       layoutY="92"
+                       prefWidth="250"
+                       prefHeight="30"
+                       alignment="CENTER"
+                       text="Active:"
+                       styleClass="active-label" />
+
+                <Label fx:id="activeMemberStatsLabel"
+                       layoutX="235"
+                       layoutY="122"
+                       prefWidth="250"
+                       prefHeight="24"
+                       alignment="CENTER"
+                       text="HP / ATK"
+                       styleClass="active-stats-label" />
+
+                <Ellipse layoutX="360" layoutY="383" radiusX="96" radiusY="15"
+                         fill="rgba(0,0,0,0.48)" />
+
+                <ImageView fx:id="activeMemberImage"
+                           layoutX="238"
+                           layoutY="142"
+                           fitWidth="245"
+                           fitHeight="245"
+                           preserveRatio="true"
+                           smooth="true" />
+
+                <Label fx:id="bossNameLabel"
+                       layoutX="615"
+                       layoutY="62"
+                       prefWidth="240"
+                       alignment="CENTER"
+                       text="Boss"
+                       styleClass="boss-name" />
+
+                <ProgressBar fx:id="bossHpBar"
+                             layoutX="630"
+                             layoutY="96"
+                             prefWidth="210"
+                             prefHeight="18"
+                             progress="1.0"
+                             styleClass="boss-hp" />
+
+                <Label fx:id="bossHpLabel"
+                       layoutX="630"
+                       layoutY="118"
+                       prefWidth="210"
+                       alignment="CENTER"
+                       text="HP 0 / 0"
+                       styleClass="boss-hp-text" />
+
+                <Ellipse layoutX="720" layoutY="383" radiusX="112" radiusY="16"
+                         fill="rgba(0,0,0,0.50)" />
+
+                <ImageView fx:id="bossImage"
+                           layoutX="585"
+                           layoutY="128"
+                           fitWidth="285"
+                           fitHeight="260"
+                           preserveRatio="true"
+                           smooth="true" />
+
+                <Label fx:id="roundLabel"
+                       layoutX="785"
+                       layoutY="346"
+                       prefWidth="85"
+                       prefHeight="35"
+                       text="Round 1"
+                       alignment="CENTER"
+                       styleClass="round-label" />
+
+                <Rectangle layoutX="0" layoutY="405" width="900" height="195" fill="linear-gradient(from 0% 0% to 0% 100%, #1b1208, #070403)" />
+                <Rectangle layoutX="0" layoutY="405" width="900" height="8" fill="rgba(214,179,90,0.95)" />
+
+                <Label fx:id="dialogueLabel"
+                       layoutX="30"
+                       layoutY="428"
+                       prefWidth="450"
+                       prefHeight="118"
+                       wrapText="true"
+                       text="Battle begins."
+                       styleClass="battle-dialogue" />
+
+                <Button fx:id="attackButton"
+                        layoutX="510"
+                        layoutY="425"
+                        prefWidth="155"
+                        prefHeight="58"
+                        text="ATTACK&#10;Memory game"
+                        onAction="#onAttack"
+                        styleClass="command-button" />
+
+                <Button fx:id="healButton"
+                        layoutX="685"
+                        layoutY="425"
+                        prefWidth="155"
+                        prefHeight="58"
+                        text="HEAL&#10;Use potion"
+                        onAction="#onHeal"
+                        styleClass="command-button" />
+
+                <Button fx:id="changeMemberButton"
+                        layoutX="510"
+                        layoutY="510"
+                        prefWidth="155"
+                        prefHeight="58"
+                        text="CHANGE MEMBER&#10;Switch fighter"
+                        onAction="#onChangeMember"
+                        styleClass="command-button" />
+
+                <Button fx:id="specialMoveButton"
+                        layoutX="685"
+                        layoutY="510"
+                        prefWidth="155"
+                        prefHeight="58"
+                        text="SPECIAL MOVE&#10;(MC Only)"
+                        onAction="#onSpecialMove"
+                        styleClass="command-button" />
+
+                <Button layoutX="25"
+                        layoutY="560"
+                        prefWidth="120"
+                        prefHeight="28"
+                        text="Return Map"
+                        onAction="#onReturnToMap"
+                        styleClass="small-button" />
+
+                <Pane fx:id="changeMemberOverlay"
+                      layoutX="0"
+                      layoutY="0"
+                      prefWidth="900"
+                      prefHeight="600"
+                      styleClass="popup-overlay" />
+
+                <VBox fx:id="healPopup"
+                      layoutX="300"
+                      layoutY="150"
+                      prefWidth="300"
+                      prefHeight="315"
+                      spacing="10"
+                      styleClass="member-popup">
+                    <children>
+                        <Label text="Use Potion" styleClass="popup-title" />
+                        <Label fx:id="healPotionCountsLabel"
+                               text="Silver x0   Gold x0   Purple x0"
+                               wrapText="true"
+                               style="-fx-text-fill: #f8e7bc; -fx-font-family: Georgia; -fx-font-size: 13px; -fx-font-weight: bold;" />
+                        <Button fx:id="smallPotionHealButton"
+                                text="Silver Potion&#10;Heal active fighter +30 HP"
+                                prefWidth="260"
+                                prefHeight="48"
+                                onAction="#onUseSmallPotion"
+                                styleClass="member-button" />
+                        <Button fx:id="partyPotionHealButton"
+                                text="Gold Potion&#10;Heal party +20 HP"
+                                prefWidth="260"
+                                prefHeight="48"
+                                onAction="#onUsePartyPotion"
+                                styleClass="member-button" />
+                        <Button fx:id="fullRestoreHealButton"
+                                text="Purple Potion&#10;Fully restore party"
+                                prefWidth="260"
+                                prefHeight="48"
+                                onAction="#onUseFullRestore"
+                                styleClass="member-button" />
+                        <Button text="Cancel"
+                                prefWidth="260"
+                                onAction="#closeHealPopup"
+                                styleClass="small-button" />
+                    </children>
+                </VBox>
+
+                <VBox fx:id="changeMemberPopup"
+                      layoutX="300"
+                      layoutY="160"
+                      prefWidth="300"
+                      prefHeight="280"
+                      spacing="10"
+                      styleClass="member-popup">
+                    <children>
+                        <Label text="Choose Fighter" styleClass="popup-title" />
+                        <VBox fx:id="memberListBox" spacing="8" />
+                        <Button text="Cancel"
+                                prefWidth="260"
+                                onAction="#closeChangeMemberPopup"
+                                styleClass="small-button" />
+                    </children>
+                </VBox>
+            </children>
+        </Pane>
+    </children>
+
+    <stylesheets>
+        <URL value="@../css/battlefield.css" />
+    </stylesheets>
+</AnchorPane>

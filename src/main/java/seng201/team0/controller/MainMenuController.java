@@ -3,6 +3,7 @@ package seng201.team0.controller;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -23,7 +24,7 @@ import seng201.team0.models.Guild;
  * This keeps the same class name used by ShopController, CharacterSelectController,
  * MainWindow and other existing screens when they return to /fxml/mainmenu.fxml.
  */
-public class MainMenuController {
+public class MainMenuController implements GameDataReceiver {
 
     // Root / responsive screen fields
     @FXML private AnchorPane rootPane;
@@ -41,6 +42,13 @@ public class MainMenuController {
     @FXML private Label smallPotionInventoryLabel;
     @FXML private Label partyPotionInventoryLabel;
     @FXML private Label fullRestoreInventoryLabel;
+
+    @FXML private Button quest1Button;
+    @FXML private Button quest2Button;
+    @FXML private Button quest3Button;
+    @FXML private Button quest4Button;
+    @FXML private Button quest5Button;
+    @FXML private Button quest6Button;
 
     // Institute popup
     @FXML private Pane darkOverlay;
@@ -80,7 +88,30 @@ public class MainMenuController {
             currentQuestLabel.setText("Current Quest: Unknown");
         }
 
-        messageLabel.setText("Click a map location.");
+        updateQuestButtons();
+        messageLabel.setText(game.isGameOver() ? "The game has ended. Open the final result or review your guild." : "Click a map location.");
+    }
+
+    private void updateQuestButtons() {
+        Button[] buttons = { quest1Button, quest2Button, quest3Button, quest4Button, quest5Button, quest6Button };
+
+        for (int i = 0; i < buttons.length; i++) {
+            if (buttons[i] == null || i >= game.getQuests().size()) {
+                continue;
+            }
+
+            boolean unlocked = game.getQuests().get(i).isUnlocked();
+            buttons[i].setDisable(!unlocked);
+            buttons[i].setOpacity(unlocked ? 1.0 : 0.45);
+
+            if (game.getQuests().get(i).isCompleted()) {
+                buttons[i].setText("✓ Quest " + (i + 1));
+            }
+        }
+
+        if (quest6Button != null) {
+            quest6Button.setVisible(game.getQuests().size() > 5 && game.getQuests().get(5).isUnlocked());
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -104,20 +135,70 @@ public class MainMenuController {
 
     @FXML
     public void onIcathia() {
+        openQuest(1);
+    }
+
+    @FXML public void onQuest1() { openQuest(1); }
+    @FXML public void onQuest2() { openQuest(2); }
+    @FXML public void onQuest3() { openQuest(3); }
+    @FXML public void onQuest4() { openQuest(4); }
+    @FXML public void onQuest5() { openQuest(5); }
+    @FXML public void onQuest6() { openQuest(6); }
+
+    @FXML
+    public void onFinalResult() {
+        openEndScreen();
+    }
+
+    private void openQuest(int questNumber) {
+        int questIndex = questNumber - 1;
+
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/quest1.fxml"));
+            if (!game.selectQuest(questIndex)) {
+                messageLabel.setText("Quest " + questNumber + " is locked.");
+                return;
+            }
+
+            String fxmlPath = questNumber == 1 ? "/fxml/quest1.fxml" : "/fxml/quest" + questNumber + ".fxml";
+            if (getClass().getResource(fxmlPath) == null && questNumber == 1) {
+                fxmlPath = "/fxml/Quest1.fxml";
+            }
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
 
-            Quest1Controller controller = loader.getController();
+            Object loadedController = loader.getController();
+            if (!(loadedController instanceof GameDataReceiver)) {
+                messageLabel.setText("Quest " + questNumber + " controller must implement GameDataReceiver.");
+                return;
+            }
+
+            ((GameDataReceiver) loadedController).setGameData(game);
+
+            Stage stage = (Stage) rootPane.getScene().getWindow();
+            ScreenUtil.switchScene(stage, root);
+            stage.setTitle("The Fall of Shurima — Quest " + questNumber);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            messageLabel.setText("Quest " + questNumber + " page is not ready yet.");
+        }
+    }
+
+    private void openEndScreen() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/end.fxml"));
+            Parent root = loader.load();
+
+            GameDataReceiver controller = loader.getController();
             controller.setGameData(game);
 
             Stage stage = (Stage) rootPane.getScene().getWindow();
             ScreenUtil.switchScene(stage, root);
-            stage.setTitle("The Fall of Shurima — Icathia");
-
+            stage.setTitle("The Fall of Shurima — Final Result");
         } catch (Exception e) {
             e.printStackTrace();
-            messageLabel.setText("Error loading Icathia.");
+            messageLabel.setText("Final result screen is not ready yet.");
         }
     }
 

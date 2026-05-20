@@ -34,7 +34,7 @@ import java.util.List;
  *
  * @author Mohammed, Xinyi
  */
-public class ShopController {
+public class ShopController implements GameDataReceiver {
 
     // ── FXML fields ───────────────────────────────────────────────────────────
     @FXML private Label goldLabel;

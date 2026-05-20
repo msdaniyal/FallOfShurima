@@ -1,29 +1,25 @@
 package seng201.team0.models;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 /**
  * Represents a single boss fight within a quest.
  *
- * Attack mechanic: memory picture game — player must recall the correct image sequence.
- * Defense mechanic: opposing D6 dice rolls — difference determines damage.
- * MC special move: once per fight, guaranteed dodge.
- *
- * Boss abilities handled here:
- *   IMMUNE_TURN  — flagged each round; BossFightController skips damage application that turn.
- *   TRUE_DAMAGE  — calcBossDamage ignores adventurer defense.
- *   ISOLATE      — tracks an isolatedTarget; only that adventurer can act for 2 rounds.
- *   DEVOUR       — instantly kills the lowest-HP adventurer.
- *   AOE          — hits every living party member each turn.
- *   HEAL_ON_HIT  — Vladimir heals by the damage he deals.
- *   SLEEP        — marks lowest-HP target; next boss hit on them deals 10x damage.
+ * This class keeps combat logic out of the JavaFX controllers.
+ * Controllers should call these public methods and only display the results:
+ * - resolvePlayerAttack(...)
+ * - resolveDefend(...)
+ * - resolveBossAttack(...)
+ * - triggerBossAbilityIfNeeded(...)
+ * - activateSpecialMove()
  *
  * @author Mohammed, Xinyi
  */
 public class BossFight {
-
-    // ------------------------------------- MEMBERS -------------------------------------
 
     private Boss boss;
     private int sequence;
@@ -32,23 +28,129 @@ public class BossFight {
 
     private int roundNumber;
     private boolean specialMoveUsed;
+    private boolean specialDodgePending;
     private boolean playerWon;
+    private boolean rewardsApplied;
     private Random random;
 
-    // Ability state
     private Adventurer sleepingTarget;
     private Adventurer isolatedTarget;
     private int isolationRoundsRemaining;
     private boolean abilityTriggeredThisRound;
-
-    // ------------------------------------- CONSTRUCTORS -------------------------------------
+    private boolean potionUsedThisTurn;
 
     /**
-     * Constructs a BossFight.
-     * @param boss The boss for this encounter
-     * @param sequence The order this fight occurs within the quest (1, 2, 3…)
-     * @param difficulty The game difficulty — controls memory sequence length and damage multiplier
+     * Result returned when the player attacks through the memory game.
      */
+    public static class AttackResult {
+        private final boolean success;
+        private final boolean blocked;
+        private final int damage;
+        private final String message;
+
+        public AttackResult(boolean success, boolean blocked, int damage, String message) {
+            this.success = success;
+            this.blocked = blocked;
+            this.damage = damage;
+            this.message = message;
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public boolean isBlocked() {
+            return blocked;
+        }
+
+        public int getDamage() {
+            return damage;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+    }
+
+    /**
+     * Result returned after a boss attack or defend dice roll.
+     */
+    public static class DefenseResult {
+        private final int playerRoll;
+        private final int bossRoll;
+        private final int damage;
+        private final Adventurer target;
+        private final boolean dodged;
+        private final boolean specialDodged;
+        private final String message;
+
+        public DefenseResult(int playerRoll, int bossRoll, int damage, Adventurer target,
+                             boolean dodged, boolean specialDodged, String message) {
+            this.playerRoll = playerRoll;
+            this.bossRoll = bossRoll;
+            this.damage = damage;
+            this.target = target;
+            this.dodged = dodged;
+            this.specialDodged = specialDodged;
+            this.message = message;
+        }
+
+        public int getPlayerRoll() {
+            return playerRoll;
+        }
+
+        public int getBossRoll() {
+            return bossRoll;
+        }
+
+        public int getDamage() {
+            return damage;
+        }
+
+        public Adventurer getTarget() {
+            return target;
+        }
+
+        public boolean isDodged() {
+            return dodged;
+        }
+
+        public boolean isSpecialDodged() {
+            return specialDodged;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+    }
+
+    /**
+     * Result returned when the player uses a potion during a boss fight.
+     */
+    public static class PotionUseResult {
+        private final boolean success;
+        private final String message;
+        private final Map<Adventurer, Integer> healedAmounts;
+
+        public PotionUseResult(boolean success, String message, Map<Adventurer, Integer> healedAmounts) {
+            this.success = success;
+            this.message = message;
+            this.healedAmounts = healedAmounts;
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public Map<Adventurer, Integer> getHealedAmounts() {
+            return healedAmounts;
+        }
+    }
+
     public BossFight(Boss boss, int sequence, Difficulty difficulty) {
         this.boss = boss;
         this.sequence = sequence;
@@ -57,29 +159,25 @@ public class BossFight {
         this.memoryGame = new MemoryGame(difficulty);
         this.roundNumber = 1;
         this.specialMoveUsed = false;
+        this.specialDodgePending = false;
+        this.playerWon = false;
+        this.rewardsApplied = false;
         this.sleepingTarget = null;
         this.isolatedTarget = null;
         this.isolationRoundsRemaining = 0;
         this.abilityTriggeredThisRound = false;
+        this.potionUsedThisTurn = false;
     }
 
-    // ------------------------------------- ADVENTURER ATTACK -------------------------------------
+    // -------------------------------------------------------------------------
+    // Adventurer attack
+    // -------------------------------------------------------------------------
 
-    /**
-     * Calculates damage one adventurer deals to the boss after a CORRECT memory sequence.
-     *
-     * Base formula:
-     *   damage = (adventurer.attack ± loyalty/madness modifiers) - boss.defense + random(1-10)
-     *   damage *= getDamageMultiplier()
-     *
-     * Loyalty bonus: loyalty > 70 → +2 attack. Penalty: loyalty < 30 → -2 attack.
-     * Madness penalty: madness > 75 → -2 attack.
-     * Minimum 1 damage.
-     *
-     * @param adventurer The attacking adventurer
-     * @return Damage dealt to the boss, minimum 1
-     */
     public int calcAdventurerDamage(Adventurer adventurer) {
+        if (adventurer == null) {
+            return 0;
+        }
+
         int damage = adventurer.getAttack();
 
         if (adventurer.getLoyalty() < 30) {
@@ -93,54 +191,190 @@ public class BossFight {
         }
 
         damage -= boss.getDefense();
-        damage += random.nextInt(10) + 1;
+        damage += random.nextInt(6) + 1;
         damage *= getDamageMultiplier();
+        damage = Math.max(1, damage);
 
-        return Math.max(1, damage);
+        return applySingleHitDamageCap(damage);
     }
 
     /**
-     * Returns the attack damage multiplier based on difficulty.
-     * Easy = x10, Normal = x7, Hard = x4.
-     * @return The damage multiplier
+     * Difficulty should tune pace, not create one-shot bosses.
+     * Earlier values (10/7/4) made a normal hit deal over 100 damage.
      */
     public int getDamageMultiplier() {
         switch (difficulty) {
-            case EASY:   return 10;
-            case NORMAL: return 7;
-            case HARD:   return 4;
-            default:     return 7;
+            case EASY:
+                return 3;
+            case NORMAL:
+                return 2;
+            case HARD:
+                return 1;
+            default:
+                return 2;
         }
     }
 
-    // ------------------------------------- BOSS ATTACK -------------------------------------
-
     /**
-     * Calculates damage the boss deals to a target using opposing D6 dice rolls.
-     *
-     * Both roll a D6.
-     * Otherwise:
-     *   difference = bossRoll - targetRoll
-     *   TRUE_DAMAGE: damage = bossAttack * difference         (ignores defense)
-     *   Default:     damage = (bossAttack * difference) - target.defense
-     *   SLEEP active on target: damage *= 10, then sleep is cleared.
-     *
-     * NOTE: For HEAL_ON_HIT (Vladimir), call applyVladimirHeal(damage) after this.
-     * NOTE: For AOE (Bel'Veth), call applyAoe(guild) instead — this method is not used.
-     *
-     * @param target The adventurer being attacked
-     * @return Damage dealt (0 if dodged)
+     * Prevents a full-health boss being deleted by one successful memory game.
+     * The cap is ignored once the boss is already low enough to finish.
      */
-    public int calcBossDamage(Adventurer target) {
-        int bossRoll = random.nextInt(6) + 1;
-        int targetRoll = random.nextInt(6) + 1;
+    private int applySingleHitDamageCap(int damage) {
+        int cap = Math.max(12, boss.getMaxHealth() / 3);
 
-        // Player blocks / dodges successfully.
-        if (bossRoll <= targetRoll) {
-            return 0;
+        if (boss.getCurrentHealth() > cap) {
+            return Math.min(damage, cap);
         }
 
-        int difference = bossRoll - targetRoll;
+        return damage;
+    }
+
+    /**
+     * Called by BossFightController after the memory game closes.
+     *
+     * @param attacker The attacking adventurer
+     * @param sequenceCorrect Whether the memory game was successful
+     * @param isMC True if the attacker is the main character
+     * @param guild The player's guild
+     * @return AttackResult for the controller to display
+     */
+    public AttackResult resolvePlayerAttack(Adventurer attacker, boolean sequenceCorrect,
+                                            boolean isMC, Guild guild) {
+        triggerBossAbilityIfNeeded(guild);
+
+        if (attacker == null || attacker.isDead()) {
+            return new AttackResult(false, false, 0, "No fighter is ready to attack.");
+        }
+
+        if (!sequenceCorrect) {
+            applySequenceFailPenalty(attacker, isMC, guild);
+            return new AttackResult(false, false, 0,
+                    attacker.getName() + "'s attack failed.");
+        }
+
+        if (isImmuneThisRound()) {
+            return new AttackResult(true, true, 0,
+                    boss.getName() + " counters the strike and takes no damage.");
+        }
+
+        int damage = calcAdventurerDamage(attacker);
+        boss.setCurrentHealth(boss.getCurrentHealth() - damage);
+
+        return new AttackResult(true, false, damage,
+                attacker.getName() + " hits " + boss.getName() + " for " + damage + " damage.");
+    }
+
+    /**
+     * Backwards-compatible method used by older code.
+     */
+    public int playerAttack(Adventurer attacker, boolean sequenceCorrect, boolean isMC, Guild guild) {
+        return resolvePlayerAttack(attacker, sequenceCorrect, isMC, guild).getDamage();
+    }
+
+    /**
+     * Backwards-compatible method used by older code.
+     */
+    public int playerAttack(Adventurer attacker, boolean sequenceCorrect) {
+        return resolvePlayerAttack(attacker, sequenceCorrect, false, null).getDamage();
+    }
+
+    public void applySequenceFailPenalty(Adventurer adventurer, boolean isMC, Guild guild) {
+        if (adventurer == null) {
+            return;
+        }
+
+        if (isMC && guild != null) {
+            for (Adventurer member : guild.getMainParty()) {
+                member.adjustLoyalty(-5);
+            }
+        } else {
+            adventurer.adjustLoyalty(-10);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Boss attack / defend
+    // -------------------------------------------------------------------------
+
+    /**
+     * Used when the player chooses DEFEND.
+     * The dice controller supplies playerRoll and bossRoll.
+     *
+     * @param defender The active adventurer defending
+     * @param playerRoll Player dice roll
+     * @param bossRoll Boss dice roll
+     * @param guild Player guild
+     * @return DefenseResult for display
+     */
+    public DefenseResult resolveDefend(Adventurer defender, int playerRoll, int bossRoll, Guild guild) {
+        triggerBossAbilityIfNeeded(guild);
+
+        if (defender == null || defender.isDead()) {
+            defender = guild == null ? null : findWeakestTarget(guild.getMainParty());
+        }
+
+        if (defender == null) {
+            return new DefenseResult(playerRoll, bossRoll, 0, null, true, false,
+                    "There is no one left to defend.");
+        }
+
+        if (specialDodgePending) {
+            specialDodgePending = false;
+            nextRound();
+            return new DefenseResult(playerRoll, bossRoll, 0, defender, true, true,
+                    defender.getName() + " evades the attack using the special move.");
+        }
+
+        if (playerRoll >= bossRoll) {
+            nextRound();
+            return new DefenseResult(playerRoll, bossRoll, 0, defender, true, false,
+                    defender.getName() + " blocks the attack.");
+        }
+
+        int difference = bossRoll - playerRoll;
+        int damage = calculateBossDamageFromDifference(defender, difference);
+
+        defender.setCurrentHealth(defender.getCurrentHealth() - damage);
+        applyHitPenalties(defender, difference);
+        applyVladimirHeal(damage);
+
+        if (guild != null) {
+            guild.removeDeadAdventurers();
+        }
+        nextRound();
+
+        return new DefenseResult(playerRoll, bossRoll, damage, defender, false, false,
+                boss.getName() + " breaks through and deals " + damage + " damage to " + defender.getName() + ".");
+    }
+
+    /**
+     * Used after the player attacks. The boss rolls automatically.
+     *
+     * @param guild Player guild
+     * @return DefenseResult for display
+     */
+    public DefenseResult resolveBossAttack(Guild guild) {
+        int playerRoll = random.nextInt(6) + 1;
+        int bossRoll = random.nextInt(6) + 1;
+
+        Adventurer target = findWeakestTarget(guild.getMainParty());
+
+        if (target == null) {
+            return new DefenseResult(playerRoll, bossRoll, 0, null, true, false,
+                    "There is no target left for " + boss.getName() + ".");
+        }
+
+        return resolveDefend(target, playerRoll, bossRoll, guild);
+    }
+
+    /**
+     * Old method kept so older MemoryGameController versions do not break.
+     */
+    public void bossTurn(Guild guild) {
+        resolveBossAttack(guild);
+    }
+
+    private int calculateBossDamageFromDifference(Adventurer target, int difference) {
         int damage;
 
         if (boss.getAbility() == BossAbility.TRUE_DAMAGE) {
@@ -160,50 +394,81 @@ public class BossFight {
     }
 
     /**
-     * Returns the dice difference from the last boss attack for use in applyHitPenalties.
-     * Used internally — BossFightController should call calcBossDamage and track the rolls itself.
-     * Kept as a helper for resolveOutcome.
+     * Kept for compatibility with existing tests/controllers.
      */
-    private int rollDiceDifference() {
+    public int calcBossDamage(Adventurer target) {
         int bossRoll = random.nextInt(6) + 1;
         int targetRoll = random.nextInt(6) + 1;
-        return Math.max(0, bossRoll - targetRoll);
+
+        if (bossRoll <= targetRoll) {
+            return 0;
+        }
+
+        return calculateBossDamageFromDifference(target, bossRoll - targetRoll);
     }
 
-    /**
-     * Applies madness and loyalty penalties after a successful boss hit.
-     * madness increase = difference * 2
-     * loyalty decrease = difference
-     * @param target The adventurer who was hit
-     * @param difference The dice roll difference (bossRoll - targetRoll)
-     */
     public void applyHitPenalties(Adventurer target, int difference) {
+        if (target == null || difference <= 0) {
+            return;
+        }
+
         target.increaseMadness(difference * 2);
         target.adjustLoyalty(-difference);
     }
 
-    // ------------------------------------- BOSS ABILITIES -------------------------------------
+    public void applyVladimirHeal(int damageDealt) {
+        if (boss.getAbility() == BossAbility.HEAL_ON_HIT && damageDealt > 0) {
+            boss.setCurrentHealth(Math.min(boss.getMaxHealth(), boss.getCurrentHealth() + damageDealt));
+        }
+    }
 
-    /**
-     * Applies the boss's active ability for this round.
-     * Called at the start of a round when boss.shouldTriggerAbility(roundNumber) is true.
-     *
-     * IMMUNE_TURN: Sets a flag read by BossFightController to block damage this round.
-     *              No state change here — controller checks isImmuneThisRound().
-     * ISOLATE:     Sets isolatedTarget to lowest-HP member for 2 rounds.
-     * DEVOUR:      Instantly kills lowest-HP member (sets HP to 0).
-     * AOE:         Deals flat boss attack damage to every living party member.
-     * SLEEP:       Marks lowest-HP member as sleeping; next boss hit on them is 10x.
-     * HEAL_ON_HIT: Passive — handled inside applyVladimirHeal after calcBossDamage.
-     * TRUE_DAMAGE: Passive — handled inside calcBossDamage.
-     *
-     * @param guild The player's guild
-     */
+    // -------------------------------------------------------------------------
+    // Boss ability
+    // -------------------------------------------------------------------------
+
+    public boolean shouldTriggerAbilityThisRound() {
+        return boss.shouldTriggerAbility(roundNumber);
+    }
+
+    public String triggerBossAbilityIfNeeded(Guild guild) {
+        if (abilityTriggeredThisRound || !shouldTriggerAbilityThisRound() || guild == null) {
+            return null;
+        }
+
+        abilityTriggeredThisRound = true;
+
+        if (boss.getAbility() == BossAbility.NONE || boss.getAbility() == BossAbility.TRUE_DAMAGE
+                || boss.getAbility() == BossAbility.HEAL_ON_HIT) {
+            return null;
+        }
+
+        if (boss.getAbility() == BossAbility.IMMUNE_TURN) {
+            return boss.getName() + " raises his guard. This round, attacks will be countered.";
+        }
+
+        applyBossAbility(guild);
+        guild.removeDeadAdventurers();
+
+        switch (boss.getAbility()) {
+            case ISOLATE:
+                return boss.getName() + " isolates " +
+                        (isolatedTarget == null ? "a target" : isolatedTarget.getName()) + ".";
+            case DEVOUR:
+                return boss.getName() + " devours the weakest fighter.";
+            case AOE:
+                return boss.getName() + " unleashes an attack across the whole party.";
+            case SLEEP:
+                return boss.getName() + " puts " +
+                        (sleepingTarget == null ? "a target" : sleepingTarget.getName()) + " to sleep.";
+            default:
+                return null;
+        }
+    }
+
     public void applyBossAbility(Guild guild) {
         List<Adventurer> party = guild.getMainParty();
 
         switch (boss.getAbility()) {
-
             case ISOLATE:
                 isolatedTarget = findLowestHP(party);
                 isolationRoundsRemaining = 2;
@@ -230,45 +495,183 @@ public class BossFight {
                 break;
 
             default:
-                // NONE, TRUE_DAMAGE, HEAL_ON_HIT, IMMUNE_TURN handled elsewhere
                 break;
         }
     }
 
-    /**
-     * Returns whether this round is an IMMUNE_TURN for Jax.
-     * BossFightController should call this before applying adventurer damage.
-     * If true, skip applying damage even if the memory sequence was correct.
-     * @return True if boss is immune to damage this round
-     */
     public boolean isImmuneThisRound() {
-        return boss.getAbility() == BossAbility.IMMUNE_TURN
-                && boss.shouldTriggerAbility(roundNumber);
+        return boss.getAbility() == BossAbility.IMMUNE_TURN && boss.shouldTriggerAbility(roundNumber);
+    }
+
+    // -------------------------------------------------------------------------
+    // Potions / healing
+    // -------------------------------------------------------------------------
+
+    public boolean isPotionUsedThisTurn() {
+        return potionUsedThisTurn;
+    }
+
+    public boolean canUsePotionThisTurn(Guild guild) {
+        return !potionUsedThisTurn
+                && guild != null
+                && guild.hasAnyHealingPotions()
+                && guild.hasInjuredMainPartyMember()
+                && !boss.isDead()
+                && !guild.isWiped();
     }
 
     /**
-     * Vladimir ability — heals the boss by the amount of damage he just dealt.
-     * Call this immediately after calcBossDamage returns a non-zero value.
-     * @param damageDealt The damage the boss dealt this turn
+     * Uses a potion during the active player's turn. This keeps potion inventory,
+     * healing amounts, and once-per-turn rules in the model instead of the controller.
      */
-    public void applyVladimirHeal(int damageDealt) {
-        if (boss.getAbility() == BossAbility.HEAL_ON_HIT && damageDealt > 0) {
-            boss.setCurrentHealth(
-                    Math.min(boss.getMaxHealth(), boss.getCurrentHealth() + damageDealt)
-            );
+    public PotionUseResult usePotionThisTurn(Guild guild, ItemType itemType, Adventurer target) {
+        Map<Adventurer, Integer> healedAmounts = new LinkedHashMap<>();
+
+        if (potionUsedThisTurn) {
+            return new PotionUseResult(false, "You already used a potion this turn.", healedAmounts);
+        }
+
+        if (guild == null || itemType == null) {
+            return new PotionUseResult(false, "No potion can be used right now.", healedAmounts);
+        }
+
+        if (!guild.hasInjuredMainPartyMember()) {
+            return new PotionUseResult(false, "Everyone is already at full health.", healedAmounts);
+        }
+
+        switch (itemType) {
+            case SINGLE:
+                return useSinglePotion(guild, target, healedAmounts);
+            case PARTY:
+                return usePartyPotion(guild, healedAmounts);
+            case FULL:
+                return useFullRestore(guild, healedAmounts);
+            default:
+                return new PotionUseResult(false, "Unknown potion type.", healedAmounts);
         }
     }
 
-    // ------------------------------------- TARGETING HELPERS -------------------------------------
+    private PotionUseResult useSinglePotion(Guild guild, Adventurer target, Map<Adventurer, Integer> healedAmounts) {
+        if (guild.getSmallPotionCount() <= 0) {
+            return new PotionUseResult(false, "No Silver Potions left.", healedAmounts);
+        }
+
+        if (target == null || target.isDead()) {
+            target = findLowestInjuredMember(guild.getMainParty());
+        }
+
+        if (target == null) {
+            return new PotionUseResult(false, "No injured fighter needs a Silver Potion.", healedAmounts);
+        }
+
+        int before = target.getCurrentHealth();
+        target.setCurrentHealth(before + 30);
+        int healed = target.getCurrentHealth() - before;
+
+        if (healed <= 0) {
+            return new PotionUseResult(false, target.getName() + " is already at full health.", healedAmounts);
+        }
+
+        guild.useSmallPotion();
+        potionUsedThisTurn = true;
+        healedAmounts.put(target, healed);
+
+        return new PotionUseResult(true, "Silver Potion healed " + target.getName() + " for " + healed + " HP.", healedAmounts);
+    }
+
+    private PotionUseResult usePartyPotion(Guild guild, Map<Adventurer, Integer> healedAmounts) {
+        if (guild.getPartyPotionCount() <= 0) {
+            return new PotionUseResult(false, "No Gold Potions left.", healedAmounts);
+        }
+
+        for (Adventurer adventurer : guild.getMainParty()) {
+            if (!adventurer.isDead() && adventurer.getCurrentHealth() < adventurer.getMaxHealth()) {
+                int before = adventurer.getCurrentHealth();
+                adventurer.setCurrentHealth(before + 20);
+                int healed = adventurer.getCurrentHealth() - before;
+                if (healed > 0) {
+                    healedAmounts.put(adventurer, healed);
+                }
+            }
+        }
+
+        if (healedAmounts.isEmpty()) {
+            return new PotionUseResult(false, "No injured fighters need a Gold Potion.", healedAmounts);
+        }
+
+        guild.usePartyPotion();
+        potionUsedThisTurn = true;
+
+        return new PotionUseResult(true, "Gold Potion healed the party.", healedAmounts);
+    }
+
+    private PotionUseResult useFullRestore(Guild guild, Map<Adventurer, Integer> healedAmounts) {
+        if (guild.getFullRestoreCount() <= 0) {
+            return new PotionUseResult(false, "No Purple Potions left.", healedAmounts);
+        }
+
+        for (Adventurer adventurer : guild.getMainParty()) {
+            if (!adventurer.isDead() && adventurer.getCurrentHealth() < adventurer.getMaxHealth()) {
+                int before = adventurer.getCurrentHealth();
+                adventurer.resetHealth();
+                int healed = adventurer.getCurrentHealth() - before;
+                if (healed > 0) {
+                    healedAmounts.put(adventurer, healed);
+                }
+            }
+        }
+
+        if (healedAmounts.isEmpty()) {
+            return new PotionUseResult(false, "No injured fighters need a Purple Potion.", healedAmounts);
+        }
+
+        guild.useFullRestore();
+        potionUsedThisTurn = true;
+
+        return new PotionUseResult(true, "Purple Potion fully restored the party.", healedAmounts);
+    }
+
+    private Adventurer findLowestInjuredMember(List<Adventurer> party) {
+        Adventurer target = null;
+
+        for (Adventurer member : party) {
+            if (!member.isDead() && member.getCurrentHealth() < member.getMaxHealth()) {
+                if (target == null || member.getCurrentHealth() < target.getCurrentHealth()) {
+                    target = member;
+                }
+            }
+        }
+
+        return target;
+    }
+
+    // -------------------------------------------------------------------------
+    // Special move
+    // -------------------------------------------------------------------------
 
     /**
-     * Finds the living adventurer with the lowest current HP.
-     * Used for Devour (Cho'Gath), Sleep (Zoe), and Isolate (Kha'Zix).
-     * @param party The current main party
-     * @return Adventurer with lowest current HP, or null if all dead
+     * Activates the MC's special move.
+     * The next boss attack is guaranteed to miss.
+     *
+     * @return true if successfully activated
      */
+    public boolean activateSpecialMove() {
+        if (specialMoveUsed) {
+            return false;
+        }
+
+        specialMoveUsed = true;
+        specialDodgePending = true;
+        return true;
+    }
+
+    // -------------------------------------------------------------------------
+    // Targeting and progression
+    // -------------------------------------------------------------------------
+
     public Adventurer findLowestHP(List<Adventurer> party) {
         Adventurer target = null;
+
         for (Adventurer member : party) {
             if (!member.isDead()) {
                 if (target == null || member.getCurrentHealth() < target.getCurrentHealth()) {
@@ -276,17 +679,13 @@ public class BossFight {
                 }
             }
         }
+
         return target;
     }
 
-    /**
-     * Finds the living adventurer with the lowest defense.
-     * Used as the default boss attack target.
-     * @param party The current main party
-     * @return Adventurer with lowest defense, or null if all dead
-     */
     public Adventurer findWeakestTarget(List<Adventurer> party) {
         Adventurer weakest = null;
+
         for (Adventurer adventurer : party) {
             if (!adventurer.isDead()) {
                 if (weakest == null || adventurer.getDefense() < weakest.getDefense()) {
@@ -294,319 +693,47 @@ public class BossFight {
                 }
             }
         }
+
         return weakest;
     }
 
-    // ------------------------------------- SEQUENCE FAIL PENALTY -------------------------------------
-
-    /**
-     * Applies loyalty penalty when a player fails a memory sequence.
-     * If MC fails: whole party loses 5 loyalty.
-     * If party member fails: only that member loses 10 loyalty.
-     * @param adventurer The adventurer who failed the sequence
-     * @param isMC True if the failing adventurer is the MC
-     * @param guild The player's guild
-     */
-    public void applySequenceFailPenalty(Adventurer adventurer, boolean isMC, Guild guild) {
-        if (isMC) {
-            for (Adventurer member : guild.getMainParty()) {
-                member.adjustLoyalty(-5);
-            }
-        } else {
-            adventurer.adjustLoyalty(-10);
+    public boolean canAdventurerAct(Adventurer adventurer) {
+        if (adventurer == null || adventurer.isDead()) {
+            return false;
         }
+
+        if (isolatedTarget != null && !adventurer.equals(isolatedTarget)) {
+            return false;
+        }
+
+        return !adventurer.equals(sleepingTarget);
     }
 
-    // ------------------------------------- SPECIAL MOVE -------------------------------------
-
-    /**
-     * Activates the MC's special move — guaranteed dodge for this round.
-     * Can only be used once per fight.
-     * @return True if activated, false if already used
-     */
-    public boolean activateSpecialMove() {
-        if (!specialMoveUsed) {
-            specialMoveUsed = true;
-            return true;
-        }
-        return false;
-    }
-
-    // ------------------------------------- ROUND PROGRESSION -------------------------------------
-
-    /**
-     * Advances the fight to the next round.
-     * Decrements isolation counter if active and clears it when expired.
-     */
     public void nextRound() {
         roundNumber++;
+
         if (isolationRoundsRemaining > 0) {
             isolationRoundsRemaining--;
+
             if (isolationRoundsRemaining == 0) {
                 isolatedTarget = null;
             }
         }
+
         abilityTriggeredThisRound = false;
+        potionUsedThisTurn = false;
     }
 
-    // ------------------------------------- FULL COMBAT LOOP -------------------------------------
-
-    /**
-     * Runs the full combat loop to completion.
-     *
-     * Each round:
-     * 1. Check if boss ability triggers (boss.shouldTriggerAbility(roundNumber)).
-     *    - Call applyBossAbility(guild) if so.
-     * 2. Each living adventurer plays the memory game to attack the boss.
-     *    - If ISOLATE is active: only isolatedTarget can act.
-     *    - If SLEEP is active on this adventurer: they skip their turn.
-     *    - If IMMUNE_TURN: correct sequence still plays but deals 0 damage.
-     *    - Correct sequence: calcAdventurerDamage() applied to boss HP.
-     *    - Wrong sequence: applySequenceFailPenalty() called.
-     * 3. Boss attacks:
-     *    - AOE: handled inside applyBossAbility, no additional attack.
-     *    - Otherwise: boss attacks findWeakestTarget().
-     *      - MC special move active: guaranteed dodge.
-     *      - Otherwise: calcBossDamage(); applyHitPenalties() if damage > 0.
-     *      - HEAL_ON_HIT: applyVladimirHeal(damage) if damage > 0.
-     * 4. guild.removeDeadAdventurers().
-     * 5. nextRound().
-     *
-     * Fight ends when boss HP ≤ 0 (player wins) or guild.isWiped() (player loses).
-     *
-     * @param guild The player's guild
-     * @param mcAdventurer The MC adventurer
-     *
-     * TODO: Coordinate with BossFightController for special move button (calls activateSpecialMove()).
-     * TODO: BossFightController should call isImmuneThisRound() before applying attack damage.
-     */
-    public void resolveOutcome(Guild guild, Adventurer mcAdventurer) {
-        while (!boss.isDead() && !guild.isWiped()) {
-
-            // 1. Boss ability trigger
-            if (boss.shouldTriggerAbility(roundNumber)) {
-                applyBossAbility(guild);
-            }
-
-            if (guild.isWiped()) break;
-
-            // 2. Party attacks
-            List<Adventurer> party = guild.getMainParty();
-            for (Adventurer adventurer : party) {
-                if (adventurer.isDead()) continue;
-
-                // Isolation: only isolatedTarget acts while isolation is active
-                if (isolatedTarget != null && !adventurer.equals(isolatedTarget)) {
-                    continue;
-                }
-
-                // Sleep: sleeping adventurer skips their attack
-                if (adventurer.equals(sleepingTarget)) {
-                    continue;
-                }
-
-
-                List<Integer> correctSequence = memoryGame.generateSequence();
-                boolean correct = false;
-
-                if (correct && !isImmuneThisRound()) {
-                    int damage = calcAdventurerDamage(adventurer);
-                    boss.setCurrentHealth(boss.getCurrentHealth() - damage);
-                } else if (!correct) {
-                    boolean isMC = adventurer.equals(mcAdventurer);
-                    applySequenceFailPenalty(adventurer, isMC, guild);
-                }
-                // correct + immune turn: no damage, no penalty
-
-                if (boss.isDead()) break;
-            }
-
-            if (boss.isDead()) break;
-
-            // 3. Boss attacks (AOE already handled in applyBossAbility)
-            if (boss.getAbility() != BossAbility.AOE || !boss.shouldTriggerAbility(roundNumber)) {
-                Adventurer target = findWeakestTarget(guild.getMainParty());
-                if (target != null) {
-                    boolean guaranteed_dodge = target.equals(mcAdventurer) && specialMoveUsed;
-
-                    if (!guaranteed_dodge) {
-                        int bossRoll = random.nextInt(6) + 1;
-                        int targetRoll = random.nextInt(6) + 1;
-
-                        if (bossRoll > targetRoll) {
-                            int difference = bossRoll - targetRoll;
-                            int damage;
-                            if (boss.getAbility() == BossAbility.TRUE_DAMAGE) {
-                                damage = boss.getAttack() * difference;
-                            } else {
-                                damage = (boss.getAttack() * difference) - target.getDefense();
-                            }
-                            damage = Math.max(1, damage);
-
-                            if (target.equals(sleepingTarget)) {
-                                damage *= 10;
-                                sleepingTarget = null;
-                            }
-
-                            target.setCurrentHealth(target.getCurrentHealth() - damage);
-                            applyHitPenalties(target, difference);
-                            applyVladimirHeal(damage);
-                        }
-                    }
-                }
-            }
-
-            guild.removeDeadAdventurers();
-            nextRound();
-        }
-
-        // Resolve win/loss
-        playerWon = boss.isDead() && !guild.isWiped();
-
-        if (playerWon) {
-            for (Adventurer adventurer : guild.getMainParty()) {
-                adventurer.adjustLoyalty(boss.getLoyaltyEffectOnWin());
-            }
-            guild.addGold(boss.getGoldDrop());
-        } else {
-            for (Adventurer adventurer : guild.getMainParty()) {
-                adventurer.adjustLoyalty(boss.getLoyaltyEffectOnLoss());
-            }
-        }
-    }
-
-    // ------------------------------------- CONTROLLER-FACING API -------------------------------------
-
-    /**
-     * Called by BossFightController after the player completes or fails the memory game.
-     *
-     * If sequenceCorrect is true and the boss is not immune this round:
-     *   - Applies calcAdventurerDamage() to the boss.
-     *   - Returns damage dealt.
-     * If sequenceCorrect is true but IMMUNE_TURN is active:
-     *   - No damage, no penalty. Returns 0.
-     * If sequenceCorrect is false:
-     *   - Calls applySequenceFailPenalty().
-     *   - Returns 0.
-     *
-     * Also triggers boss ability at the start of the round if due.
-     *
-     * @param attacker The adventurer whose turn it is
-     * @param sequenceCorrect Whether the player got the memory sequence right
-     * @return Damage dealt to the boss (0 if missed, immune, or failed)
-     */
-    public int playerAttack(Adventurer attacker, boolean sequenceCorrect) {
-        // Trigger boss ability at start of round if due
-        // (safe to call repeatedly — applyBossAbility is idempotent per round
-        //  because the controller drives one attacker at a time)
-        if (boss.shouldTriggerAbility(roundNumber)) {
-            // Only trigger once per round — controller should call this on the first attacker's turn
-            // TODO: track abilityTriggeredThisRound if needed
-        }
-
-        if (sequenceCorrect) {
-            if (isImmuneThisRound()) {
-                return 0; // Jax counters — no damage, no penalty
-            }
-            int damage = calcAdventurerDamage(attacker);
-            boss.setCurrentHealth(boss.getCurrentHealth() - damage);
-            return damage;
-        } else {
-            // Pass null for MC check — controller should use the overload below if MC tracking matters
-            applySequenceFailPenalty(attacker, false, null);
-            return 0;
-        }
-    }
-
-    /**
-     * Overload of playerAttack that also handles MC fail penalty correctly.
-     * Use this version when the attacker might be the MC.
-     * @param attacker The adventurer whose turn it is
-     * @param sequenceCorrect Whether the player got the memory sequence right
-     * @param isMC True if attacker is the MC (fail penalises whole party)
-     * @param guild The player's guild (needed for whole-party penalty)
-     * @return Damage dealt to the boss
-     */
-    public int playerAttack(Adventurer attacker, boolean sequenceCorrect, boolean isMC, Guild guild) {
-        if (sequenceCorrect) {
-            if (isImmuneThisRound()) {
-                return 0;
-            }
-            int damage = calcAdventurerDamage(attacker);
-            boss.setCurrentHealth(boss.getCurrentHealth() - damage);
-            return damage;
-        } else {
-            applySequenceFailPenalty(attacker, isMC, guild);
-            return 0;
-        }
-    }
-
-    private void triggerBossAbilityIfNeeded(Guild guild) {
-        if (!abilityTriggeredThisRound && boss.shouldTriggerAbility(roundNumber)) {
-            applyBossAbility(guild);
-            abilityTriggeredThisRound = true;
-        }
-    }
-
-    /**
-     * Executes the boss's attack phase for this round.
-     * Called by BossFightController after the player's attack resolves.
-     *
-     * Handles:
-     *   - AOE: calls applyBossAbility(guild) for flat damage to all party members.
-     *   - Otherwise: attacks findWeakestTarget().
-     *     - Special move active on MC: guaranteed dodge.
-     *     - Otherwise: dice rolls, calcBossDamage(), applyHitPenalties(), applyVladimirHeal().
-     *
-     * Advances to the next round and removes dead adventurers after attacking.
-     *
-     * @param guild The player's guild
-     */
-    public void bossTurn(Guild guild) {
-        triggerBossAbilityIfNeeded(guild);
-
-        if (boss.getAbility() == BossAbility.AOE && boss.shouldTriggerAbility(roundNumber)) {
-            guild.removeDeadAdventurers();
-            nextRound();
-            return;
-        }
-
-        Adventurer target = findWeakestTarget(guild.getMainParty());
-
-        if (target != null && !target.isDead()) {
-            int difference = rollDiceDifference();
-            int damage = calcBossDamage(target);
-
-            target.setCurrentHealth(target.getCurrentHealth() - damage);
-            applyHitPenalties(target, difference);
-            applyVladimirHeal(damage);
-        }
-
-        guild.removeDeadAdventurers();
-        nextRound();
-    }
-
-    /**
-     * Returns true if the fight is over — either the boss is dead or the guild is wiped.
-     * BossFightController calls this after each player attack and boss turn to check loop exit.
-     * @param guild The player's guild
-     * @return True if the fight has ended
-     */
     public boolean isFightOver(Guild guild) {
         return boss.isDead() || guild.isWiped();
     }
 
-    /**
-     * Finalises the fight result if it's over.
-     * Sets playerWon and applies win/loss loyalty and gold effects.
-     * Safe to call multiple times — does nothing if fight is not over.
-     * BossFightController calls this after isFightOver() returns true.
-     * @param guild The player's guild
-     */
     public void finishFightIfOver(Guild guild) {
-        if (!isFightOver(guild)) {
+        if (!isFightOver(guild) || rewardsApplied) {
             return;
         }
+
+        rewardsApplied = true;
         playerWon = boss.isDead() && !guild.isWiped();
 
         if (playerWon) {
@@ -621,60 +748,42 @@ public class BossFight {
         }
     }
 
-    // ------------------------------------- GETTERS -------------------------------------
+    // -------------------------------------------------------------------------
+    // Getters
+    // -------------------------------------------------------------------------
 
-    /**
-     * @return The memory game instance for this fight
-     */
     public MemoryGame getMemoryGame() {
         return memoryGame;
     }
 
-    /**
-     * @return The boss for this fight
-     */
     public Boss getBoss() {
         return boss;
     }
 
-    /**
-     * @return The sequence number of this fight within the quest (1-indexed)
-     */
     public int getSequence() {
         return sequence;
     }
 
-    /**
-     * @return True if the player won this boss fight
-     */
+    public int getRoundNumber() {
+        return roundNumber;
+    }
+
     public boolean isPlayerWon() {
         return playerWon;
     }
 
-    /**
-     * @return True if the MC special move has already been used this fight
-     */
     public boolean isSpecialMoveUsed() {
         return specialMoveUsed;
     }
 
-    /**
-     * @return The currently sleeping adventurer, or null if none
-     */
     public Adventurer getSleepingTarget() {
         return sleepingTarget;
     }
 
-    /**
-     * @return The currently isolated adventurer, or null if none
-     */
     public Adventurer getIsolatedTarget() {
         return isolatedTarget;
     }
 
-    /**
-     * @return How many rounds of isolation remain
-     */
     public int getIsolationRoundsRemaining() {
         return isolationRoundsRemaining;
     }

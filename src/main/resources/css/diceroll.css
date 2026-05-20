@@ -1,0 +1,71 @@
+.title-label {
+    -fx-text-fill: #ffd86a;
+    -fx-font-family: Georgia;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, black, 6, 0.75, 0, 0);
+}
+
+.side-label {
+    -fx-text-fill: #f8e7bc;
+    -fx-font-family: Georgia;
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+}
+
+.dice-label {
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+    -fx-border-width: 4;
+    -fx-text-fill: white;
+    -fx-font-family: Georgia;
+    -fx-font-size: 68px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, black, 12, 0.85, 0, 0);
+}
+
+.player-dice {
+    -fx-background-color: #163a8a;
+    -fx-border-color: #82aaff;
+}
+
+.boss-dice {
+    -fx-background-color: #8a1f16;
+    -fx-border-color: #ff8a70;
+}
+
+.vs-label {
+    -fx-text-fill: #f8e7bc;
+    -fx-font-family: Georgia;
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+}
+
+.result-label {
+    -fx-background-color: rgba(20, 12, 8, 0.9);
+    -fx-border-color: #d6b35a;
+    -fx-border-width: 2;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-text-fill: #f8e7bc;
+    -fx-font-family: Georgia;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.gold-button {
+    -fx-background-color: linear-gradient(#f7d36a, #b8860b);
+    -fx-text-fill: #2b1900;
+    -fx-font-family: Georgia;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-border-color: #6b3f00;
+    -fx-border-width: 2;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.gold-button:hover {
+    -fx-background-color: linear-gradient(#ffe995, #d6a72c);
+}
