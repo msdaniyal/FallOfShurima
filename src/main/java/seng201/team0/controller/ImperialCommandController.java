@@ -77,10 +77,6 @@ public class ImperialCommandController {
             nextArrowLabel.setVisible(false);
         }
 
-        /*
-         * Click anywhere on the scene to continue.
-         * If text is still typing, the click completes the line first.
-         */
         contentPane.setOnMouseClicked(event -> advanceDialogue());
     }
 
@@ -110,7 +106,7 @@ public class ImperialCommandController {
         lines.add(new DialogueLine(
                 "Azir",
                 "Their nobles refuse tribute, their armies gather at the eastern gates, and the rebels whisper two names: Zilean and Jax.",
-                "/images/azir_bowing.png"
+                "/images/jax_and_zilean.png"
         ));
 
         lines.add(new DialogueLine(
@@ -151,11 +147,6 @@ public class ImperialCommandController {
             ));
         }
 
-        lines.add(new DialogueLine(
-                "Narrator",
-                "And so the command was given. The march to Icathia began beneath the gaze of the Sun Disc.",
-                choseAatrox ? "/images/imperial_command_aatrox.png" : "/images/imperial_command_xolaani.png"
-        ));
     }
 
     private void showCurrentLine() {
