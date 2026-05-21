@@ -48,13 +48,21 @@
                        text="Active:"
                        styleClass="active-label" />
 
+                <ProgressBar fx:id="activeMemberHpBar"
+                             layoutX="260"
+                             layoutY="124"
+                             prefWidth="200"
+                             prefHeight="16"
+                             progress="1.0"
+                             style="-fx-accent: #39d353;" />
+
                 <Label fx:id="activeMemberStatsLabel"
                        layoutX="235"
-                       layoutY="122"
+                       layoutY="144"
                        prefWidth="250"
                        prefHeight="24"
                        alignment="CENTER"
-                       text="HP / ATK"
+                       text="HP 0 / 0"
                        styleClass="active-stats-label" />
 
                 <Ellipse layoutX="360" layoutY="383" radiusX="96" radiusY="15"
@@ -62,9 +70,9 @@
 
                 <ImageView fx:id="activeMemberImage"
                            layoutX="238"
-                           layoutY="142"
+                           layoutY="162"
                            fitWidth="245"
-                           fitHeight="245"
+                           fitHeight="225"
                            preserveRatio="true"
                            smooth="true" />
 
@@ -166,6 +174,15 @@
                         prefHeight="28"
                         text="Return Map"
                         onAction="#onReturnToMap"
+                        styleClass="small-button" />
+
+                <Button fx:id="restartQuestButton"
+                        layoutX="155"
+                        layoutY="560"
+                        prefWidth="130"
+                        prefHeight="28"
+                        text="Restart Quest"
+                        onAction="#onRestartQuest"
                         styleClass="small-button" />
 
                 <Pane fx:id="changeMemberOverlay"

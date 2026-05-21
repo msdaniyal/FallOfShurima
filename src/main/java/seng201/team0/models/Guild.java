@@ -1,12 +1,12 @@
 package seng201.team0.models;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * Represents the player's guild (warband).
  * Manages the main party, reserves, gold, and recruitment pool.
- * @author Mohammed, Xinyi
  */
 public class Guild {
 
@@ -18,6 +18,7 @@ public class Guild {
     private List<Adventurer> mainParty;
     private List<Adventurer> reserves;
     private List<Adventurer> recruitPool;
+    private List<String> permanentlyUnavailableCharacterNames;
 
     private int smallPotionCount;
     private int partyPotionCount;
@@ -26,12 +27,6 @@ public class Guild {
     private static final int MAX_PARTY_SIZE = 5;
     private static final int MAX_RESERVE_SIZE = 5;
 
-    /**
-     * Constructs a Guild with a name, starting gold and the player's chosen faction.
-     * @param name The guild's name (3-15 characters)
-     * @param startingGold The amount of gold the guild starts with
-     * @param playerFaction The MC faction chosen by the player (AATROX or XOLAANI)
-     */
     public Guild(String name, int startingGold, Faction playerFaction) {
         this.name = name;
         this.gold = startingGold;
@@ -41,36 +36,25 @@ public class Guild {
         this.mainParty = new ArrayList<>();
         this.reserves = new ArrayList<>();
         this.recruitPool = new ArrayList<>();
+        this.permanentlyUnavailableCharacterNames = new ArrayList<>();
         this.mainParty.add(mainCharacter);
         this.smallPotionCount = 0;
         this.partyPotionCount = 0;
         this.fullRestoreCount = 0;
     }
 
-    /**
-     * @return The guild's name
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * @return The guild's current gold
-     */
     public int getGold() {
         return gold;
     }
 
-    /**
-     * @return The faction the player chose at setup
-     */
     public Faction getPlayerFaction() {
         return playerFaction;
     }
 
-    /**
-     * @return The chosen main character for this guild.
-     */
     public Adventurer getMainCharacter() {
         if (mainCharacter == null) {
             mainCharacter = createMainCharacter(playerFaction);
@@ -78,24 +62,43 @@ public class Guild {
         return mainCharacter;
     }
 
-    /**
-     * @return True if the given adventurer is the chosen Aatrox/Xolaani main character.
-     */
     public boolean isMainCharacter(Adventurer adventurer) {
         return adventurer != null && isMainCharacterName(adventurer.getName());
     }
 
-    /**
-     * @return True if this name belongs to the chosen main character.
-     */
     public boolean isMainCharacterName(String name) {
         return name != null && getMainCharacter().getName().equals(name);
     }
 
     /**
-     * Creates the player's fixed main character from the setup faction choice.
-     * The player then adds 1 to 4 companions around this character.
+     * True when a companion has permanently left the game by death or abandonment.
+     * These characters must not appear in Character Select, Shop, Barracks, or Quest 5 rival pools again.
      */
+    public boolean isPermanentlyUnavailable(String name) {
+        return name != null && permanentlyUnavailableCharacterNames.contains(name);
+    }
+
+    public boolean isPermanentlyUnavailable(Adventurer adventurer) {
+        return adventurer != null && isPermanentlyUnavailable(adventurer.getName());
+    }
+
+    public List<String> getPermanentlyUnavailableCharacterNames() {
+        return new ArrayList<>(permanentlyUnavailableCharacterNames);
+    }
+
+    private void markPermanentlyUnavailable(Adventurer adventurer) {
+        if (adventurer == null || isMainCharacter(adventurer)) {
+            return;
+        }
+
+        String name = adventurer.getName();
+        if (!permanentlyUnavailableCharacterNames.contains(name)) {
+            permanentlyUnavailableCharacterNames.add(name);
+        }
+
+        recruitPool.removeIf(candidate -> candidate.getName().equals(name));
+    }
+
     private Adventurer createMainCharacter(Faction faction) {
         if (faction == Faction.XOLAANI) {
             return new Adventurer(
@@ -112,9 +115,6 @@ public class Guild {
         );
     }
 
-    /**
-     * Makes sure the main character is present at the front of the main party.
-     */
     public void ensureMainCharacterInParty() {
         Adventurer mc = getMainCharacter();
         mainParty.removeIf(member -> member.getName().equals(mc.getName()));
@@ -125,96 +125,77 @@ public class Guild {
         }
     }
 
+    public boolean isMainCharacterDead() {
+        return getMainCharacter().isDead();
+    }
+
     /**
-     * @return True if the party is locked after Quest 5
+     * Used when the player returns to the map after the MC falls.
+     * The quest itself is not completed, but the player is not soft-locked.
      */
+    public void reviveMainCharacterForMenu() {
+        getMainCharacter().resetHealth();
+        ensureMainCharacterInParty();
+    }
+
     public boolean isPartyLocked() {
         return partyLocked;
     }
 
-    /**
-     * Locks the party after Quest 5.
-     * No recruiting or moving adventurers is allowed after this point.
-     */
     public void lockParty() {
         this.partyLocked = true;
     }
 
-    /**
-     * @return The list of adventurers in the main party
-     */
     public List<Adventurer> getMainParty() {
         return mainParty;
     }
 
-    /**
-     * @return The list of adventurers in reserves
-     */
     public List<Adventurer> getReserves() {
         return reserves;
     }
 
-    /**
-     * @return The current recruit pool available for hiring
-     */
     public List<Adventurer> getRecruitPool() {
         return recruitPool;
     }
 
-    /**
-     * @return The number of small potion owned
-     */
     public int getSmallPotionCount() {
         return smallPotionCount;
     }
 
-
-    /**
-     * @return The number of party potion owned
-     */
     public int getPartyPotionCount() {
         return partyPotionCount;
     }
 
-    /**
-     * @return The number of full-restore potion owned
-     */
     public int getFullRestoreCount() {
         return fullRestoreCount;
     }
 
     public void addSmallPotions(int amount) {
-        smallPotionCount += amount;
+        smallPotionCount += Math.max(0, amount);
     }
 
     public void addPartyPotions(int amount) {
-        partyPotionCount += amount;
+        partyPotionCount += Math.max(0, amount);
     }
 
     public void addFullRestores(int amount) {
-        fullRestoreCount += amount;
+        fullRestoreCount += Math.max(0, amount);
     }
 
     public boolean useSmallPotion() {
-        if (smallPotionCount <= 0) {
-            return false;
-        }
+        if (smallPotionCount <= 0) return false;
         smallPotionCount--;
         return true;
     }
 
     public boolean usePartyPotion() {
-        if (partyPotionCount <= 0) {
-            return false;
-        }
+        if (partyPotionCount <= 0) return false;
         partyPotionCount--;
         return true;
     }
 
     public boolean useFullRestore() {
-        if (fullRestoreCount <= 0) {
-            return false;
-        }
+        if (fullRestoreCount <= 0) return false;
         fullRestoreCount--;
         return true;
     }
@@ -238,20 +219,12 @@ public class Guild {
         return false;
     }
 
-    /**
-     * Adds gold to the guild's treasury.
-     * @param amount The amount of gold to add
-     */
     public void addGold(int amount) {
         this.gold += amount;
     }
 
-    /**
-     * Spends gold from the guild's treasury.
-     * @param amount The amount of gold to spend
-     * @return True if the guild had enough gold, false otherwise
-     */
     public boolean spendGold(int amount) {
+        if (amount <= 0) return true;
         if (gold >= amount) {
             gold -= amount;
             return true;
@@ -259,49 +232,27 @@ public class Guild {
         return false;
     }
 
-    /**
-     * Adds an adventurer directly to the main party during setup.
-     * Used for the three starting adventurers whose hiring cost is waived.
-     * @param adventurer The adventurer to add
-     * @return True if added successfully, false if party is full
-     */
     public boolean addToMainParty(Adventurer adventurer) {
-        if (adventurer == null || isInCurrentMainParty(adventurer)) {
-            return false;
-        }
+        if (adventurer == null || isInCurrentMainParty(adventurer) || isPermanentlyUnavailable(adventurer)) return false;
+        if (mainParty.size() >= MAX_PARTY_SIZE) return false;
 
-        if (mainParty.size() < MAX_PARTY_SIZE) {
-            if (isMainCharacter(adventurer)) {
-                mainParty.add(0, getMainCharacter());
-            } else {
-                mainParty.add(adventurer);
-            }
-            return true;
+        if (isMainCharacter(adventurer)) {
+            mainParty.add(0, getMainCharacter());
+        } else {
+            mainParty.add(adventurer);
         }
-        return false;
+        return true;
     }
 
-    /**
-     * Adds an adventurer to the reserves.
-     * @param adventurer The adventurer to add
-     * @return True if added successfully, false if reserves are full
-     */
     public boolean addToReserves(Adventurer adventurer) {
-        if (reserves.size() < MAX_RESERVE_SIZE) {
-            reserves.add(adventurer);
-            return true;
-        }
-        return false;
+        if (adventurer == null || reserves.size() >= MAX_RESERVE_SIZE || isPermanentlyUnavailable(adventurer)) return false;
+        if (containsByName(reserves, adventurer.getName()) || containsByName(mainParty, adventurer.getName())) return false;
+        reserves.add(adventurer);
+        return true;
     }
 
-    /**
-     * Moves an adventurer from reserves to the main party.
-     * Not allowed if party is locked.
-     * @param adventurer The adventurer to move
-     * @return True if moved successfully, false if locked, party full, or adventurer not in reserves
-     */
     public boolean moveToMainParty(Adventurer adventurer) {
-        if (partyLocked) return false;
+        if (partyLocked || adventurer == null || isMainCharacter(adventurer)) return false;
         if (reserves.contains(adventurer) && mainParty.size() < MAX_PARTY_SIZE) {
             reserves.remove(adventurer);
             mainParty.add(adventurer);
@@ -310,17 +261,9 @@ public class Guild {
         return false;
     }
 
-    /**
-     * Moves an adventurer from the main party to reserves.
-     * The main party must always have at least one adventurer.
-     * Not allowed if party is locked.
-     * @param adventurer The adventurer to move
-     * @return True if moved successfully, false if locked, would empty party, or reserves full
-     */
     public boolean moveToReserves(Adventurer adventurer) {
-        if (partyLocked) return false;
-        if (mainParty.contains(adventurer) && mainParty.size() > 1
-                && reserves.size() < MAX_RESERVE_SIZE) {
+        if (partyLocked || adventurer == null || isMainCharacter(adventurer)) return false;
+        if (mainParty.contains(adventurer) && mainParty.size() > 2 && reserves.size() < MAX_RESERVE_SIZE) {
             mainParty.remove(adventurer);
             reserves.add(adventurer);
             return true;
@@ -328,39 +271,29 @@ public class Guild {
         return false;
     }
 
-    /**
-     * Recruits an adventurer from the recruit pool into the main party or reserves.
-     * Deducts the adventurer's pay as a hiring fee.
-     * Not allowed if party is locked.
-     * @param adventurer The adventurer to recruit
-     * @return True if recruited successfully, false if locked, not enough gold, or no space
-     */
     public boolean recruit(Adventurer adventurer) {
-        if (partyLocked) return false;
+        if (partyLocked || adventurer == null || isPermanentlyUnavailable(adventurer)) return false;
         if (!recruitPool.contains(adventurer)) return false;
         if (!spendGold(adventurer.getPay())) return false;
+
         recruitPool.remove(adventurer);
+        adventurer.resetHealth();
+
         if (mainParty.size() < MAX_PARTY_SIZE) {
             mainParty.add(adventurer);
         } else if (reserves.size() < MAX_RESERVE_SIZE) {
             reserves.add(adventurer);
         } else {
+            addToRecruitPoolIfMissing(adventurer);
             return false;
         }
         return true;
     }
 
-    /**
-     * Retires an adventurer, removing them from the guild permanently.
-     * Cannot retire if it would leave the main party empty.
-     * Not allowed if party is locked.
-     * @param adventurer The adventurer to retire
-     * @return True if retired successfully, false otherwise
-     */
     public boolean retire(Adventurer adventurer) {
-        if (partyLocked) return false;
+        if (partyLocked || adventurer == null || isMainCharacter(adventurer)) return false;
         if (mainParty.contains(adventurer)) {
-            if (mainParty.size() <= 1) return false;
+            if (mainParty.size() <= 2) return false;
             mainParty.remove(adventurer);
             return true;
         }
@@ -371,53 +304,34 @@ public class Guild {
         return false;
     }
 
-    /**
-     * Calculates the gold required to confirm a new main-party selection.
-     * Adventurers already in the current main party are free to keep; newly selected
-     * adventurers cost their pay value. This keeps spending logic in the model.
-     * @param selectedParty The proposed main party
-     * @return Total recruitment cost for newly added adventurers
-     */
     public int calculatePartySelectionCost(List<Adventurer> selectedParty) {
         int totalCost = 0;
-
         for (Adventurer adventurer : selectedParty) {
-            if (!isMainCharacter(adventurer) && !isInCurrentMainParty(adventurer)) {
+            if (!isMainCharacter(adventurer) && !isInCurrentMainParty(adventurer) && !isPermanentlyUnavailable(adventurer)) {
                 totalCost += adventurer.getPay();
             }
         }
-
         return totalCost;
     }
 
-    /**
-     * @param selectedParty Proposed party selection
-     * @return The gold remaining if this selection is confirmed
-     */
     public int previewGoldAfterPartySelection(List<Adventurer> selectedParty) {
         return gold - calculatePartySelectionCost(selectedParty);
     }
 
-    /**
-     * Replaces the current main party and spends gold only for newly hired members.
-     * This method is the single source of truth for party confirmation spending.
-     * @param selectedParty The proposed main party
-     * @return True if the party was replaced and payment succeeded
-     */
     public boolean replaceMainPartyWithSelection(List<Adventurer> selectedParty) {
-        if (partyLocked || selectedParty == null || !containsMainCharacter(selectedParty)) {
-            return false;
-        }
+        if (partyLocked || selectedParty == null || !containsMainCharacter(selectedParty)) return false;
 
         int selectedSize = selectedParty.size();
-        if (selectedSize < 2 || selectedSize > MAX_PARTY_SIZE) {
-            return false;
+        if (selectedSize < 2 || selectedSize > MAX_PARTY_SIZE) return false;
+
+        for (Adventurer adventurer : selectedParty) {
+            if (!isMainCharacter(adventurer) && isPermanentlyUnavailable(adventurer)) {
+                return false;
+            }
         }
 
         int cost = calculatePartySelectionCost(selectedParty);
-        if (!spendGold(cost)) {
-            return false;
-        }
+        if (!spendGold(cost)) return false;
 
         mainParty.clear();
         mainParty.add(getMainCharacter());
@@ -425,6 +339,7 @@ public class Guild {
         for (Adventurer adventurer : selectedParty) {
             if (!isMainCharacter(adventurer)) {
                 addToMainParty(adventurer);
+                recruitPool.removeIf(candidate -> candidate.getName().equals(adventurer.getName()));
             }
         }
 
@@ -433,53 +348,87 @@ public class Guild {
 
     private boolean containsMainCharacter(List<Adventurer> selectedParty) {
         for (Adventurer adventurer : selectedParty) {
-            if (isMainCharacter(adventurer)) {
-                return true;
-            }
+            if (isMainCharacter(adventurer)) return true;
         }
         return false;
     }
 
     private boolean isInCurrentMainParty(Adventurer adventurer) {
-        if (adventurer == null) {
-            return false;
-        }
+        if (adventurer == null) return false;
+        return containsByName(mainParty, adventurer.getName());
+    }
 
-        for (Adventurer member : mainParty) {
-            if (member.getName().equals(adventurer.getName())) {
-                return true;
-            }
-        }
+    public boolean hasMemberNamed(String name) {
+        return containsByName(mainParty, name) || containsByName(reserves, name);
+    }
 
+    private boolean containsByName(List<Adventurer> list, String name) {
+        if (name == null) return false;
+        for (Adventurer adventurer : list) {
+            if (name.equals(adventurer.getName())) return true;
+        }
         return false;
     }
 
-    /**
-     * Removes any adventurers who have abandoned the guild (loyalty reached 0).
-     * Called after loyalty updates.
-     */
     public void removeAbandoned() {
-        mainParty.removeIf(Adventurer::getAbandoned);
-        reserves.removeIf(Adventurer::getAbandoned);
+        Iterator<Adventurer> mainIterator = mainParty.iterator();
+        while (mainIterator.hasNext()) {
+            Adventurer adventurer = mainIterator.next();
+            if (!isMainCharacter(adventurer) && adventurer.getAbandoned()) {
+                markPermanentlyUnavailable(adventurer);
+                mainIterator.remove();
+            }
+        }
+
+        Iterator<Adventurer> reserveIterator = reserves.iterator();
+        while (reserveIterator.hasNext()) {
+            Adventurer adventurer = reserveIterator.next();
+            if (adventurer.getAbandoned()) {
+                markPermanentlyUnavailable(adventurer);
+                reserveIterator.remove();
+            }
+        }
+
+        ensureMainCharacterInParty();
     }
 
     /**
-     * Removes all dead adventurers from the guild.
-     * Called in combat loops.
+     * Dead companions are permanently gone. They leave the active party/reserves
+     * and are removed from the recruit pool so they cannot be hired again.
+     * The main character is not removed; the controller stops the quest immediately
+     * when the MC hits 0 HP and lets the player restart the quest.
      */
     public void removeDeadAdventurers() {
-        mainParty.removeIf(Adventurer::isDead);
-        reserves.removeIf(Adventurer::isDead);
+        Iterator<Adventurer> mainIterator = mainParty.iterator();
+        while (mainIterator.hasNext()) {
+            Adventurer adventurer = mainIterator.next();
+            if (adventurer.isDead() && !isMainCharacter(adventurer)) {
+                markPermanentlyUnavailable(adventurer);
+                mainIterator.remove();
+            }
+        }
+
+        Iterator<Adventurer> reserveIterator = reserves.iterator();
+        while (reserveIterator.hasNext()) {
+            Adventurer adventurer = reserveIterator.next();
+            if (adventurer.isDead()) {
+                markPermanentlyUnavailable(adventurer);
+                reserveIterator.remove();
+            }
+        }
     }
 
-    /**
-     * Collapses loyalty of all adventurers belonging to the opposing faction to 0.
-     * Called at the end of Quest 5 (Faction War).
-     * Triggers their abandoned flag and removes them from the guild.
-     */
+    private void addToRecruitPoolIfMissing(Adventurer adventurer) {
+        if (adventurer == null || isMainCharacter(adventurer) || isPermanentlyUnavailable(adventurer)) return;
+        if (!containsByName(recruitPool, adventurer.getName()) && !hasMemberNamed(adventurer.getName())) {
+            recruitPool.add(adventurer);
+        }
+    }
+
     public void collapseOpposingFaction() {
         for (Adventurer adventurer : mainParty) {
-            if (adventurer.getFaction() != playerFaction
+            if (!isMainCharacter(adventurer)
+                    && adventurer.getFaction() != playerFaction
                     && adventurer.getFaction() != Faction.NEUTRAL) {
                 adventurer.adjustLoyalty(-100);
             }
@@ -493,36 +442,27 @@ public class Guild {
         removeAbandoned();
     }
 
-    /**
-     * Sets the recruit pool for this guild.
-     * Called by ShopService to refresh available recruits after each expedition.
-     * @param pool The new list of recruitable adventurers
-     */
     public void setRecruitPool(List<Adventurer> pool) {
-        this.recruitPool = pool;
+        this.recruitPool = new ArrayList<>();
+        if (pool == null) {
+            return;
+        }
+        for (Adventurer adventurer : pool) {
+            addToRecruitPoolIfMissing(adventurer);
+        }
     }
 
-    /**
-     * Checks whether all adventurers in the main party have loyalty above the given threshold.
-     * Used to determine whether the player faces Zoe or gets the true ending.
-     * @param threshold The minimum loyalty required
-     * @return True if all main party members meet the threshold
-     */
     public boolean checkLoyaltyThreshold(int threshold) {
-        return mainParty.stream().allMatch(a -> a.isLoyal(threshold));
+        return mainParty.stream().filter(a -> !a.isDead()).allMatch(a -> a.isLoyal(threshold));
     }
 
-    /**
-     * @return True if the main party is empty
-     */
     public boolean isWiped() {
-        return mainParty.isEmpty();
+        for (Adventurer member : mainParty) {
+            if (!member.isDead()) return false;
+        }
+        return true;
     }
 
-    /**
-     * Pays all adventurers in the main party their expedition fee.
-     * @return True if the guild had enough gold to pay everyone, false otherwise
-     */
     public boolean payParty() {
         int totalPay = mainParty.stream().mapToInt(Adventurer::getPay).sum();
         return spendGold(totalPay);

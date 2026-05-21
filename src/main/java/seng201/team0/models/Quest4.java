@@ -41,6 +41,13 @@ public class Quest4 extends Quest implements StoryDrivenQuest {
     public List<QuestStoryEvent> getStoryEvents() {
         return Arrays.asList(
                 new QuestStoryEvent(
+                        "The Crimson Offer",
+                        "Vladimir",
+                        "{quest4Offer} {quest4BattleReason}",
+                        "/images/Quest4/quest4_blood_magic_offer.png",
+                        java.util.Collections.emptyList()
+                ),
+                new QuestStoryEvent(
                         "The Blood Gate",
                         "Narrator",
                         "The mansion gate opens without a hand touching it. Blood-red lanterns ignite one by one along the path.",
@@ -125,9 +132,13 @@ public class Quest4 extends Quest implements StoryDrivenQuest {
 
     @Override
     public String applyStoryChoice(Guild guild, int eventIndex, int choiceIndex) {
+        if (eventIndex == 0) {
+            return "Vladimir's offer hangs in the air like a fresh wound.";
+        }
+
         boolean optionA = choiceIndex == 0;
 
-        switch (eventIndex) {
+        switch (eventIndex - 1) {
             case 0:
                 if (optionA) {
                     guild.addGold(25);
@@ -216,6 +227,12 @@ public class Quest4 extends Quest implements StoryDrivenQuest {
     }
 
     @Override
+    public void updateCharacters(Guild guild) {
+        super.updateCharacters(guild);
+        guild.lockParty();
+    }
+
+    @Override
     public void runEvents(Guild guild) {
         if (storyCompleted) {
             return;
@@ -223,7 +240,9 @@ public class Quest4 extends Quest implements StoryDrivenQuest {
 
         // Fallback for direct testing without the story controller.
         for (int i = 0; i < getStoryEvents().size(); i++) {
-            applyStoryChoice(guild, i, 0);
+            if (getStoryEvents().get(i).getChoices() != null && !getStoryEvents().get(i).getChoices().isEmpty()) {
+                applyStoryChoice(guild, i, 0);
+            }
         }
         markStoryCompleted();
     }

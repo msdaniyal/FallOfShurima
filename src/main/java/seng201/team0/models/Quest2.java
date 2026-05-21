@@ -8,7 +8,7 @@ import java.util.List;
  * The guild descends into the tunnels beneath Icathia.
  * Paranoia and distrust spread through the party as void corruption takes hold.
  * Every event tests whether the guild holds together or fractures under pressure.
- * Boss: Voidlings (three creatures, AOE attack every 3 rounds).
+ * Boss: Three separate Voidling phases. No special moves.
  * Events (5 total, each with 2 meaningful choices):
  *   1. The Sealed Tunnel      — safety vs speed
  *   2. A Lost Companion       — rescue vs survival
@@ -48,23 +48,44 @@ public class Quest2 extends Quest implements StoryDrivenQuest {
     // ------------------------------------- BOSS FIGHTS -------------------------------------
 
     /**
-     * Initialises boss fight for Quest 2.
-     * Three Voidlings acting as one unit — AOE damage every 3 rounds.
+     * Initialises the three Voidling phases.
+     * Each Voidling is weaker than the original combined boss and has no special ability.
      * @return Ordered list of boss fights
      */
     @Override
     protected List<BossFight> initialiseBossFights() {
-        Boss voidlings = new Boss(
-                "Voidlings",
-                120, 14, 5,
-                150, 8, -8,
-                "Three hungry voidlings pour from the cracks in the stone, " +
-                        "clawing at everything that breathes.",
-                BossAbility.AOE,
-                3
+        Boss voidlingOne = new Boss(
+                "Voidling I",
+                45, 11, 3,
+                45, 3, -3,
+                "The first voidling tears out of the rift, hungry and fragile.",
+                BossAbility.NONE,
+                0
         );
 
-        return Arrays.asList(new BossFight(voidlings, 1, getDifficulty()));
+        Boss voidlingTwo = new Boss(
+                "Voidling II",
+                55, 12, 4,
+                50, 3, -3,
+                "A second voidling crawls over the body of the first.",
+                BossAbility.NONE,
+                0
+        );
+
+        Boss voidlingThree = new Boss(
+                "Voidling III",
+                65, 13, 4,
+                55, 4, -4,
+                "The final voidling is larger, but still only a creature of instinct.",
+                BossAbility.NONE,
+                0
+        );
+
+        return Arrays.asList(
+                new BossFight(voidlingOne, 1, getDifficulty()),
+                new BossFight(voidlingTwo, 2, getDifficulty()),
+                new BossFight(voidlingThree, 3, getDifficulty())
+        );
     }
 
     // ------------------------------------- EVENTS -------------------------------------
@@ -300,6 +321,13 @@ public class Quest2 extends Quest implements StoryDrivenQuest {
     public List<QuestStoryEvent> getStoryEvents() {
         return Arrays.asList(
                 new QuestStoryEvent(
+                        "Azir's Command",
+                        "Azir",
+                        "A purple rift tears open beyond Icathia's broken roads. {mc} sends word to Azir. The emperor's command returns at once: investigate the rift in the empire's name and let no panic reach Shurima.",
+                        "/images/Quest2/quest2_azir_command.png",
+                        java.util.Collections.emptyList()
+                ),
+                new QuestStoryEvent(
                         "The Sealed Tunnel",
                         "Scout",
                         "A sealed tunnel offers a faster route deeper into the void, but the runes around it pulse with unstable energy.",
@@ -384,9 +412,13 @@ public class Quest2 extends Quest implements StoryDrivenQuest {
 
     @Override
     public String applyStoryChoice(Guild guild, int eventIndex, int choiceIndex) {
+        if (eventIndex == 0) {
+            return "Azir's order is received. The investigation begins.";
+        }
+
         boolean optionA = choiceIndex == 0;
 
-        switch (eventIndex) {
+        switch (eventIndex - 1) {
             case 0:
                 event1SealedTunnel(guild, optionA);
                 break;
@@ -456,6 +488,7 @@ public class Quest2 extends Quest implements StoryDrivenQuest {
         event3CorruptedMember(guild, true);
         event4SupplyCache(guild,     true);
         event5ScoutsWarning(guild,   true);
+        markStoryCompleted();
     }
 
     // ------------------------------------- PRIVATE HELPERS -------------------------------------

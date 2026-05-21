@@ -1,5 +1,6 @@
 package seng201.team0.models;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import java.util.List;
 public class Quest5 extends Quest implements StoryDrivenQuest {
 
     private boolean storyCompleted;
+    private Guild preparedGuild;
 
     public Quest5(Difficulty difficulty) {
         super(
@@ -37,9 +39,117 @@ public class Quest5 extends Quest implements StoryDrivenQuest {
         return Arrays.asList(new BossFight(enemyCaptain, 1, getDifficulty()));
     }
 
+    /**
+     * Quest 5 is built from the player's actual roster. The captain is the
+     * main character not chosen at setup. Up to three unrecruited guild members
+     * join that rival side as extra boss fights.
+     */
+    public void prepareEnemyGuild(Guild guild) {
+        if (guild == null) {
+            return;
+        }
+
+        this.preparedGuild = guild;
+
+        List<BossFight> fights = new ArrayList<>();
+        int sequence = 1;
+
+        for (Adventurer rivalMember : getUnrecruitedRivals(guild)) {
+            fights.add(new BossFight(createBossFromAdventurer(rivalMember, 120, 4, 4), sequence++, getDifficulty()));
+        }
+
+        Boss rivalCaptain = createOpposingMainCharacterBoss(guild);
+        fights.add(new BossFight(rivalCaptain, sequence, getDifficulty()));
+
+        setBossFights(fights);
+    }
+
+    @Override
+    public void resetBossFights() {
+        if (preparedGuild != null) {
+            prepareEnemyGuild(preparedGuild);
+        } else {
+            super.resetBossFights();
+        }
+    }
+
+    private Boss createOpposingMainCharacterBoss(Guild guild) {
+        if (guild.getPlayerFaction() == Faction.AATROX) {
+            return new Boss(
+                    "Xolaani",
+                    185, 26, 6,
+                    420, 12, -15,
+                    "Xolaani leads the rival faction, relying on blood magic and speed rather than armour.",
+                    BossAbility.HEAL_ON_HIT,
+                    0
+            );
+        }
+
+        return new Boss(
+                "Aatrox",
+                270, 25, 11,
+                420, 12, -15,
+                "Aatrox leads the rival faction, rejecting Xolaani's blood magic as another prison of flesh.",
+                BossAbility.NONE,
+                0
+        );
+    }
+
+    private List<Adventurer> getUnrecruitedRivals(Guild guild) {
+        List<Adventurer> roster = createFullCompanionRoster(guild.getPlayerFaction());
+        List<Adventurer> rivals = new ArrayList<>();
+
+        for (Adventurer candidate : roster) {
+            if (!guild.hasMemberNamed(candidate.getName())
+                    && !guild.isPermanentlyUnavailable(candidate)) {
+                rivals.add(candidate);
+            }
+
+            if (rivals.size() >= 3) {
+                break;
+            }
+        }
+
+        return rivals;
+    }
+
+    private List<Adventurer> createFullCompanionRoster(Faction playerFaction) {
+        return Arrays.asList(
+                new Adventurer("Baalkux", 110, 18, 8, 20, Faction.AATROX, playerFaction, "A brutal Darkin warrior with strong attack power."),
+                new Adventurer("Horazi", 90, 20, 5, 25, Faction.XOLAANI, playerFaction, "A celestial marksman with high damage but lower defence."),
+                new Adventurer("Ibaaros", 130, 14, 12, 20, Faction.AATROX, playerFaction, "A tough frontline fighter with high health and defence."),
+                new Adventurer("Joraal", 120, 15, 11, 20, Faction.AATROX, playerFaction, "A loyal shield-bearer who protects the party."),
+                new Adventurer("Naafiri", 85, 22, 4, 25, Faction.XOLAANI, playerFaction, "A fast assassin with very high attack but low defence."),
+                new Adventurer("Rhaast", 115, 19, 7, 25, Faction.AATROX, playerFaction, "An aggressive fighter who thrives in dangerous battles."),
+                new Adventurer("Taarosh", 150, 12, 14, 20, Faction.AATROX, playerFaction, "A heavy tank with high health and strong defence."),
+                new Adventurer("Varus", 95, 21, 6, 25, Faction.XOLAANI, playerFaction, "A ranged attacker with strong burst damage."),
+                new Adventurer("Zaahen", 105, 17, 9, 20, Faction.NEUTRAL, playerFaction, "A balanced warrior who is not tied strongly to either side.")
+        );
+    }
+
+    private Boss createBossFromAdventurer(Adventurer adventurer, int goldDrop, int loyaltyWin, int loyaltyLoss) {
+        return new Boss(
+                adventurer.getName(),
+                adventurer.getMaxHealth() + 35,
+                adventurer.getAttack() + 3,
+                adventurer.getDefense() + 2,
+                goldDrop, loyaltyWin, -Math.abs(loyaltyLoss),
+                adventurer.getDescription(),
+                BossAbility.NONE,
+                0
+        );
+    }
+
     @Override
     public List<QuestStoryEvent> getStoryEvents() {
         return Arrays.asList(
+                new QuestStoryEvent(
+                        "The Darkin Rift",
+                        "{enemyMc}",
+                        "{bloodMagicConflict} The argument becomes a faction fracture, and the warriors who never joined your guild gather behind {enemyMc}.",
+                        "/images/Quest5/quest5_darkin_rift.png",
+                        java.util.Collections.emptyList()
+                ),
                 new QuestStoryEvent(
                         "The War Council",
                         "Commander",
@@ -125,10 +235,14 @@ public class Quest5 extends Quest implements StoryDrivenQuest {
 
     @Override
     public String applyStoryChoice(Guild guild, int eventIndex, int choiceIndex) {
+        if (eventIndex == 0) {
+            return "The rival banner rises. The faction war can no longer be delayed.";
+        }
+
         boolean optionA = choiceIndex == 0;
         Adventurer main = guild.getMainCharacter();
 
-        switch (eventIndex) {
+        switch (eventIndex - 1) {
             case 0:
                 if (optionA) {
                     for (Adventurer member : guild.getMainParty()) {
@@ -225,7 +339,9 @@ public class Quest5 extends Quest implements StoryDrivenQuest {
 
         // Fallback for direct testing without the story controller.
         for (int i = 0; i < getStoryEvents().size(); i++) {
-            applyStoryChoice(guild, i, 0);
+            if (getStoryEvents().get(i).getChoices() != null && !getStoryEvents().get(i).getChoices().isEmpty()) {
+                applyStoryChoice(guild, i, 0);
+            }
         }
         markStoryCompleted();
     }
@@ -233,7 +349,6 @@ public class Quest5 extends Quest implements StoryDrivenQuest {
     @Override
     public void updateCharacters(Guild guild) {
         guild.collapseOpposingFaction();
-        guild.lockParty();
         super.updateCharacters(guild);
     }
 }

@@ -177,6 +177,9 @@ public class CharacterSelectController implements GameDataReceiver {
                 Faction.NEUTRAL, playerFaction,
                 "A balanced warrior who is not tied strongly to either side."
         ));
+
+        allCharacters.removeIf(adventurer -> !guild.isMainCharacter(adventurer)
+                && guild.isPermanentlyUnavailable(adventurer));
     }
 
     private void displayCharacters() {
@@ -325,6 +328,12 @@ public class CharacterSelectController implements GameDataReceiver {
             return;
         }
 
+        if (guild.isPermanentlyUnavailable(adventurer)) {
+            warningLabel.setTextFill(Color.RED);
+            warningLabel.setText(adventurer.getName() + " is gone and cannot be recruited again.");
+            return;
+        }
+
         Adventurer selected = findSelectedByName(adventurer.getName());
 
         if (selected != null) {
@@ -364,6 +373,13 @@ public class CharacterSelectController implements GameDataReceiver {
         if (guild != null && guild.isMainCharacter(adventurer)) {
             selectButton.setDisable(true);
             selectButton.setText("Main Character");
+            selectButton.setStyle(getMainCharacterButtonStyle());
+            return;
+        }
+
+        if (guild != null && guild.isPermanentlyUnavailable(adventurer)) {
+            selectButton.setDisable(true);
+            selectButton.setText("Gone");
             selectButton.setStyle(getMainCharacterButtonStyle());
             return;
         }

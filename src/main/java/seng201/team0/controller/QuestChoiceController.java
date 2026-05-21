@@ -16,6 +16,8 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import seng201.team0.models.Game;
 import seng201.team0.models.Quest;
+import seng201.team0.models.Faction;
+import seng201.team0.models.Quest5;
 import seng201.team0.models.QuestStoryChoice;
 import seng201.team0.models.QuestStoryEvent;
 import seng201.team0.models.StoryDrivenQuest;
@@ -85,6 +87,9 @@ public abstract class QuestChoiceController implements GameDataReceiver {
         game.selectQuest(getQuestIndex());
 
         this.quest = game.getQuests().get(getQuestIndex());
+        if (quest instanceof Quest5) {
+            ((Quest5) quest).prepareEnemyGuild(game.getGuild());
+        }
         if (!(quest instanceof StoryDrivenQuest)) {
             throw new IllegalStateException(quest.getName() + " must implement StoryDrivenQuest.");
         }
@@ -110,12 +115,14 @@ public abstract class QuestChoiceController implements GameDataReceiver {
 
         QuestStoryEvent event = storyEvents.get(eventIndex);
 
-        waitingForChoice = true;
+        boolean hasChoices = event.getChoices() != null && !event.getChoices().isEmpty();
+
+        waitingForChoice = hasChoices;
         showingResult = false;
         finalScene = false;
 
-        eventTitleLabel.setText(event.getTitle());
-        speakerLabel.setText(event.getSpeaker());
+        eventTitleLabel.setText(renderText(event.getTitle()));
+        speakerLabel.setText(renderText(event.getSpeaker()));
         setBackground(event.getBackgroundImagePath());
 
         hideChoiceButtons();
@@ -123,7 +130,7 @@ public abstract class QuestChoiceController implements GameDataReceiver {
         nextArrowLabel.setVisible(false);
         choicePreviewLabel.setVisible(false);
 
-        typeText(event.getPrompt());
+        typeText(renderText(event.getPrompt()));
     }
 
     protected void showFinalScene() {
@@ -142,7 +149,7 @@ public abstract class QuestChoiceController implements GameDataReceiver {
         nextArrowLabel.setVisible(false);
 
         storyQuest.markStoryCompleted();
-        typeText(storyQuest.getBattleIntroText());
+        typeText(renderText(storyQuest.getBattleIntroText()));
     }
 
     protected void setBackground(String imagePath) {
@@ -212,7 +219,7 @@ public abstract class QuestChoiceController implements GameDataReceiver {
             return;
         }
 
-        if (showingResult) {
+        if (showingResult || (!waitingForChoice && !finalScene)) {
             eventIndex++;
             showCurrentEvent();
         }
@@ -238,6 +245,11 @@ public abstract class QuestChoiceController implements GameDataReceiver {
             return;
         }
 
+        QuestStoryEvent currentEvent = storyEvents.get(eventIndex);
+        if (currentEvent.getChoices() == null || choiceIndex < 0 || choiceIndex >= currentEvent.getChoices().size()) {
+            return;
+        }
+
         String result = storyQuest.applyStoryChoice(game.getGuild(), eventIndex, choiceIndex);
 
         waitingForChoice = false;
@@ -245,12 +257,17 @@ public abstract class QuestChoiceController implements GameDataReceiver {
         hideChoiceButtons();
         choicePreviewLabel.setVisible(false);
         speakerLabel.setText("Result");
-        typeText(result);
+        typeText(renderText(result));
     }
 
     protected void showChoiceButtons() {
         QuestStoryEvent event = storyEvents.get(eventIndex);
         List<QuestStoryChoice> choices = event.getChoices();
+        if (choices == null || choices.size() < 2) {
+            nextArrowLabel.setVisible(true);
+            continueButton.setVisible(true);
+            return;
+        }
 
         setupChoiceButton(choiceAButton, choices.get(0));
         setupChoiceButton(choiceBButton, choices.get(1));
@@ -265,9 +282,9 @@ public abstract class QuestChoiceController implements GameDataReceiver {
     }
 
     protected void setupChoiceButton(Button button, QuestStoryChoice choice) {
-        button.setText(choice.getShortChoiceText());
+        button.setText(renderText(choice.getShortChoiceText()));
         button.setOnMouseEntered(event -> {
-            choicePreviewLabel.setText(choice.getFullChoiceText());
+            choicePreviewLabel.setText(renderText(choice.getFullChoiceText()));
             choicePreviewLabel.setVisible(true);
         });
         button.setOnMouseExited(event -> {
@@ -287,6 +304,53 @@ public abstract class QuestChoiceController implements GameDataReceiver {
             choiceBButton.setVisible(false);
             choiceBButton.setDisable(true);
         }
+    }
+
+    protected String renderText(String rawText) {
+        if (rawText == null || game == null || game.getGuild() == null) {
+            return rawText == null ? "" : rawText;
+        }
+
+        String mc = game.getGuild().getMainCharacter().getName();
+        String enemyMc = game.getGuild().getPlayerFaction() == Faction.AATROX ? "Xolaani" : "Aatrox";
+        String companions = getLivingCompanionNames();
+
+        String quest4Offer;
+        String quest4BattleReason;
+        String bloodMagicConflict;
+
+        if (game.getGuild().getPlayerFaction() == Faction.XOLAANI) {
+            quest4Offer = "Vladimir offers to teach Xolaani blood magic. Xolaani accepts; she sees a weapon that can bind wounds, loyalty, and enemies alike.";
+            quest4BattleReason = "Xolaani battles Vladimir to claim the lesson by force and prove she will not kneel to him.";
+            bloodMagicConflict = "Aatrox condemns Xolaani's blood magic as another chain. Xolaani argues it is the only way to hold a breaking world together.";
+        } else {
+            quest4Offer = "Vladimir offers to teach Aatrox blood magic. Aatrox refuses; he will not trade one prison of flesh for another.";
+            quest4BattleReason = "Aatrox battles Vladimir because the offer itself is an insult, and because the crimson lord knows too much.";
+            bloodMagicConflict = "Xolaani arrives marked by blood magic and claims she learned what Aatrox was too proud to understand. Aatrox calls it corruption.";
+        }
+
+        return rawText
+                .replace("{mc}", mc)
+                .replace("{enemyMc}", enemyMc)
+                .replace("{companions}", companions)
+                .replace("{quest4Offer}", quest4Offer)
+                .replace("{quest4BattleReason}", quest4BattleReason)
+                .replace("{bloodMagicConflict}", bloodMagicConflict);
+    }
+
+    private String getLivingCompanionNames() {
+        StringBuilder builder = new StringBuilder();
+
+        for (seng201.team0.models.Adventurer member : game.getGuild().getMainParty()) {
+            if (!member.isDead() && !game.getGuild().isMainCharacter(member)) {
+                if (builder.length() > 0) {
+                    builder.append(", ");
+                }
+                builder.append(member.getName());
+            }
+        }
+
+        return builder.length() == 0 ? "the surviving warriors" : builder.toString();
     }
 
     protected void goToBattlefield() {

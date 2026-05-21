@@ -25,9 +25,12 @@ import seng201.team0.models.Guild;
 import seng201.team0.models.ItemType;
 import seng201.team0.models.Quest;
 import seng201.team0.models.Quest1;
+import seng201.team0.models.Quest5;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Generic battlefield controller for all boss fights.
@@ -55,6 +58,7 @@ public class BossFightController implements GameDataReceiver {
 
     @FXML private Label activeMemberLabel;
     @FXML private Label activeMemberStatsLabel;
+    @FXML private ProgressBar activeMemberHpBar;
     @FXML private ImageView activeMemberImage;
 
     @FXML private Label roundLabel;
@@ -64,6 +68,7 @@ public class BossFightController implements GameDataReceiver {
     @FXML private Button healButton;
     @FXML private Button changeMemberButton;
     @FXML private Button specialMoveButton;
+    @FXML private Button restartQuestButton;
 
     @FXML private Pane changeMemberOverlay;
     @FXML private VBox changeMemberPopup;
@@ -87,6 +92,10 @@ public class BossFightController implements GameDataReceiver {
     private int fightIndex = 0;
     private int attackerIndex = 0;
     private boolean battleEnded = false;
+    private boolean questFailedBecauseMainCharacterDied = false;
+
+    private final List<Adventurer> questStartParty = new ArrayList<>();
+    private final Map<String, Integer> questStartHealth = new HashMap<>();
 
     private String pendingAttackMessage = "";
 
@@ -105,6 +114,11 @@ public class BossFightController implements GameDataReceiver {
         if (healPopup != null) {
             healPopup.setVisible(false);
         }
+
+        if (restartQuestButton != null) {
+            restartQuestButton.setVisible(false);
+            restartQuestButton.setDisable(true);
+        }
     }
 
     public void setGameData(Game game) {
@@ -120,8 +134,10 @@ public class BossFightController implements GameDataReceiver {
         this.fightIndex = currentQuest.getFirstUnfinishedFightIndex(guild);
         this.attackerIndex = 0;
         this.battleEnded = false;
+        this.questFailedBecauseMainCharacterDied = false;
 
         this.mainCharacter = findMainCharacter();
+        saveQuestStartState();
 
         startCurrentFight();
     }
@@ -130,7 +146,56 @@ public class BossFightController implements GameDataReceiver {
         return guild == null ? null : guild.getMainCharacter();
     }
 
+    private void saveQuestStartState() {
+        questStartParty.clear();
+        questStartHealth.clear();
+
+        if (guild == null) {
+            return;
+        }
+
+        for (Adventurer member : guild.getMainParty()) {
+            questStartParty.add(member);
+            questStartHealth.put(member.getName(), member.getCurrentHealth());
+        }
+    }
+
+    private void restoreQuestStartState() {
+        if (guild == null) {
+            return;
+        }
+
+        guild.getMainParty().clear();
+
+        for (Adventurer member : questStartParty) {
+            Integer savedHealth = questStartHealth.get(member.getName());
+            if (savedHealth == null || savedHealth <= 0) {
+                member.resetHealth();
+            } else {
+                member.setCurrentHealth(savedHealth);
+            }
+            guild.getMainParty().add(member);
+        }
+
+        guild.ensureMainCharacterInParty();
+        guild.getRecruitPool().removeIf(candidate -> containsQuestStartMember(candidate.getName()));
+    }
+
+    private boolean containsQuestStartMember(String name) {
+        for (Adventurer member : questStartParty) {
+            if (member.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void startCurrentFight() {
+        if (restartQuestButton != null) {
+            restartQuestButton.setVisible(false);
+            restartQuestButton.setDisable(true);
+        }
+
         if (fightIndex >= bossFights.size()) {
             finishQuest();
             return;
@@ -144,7 +209,11 @@ public class BossFightController implements GameDataReceiver {
         updateAllDisplays();
 
         dialogueLabel.getStyleClass().remove("special-effect-text");
-        dialogueLabel.setText(currentFight.getBoss().getName() + " stands before you.");
+        if (fightIndex > 0) {
+            dialogueLabel.setText("Next phase: " + currentFight.getBoss().getName() + " enters the fight.");
+        } else {
+            dialogueLabel.setText(currentFight.getBoss().getName() + " stands before you.");
+        }
         checkAndShowBossAbility();
     }
 
@@ -296,8 +365,7 @@ public class BossFightController implements GameDataReceiver {
         hp.setPrefWidth(145);
         hp.setStyle("-fx-accent: #39d353;");
 
-        Label hpText = new Label("HP " + member.getCurrentHealth() + "/" + member.getMaxHealth()
-                + "   ATK " + member.getAttack());
+        Label hpText = new Label("HP " + member.getCurrentHealth() + "/" + member.getMaxHealth());
         hpText.setStyle("-fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: bold;");
 
         card.getChildren().addAll(name, hp, hpText);
@@ -308,6 +376,9 @@ public class BossFightController implements GameDataReceiver {
         if (currentAttacker == null) {
             activeMemberLabel.setText("Active: None");
             activeMemberStatsLabel.setText("");
+            if (activeMemberHpBar != null) {
+                activeMemberHpBar.setProgress(0);
+            }
             activeMemberImage.setImage(null);
             return;
         }
@@ -315,8 +386,14 @@ public class BossFightController implements GameDataReceiver {
         activeMemberLabel.setText("Active: " + currentAttacker.getName());
         activeMemberStatsLabel.setText(
                 "HP " + currentAttacker.getCurrentHealth() + "/" + currentAttacker.getMaxHealth()
-                        + "   ATK " + currentAttacker.getAttack()
         );
+
+        if (activeMemberHpBar != null) {
+            double hpPercent = currentAttacker.getMaxHealth() <= 0
+                    ? 0
+                    : (double) currentAttacker.getCurrentHealth() / currentAttacker.getMaxHealth();
+            activeMemberHpBar.setProgress(Math.max(0, hpPercent));
+        }
 
         String name = safeName(currentAttacker.getName());
 
@@ -329,18 +406,22 @@ public class BossFightController implements GameDataReceiver {
                 "/images/aatrox.png");
 
         activeMemberImage.setFitWidth(245);
-        activeMemberImage.setFitHeight(245);
+        activeMemberImage.setFitHeight(225);
         activeMemberImage.setPreserveRatio(true);
         activeMemberImage.setSmooth(true);
         activeMemberImage.setTranslateY(0);
     }
 
     private void updateCommandButtons() {
-        boolean canAct = !battleEnded && currentAttacker != null && !guild.isWiped()
-                && !currentFight.getBoss().isDead();
+        boolean canAct = !battleEnded
+                && currentAttacker != null
+                && !guild.isWiped()
+                && !currentFight.getBoss().isDead()
+                && currentFight.canAdventurerAct(currentAttacker);
 
         attackButton.setDisable(!canAct);
-        changeMemberButton.setDisable(!canAct);
+        boolean canChangeMember = canAct && currentFight.canChangeMember();
+        changeMemberButton.setDisable(!canChangeMember);
 
         if (healButton != null) {
             healButton.setDisable(!canAct);
@@ -367,7 +448,17 @@ public class BossFightController implements GameDataReceiver {
             dialogueLabel.setText(abilityMessage);
             dialogueLabel.getStyleClass().remove("special-effect-text");
             dialogueLabel.getStyleClass().add("special-effect-text");
+
+            if (currentFight.isIsolationActive()) {
+                currentAttacker = currentFight.getIsolatedTarget();
+                attackerIndex = Math.max(0, guild.getMainParty().indexOf(currentAttacker));
+            }
+
             updateAllDisplays();
+        }
+
+        if (handleMainCharacterDeathIfNeeded()) {
+            return;
         }
 
         if (currentFight.isFightOver(guild)) {
@@ -428,6 +519,10 @@ public class BossFightController implements GameDataReceiver {
         dialogueLabel.setText(pendingAttackMessage);
         updateAllDisplays();
 
+        if (handleMainCharacterDeathIfNeeded()) {
+            return;
+        }
+
         if (finishCurrentFightIfNeeded()) {
             return;
         }
@@ -437,7 +532,9 @@ public class BossFightController implements GameDataReceiver {
 
     private void openBossDiceRoll() {
         if (currentAttacker == null || currentAttacker.isDead()) {
-            endTurnAfterBossAttack("No active fighter remains.");
+            if (!handleMainCharacterDeathIfNeeded()) {
+                endTurnAfterBossAttack("No active fighter remains.");
+            }
             return;
         }
 
@@ -593,6 +690,15 @@ public class BossFightController implements GameDataReceiver {
 
     @FXML
     public void onChangeMember() {
+        if (currentFight != null && !currentFight.canChangeMember()) {
+            Adventurer isolated = currentFight.getIsolatedTarget();
+            dialogueLabel.setText("Kha'Zix has isolated "
+                    + (isolated == null ? "a fighter" : isolated.getName())
+                    + ". This is a 1v1 until one of them falls.");
+            updateCommandButtons();
+            return;
+        }
+
         if (changeMemberOverlay != null) {
             changeMemberOverlay.setVisible(true);
         }
@@ -664,8 +770,16 @@ public class BossFightController implements GameDataReceiver {
     }
 
     private void endTurn() {
+        if (handleMainCharacterDeathIfNeeded()) {
+            return;
+        }
+
         guild.removeDeadAdventurers();
         updateAllDisplays();
+
+        if (handleMainCharacterDeathIfNeeded()) {
+            return;
+        }
 
         if (finishCurrentFightIfNeeded()) {
             return;
@@ -689,7 +803,73 @@ public class BossFightController implements GameDataReceiver {
         checkAndShowBossAbility();
     }
 
+    private boolean handleMainCharacterDeathIfNeeded() {
+        if (guild == null || mainCharacter == null) {
+            return false;
+        }
+
+        if (!mainCharacter.isDead()) {
+            return false;
+        }
+
+        questFailedBecauseMainCharacterDied = true;
+        showQuestRestartOption(mainCharacter.getName() + " has fallen. The quest ends here. Restart the quest or return to the map to rebuild the guild.");
+        return true;
+    }
+
+    private void showQuestRestartOption(String message) {
+        battleEnded = true;
+        dialogueLabel.getStyleClass().remove("special-effect-text");
+        dialogueLabel.setText(message);
+
+        attackButton.setDisable(true);
+        if (healButton != null) {
+            healButton.setDisable(true);
+        }
+        changeMemberButton.setDisable(true);
+        specialMoveButton.setDisable(true);
+
+        if (restartQuestButton != null) {
+            restartQuestButton.setVisible(true);
+            restartQuestButton.setDisable(false);
+        }
+    }
+
+    @FXML
+    public void onRestartQuest() {
+        if (currentQuest == null) {
+            return;
+        }
+
+        restoreQuestStartState();
+        currentQuest.resetBossFights();
+        if (currentQuest instanceof Quest5) {
+            ((Quest5) currentQuest).prepareEnemyGuild(guild);
+        }
+
+        this.bossFights = currentQuest.getBossFights();
+        this.fightIndex = 0;
+        this.attackerIndex = 0;
+        this.battleEnded = false;
+        this.questFailedBecauseMainCharacterDied = false;
+        this.pendingAttackMessage = "";
+        this.mainCharacter = guild.getMainCharacter();
+
+        if (restartQuestButton != null) {
+            restartQuestButton.setVisible(false);
+            restartQuestButton.setDisable(true);
+        }
+
+        closeHealPopup();
+        closeChangeMemberPopup();
+        startCurrentFight();
+    }
+
     private boolean finishCurrentFightIfNeeded() {
+        if (handleMainCharacterDeathIfNeeded()) {
+            return true;
+        }
+
         if (!currentFight.isFightOver(guild)) {
             return false;
         }
@@ -708,7 +888,6 @@ public class BossFightController implements GameDataReceiver {
             return true;
         }
 
-        dialogueLabel.setText(currentFight.getBoss().getName() + " falls. Another enemy approaches.");
         startCurrentFight();
         return true;
     }
@@ -762,10 +941,23 @@ public class BossFightController implements GameDataReceiver {
         }
         changeMemberButton.setDisable(true);
         specialMoveButton.setDisable(true);
+
+        if (restartQuestButton != null && !questFailedBecauseMainCharacterDied) {
+            restartQuestButton.setVisible(false);
+            restartQuestButton.setDisable(true);
+        }
     }
 
     @FXML
     public void onReturnToMap() {
+        if (questFailedBecauseMainCharacterDied) {
+            guild.reviveMainCharacterForMenu();
+            currentQuest.resetBossFights();
+            if (currentQuest instanceof Quest5) {
+                ((Quest5) currentQuest).prepareEnemyGuild(guild);
+            }
+        }
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/mainmenu.fxml"));
             Parent root = loader.load();

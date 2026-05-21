@@ -343,8 +343,12 @@ public class BossFight {
         }
         nextRound();
 
-        return new DefenseResult(playerRoll, bossRoll, damage, defender, false, false,
-                boss.getName() + " breaks through and deals " + damage + " damage to " + defender.getName() + ".");
+        String hitMessage = boss.getName() + " breaks through and deals " + damage + " damage to " + defender.getName() + ".";
+        if (isKhazixBoss() && defender.equals(isolatedTarget)) {
+            hitMessage += " Isolation makes the strike hit harder.";
+        }
+
+        return new DefenseResult(playerRoll, bossRoll, damage, defender, false, false, hitMessage);
     }
 
     /**
@@ -357,7 +361,7 @@ public class BossFight {
         int playerRoll = random.nextInt(6) + 1;
         int bossRoll = random.nextInt(6) + 1;
 
-        Adventurer target = findWeakestTarget(guild.getMainParty());
+        Adventurer target = getBossAttackTarget(guild.getMainParty());
 
         if (target == null) {
             return new DefenseResult(playerRoll, bossRoll, 0, null, true, false,
@@ -377,13 +381,17 @@ public class BossFight {
     private int calculateBossDamageFromDifference(Adventurer target, int difference) {
         int damage;
 
-        if (boss.getAbility() == BossAbility.TRUE_DAMAGE) {
+        if (boss.getAbility() == BossAbility.TRUE_DAMAGE || isBelvethBoss()) {
             damage = boss.getAttack() * difference;
         } else {
             damage = (boss.getAttack() * difference) - target.getDefense();
         }
 
         damage = Math.max(1, damage);
+
+        if (isKhazixBoss() && isIsolationActive() && target.equals(isolatedTarget)) {
+            damage = Math.max(damage + 5, (int) Math.ceil(damage * 1.5));
+        }
 
         if (target.equals(sleepingTarget)) {
             damage *= 10;
@@ -430,12 +438,83 @@ public class BossFight {
         return boss.shouldTriggerAbility(roundNumber);
     }
 
+    private boolean isKhazixBoss() {
+        return boss != null && boss.getName() != null && boss.getName().equalsIgnoreCase("Kha'Zix");
+    }
+
+    private boolean isBelvethBoss() {
+        if (boss == null || boss.getName() == null) {
+            return false;
+        }
+        String cleanName = boss.getName().toLowerCase().replaceAll("[^a-z]", "");
+        return cleanName.equals("belveth");
+    }
+
+    public boolean isIsolationActive() {
+        return isolatedTarget != null && !isolatedTarget.isDead() && !boss.isDead();
+    }
+
+    public boolean canChangeMember() {
+        return !isIsolationActive();
+    }
+
+    private Adventurer getBossAttackTarget(List<Adventurer> party) {
+        if (isIsolationActive()) {
+            return isolatedTarget;
+        }
+        return findWeakestTarget(party);
+    }
+
+    private double getDevourThreshold() {
+        switch (difficulty) {
+            case EASY:
+                return 0.30;
+            case NORMAL:
+                return 0.50;
+            case HARD:
+                return 0.60;
+            default:
+                return 0.50;
+        }
+    }
+
+    private Adventurer findDevourableTarget(List<Adventurer> party) {
+        Adventurer lowest = null;
+        double threshold = getDevourThreshold();
+
+        for (Adventurer member : party) {
+            if (member == null || member.isDead() || member.getMaxHealth() <= 0) {
+                continue;
+            }
+
+            double hpPercent = (double) member.getCurrentHealth() / member.getMaxHealth();
+            if (hpPercent <= threshold) {
+                if (lowest == null || member.getCurrentHealth() < lowest.getCurrentHealth()) {
+                    lowest = member;
+                }
+            }
+        }
+
+        return lowest;
+    }
+
     public String triggerBossAbilityIfNeeded(Guild guild) {
         if (abilityTriggeredThisRound || !shouldTriggerAbilityThisRound() || guild == null) {
             return null;
         }
 
         abilityTriggeredThisRound = true;
+
+        if (boss.getAbility() == BossAbility.ISOLATE && isIsolationActive()) {
+            return null;
+        }
+
+        if (boss.getAbility() == BossAbility.DEVOUR) {
+            Adventurer target = findDevourableTarget(guild.getMainParty());
+            if (target == null) {
+                return boss.getName() + " searches for a weakened target, but no one is weak enough to devour.";
+            }
+        }
 
         if (boss.getAbility() == BossAbility.NONE || boss.getAbility() == BossAbility.TRUE_DAMAGE
                 || boss.getAbility() == BossAbility.HEAL_ON_HIT) {
@@ -454,7 +533,7 @@ public class BossFight {
                 return boss.getName() + " isolates " +
                         (isolatedTarget == null ? "a target" : isolatedTarget.getName()) + ".";
             case DEVOUR:
-                return boss.getName() + " devours the weakest fighter.";
+                return boss.getName() + " devours a weakened fighter.";
             case AOE:
                 return boss.getName() + " unleashes an attack across the whole party.";
             case SLEEP:
@@ -470,12 +549,14 @@ public class BossFight {
 
         switch (boss.getAbility()) {
             case ISOLATE:
-                isolatedTarget = findLowestHP(party);
-                isolationRoundsRemaining = 2;
+                if (!isIsolationActive()) {
+                    isolatedTarget = findLowestHP(party);
+                    isolationRoundsRemaining = isKhazixBoss() ? Integer.MAX_VALUE : 2;
+                }
                 break;
 
             case DEVOUR:
-                Adventurer devourTarget = findLowestHP(party);
+                Adventurer devourTarget = findDevourableTarget(party);
                 if (devourTarget != null) {
                     devourTarget.setCurrentHealth(0);
                 }
@@ -702,7 +783,7 @@ public class BossFight {
             return false;
         }
 
-        if (isolatedTarget != null && !adventurer.equals(isolatedTarget)) {
+        if (isIsolationActive() && !adventurer.equals(isolatedTarget)) {
             return false;
         }
 
@@ -712,7 +793,10 @@ public class BossFight {
     public void nextRound() {
         roundNumber++;
 
-        if (isolationRoundsRemaining > 0) {
+        if (isolatedTarget != null && (isolatedTarget.isDead() || boss.isDead())) {
+            isolatedTarget = null;
+            isolationRoundsRemaining = 0;
+        } else if (isolationRoundsRemaining > 0 && !isKhazixBoss()) {
             isolationRoundsRemaining--;
 
             if (isolationRoundsRemaining == 0) {

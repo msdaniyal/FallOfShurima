@@ -125,9 +125,13 @@ public class Quest3 extends Quest implements StoryDrivenQuest {
 
     @Override
     public String applyStoryChoice(Guild guild, int eventIndex, int choiceIndex) {
+        if (eventIndex == 0) {
+            return "The party has spoken. The descent continues.";
+        }
+
         boolean optionA = choiceIndex == 0;
 
-        switch (eventIndex) {
+        switch (eventIndex - 1) {
             case 0:
                 if (optionA) {
                     for (Adventurer member : guild.getMainParty()) {
@@ -198,7 +202,9 @@ public class Quest3 extends Quest implements StoryDrivenQuest {
 
         // Fallback for direct testing without the story controller.
         for (int i = 0; i < getStoryEvents().size(); i++) {
-            applyStoryChoice(guild, i, 0);
+            if (getStoryEvents().get(i).getChoices() != null && !getStoryEvents().get(i).getChoices().isEmpty()) {
+                applyStoryChoice(guild, i, 0);
+            }
         }
         markStoryCompleted();
     }

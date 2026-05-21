@@ -277,6 +277,12 @@ public class MainMenuController implements GameDataReceiver {
 
     @FXML
     public void onMyParty() {
+        if (game != null && game.getGuild() != null && game.getGuild().isPartyLocked()) {
+            messageLabel.setText("Recruiting is closed after Quest 4. Your warband is locked for the final conflict.");
+            hideInstitutePopup();
+            return;
+        }
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/characterselect.fxml"));
             Parent root = loader.load();

@@ -92,6 +92,6 @@ public class Quest6 extends Quest {
     }
 
     public String getFinalIntroText() {
-        return "Zoe appears only when the party is too fractured for the true ending. Win here, or lose everything.";
+        return "The Aspect of Twilight descends from a sky that folds like a dream. Zoe has come to seal every god warrior before the Darkin fracture the world beyond repair. This is not a quest for gold or glory — it is the final judgement.";
     }
 }
