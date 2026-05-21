@@ -12,7 +12,7 @@ import seng201.team0.models.Difficulty;
 import seng201.team0.models.Faction;
 import seng201.team0.models.Game;
 import seng201.team0.models.Guild;
-
+import seng201.team0.controller.Quest3Controller;
 import java.io.IOException;
 
 /**
@@ -29,13 +29,12 @@ public class MainWindow extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
 
-//        boolean DEBUG_MAIN_MENU = true;
-//
-//        if (DEBUG_MAIN_MENU) {
-//            startDebugMainMenu(primaryStage);
-//            return;
-//        }
+        boolean DEBUG_MAIN_MENU = false;
 
+        if (DEBUG_MAIN_MENU) {
+            startDebugMainMenu(primaryStage);
+            return;
+        }
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/start.fxml"));
         Parent root = loader.load();
 
@@ -114,9 +113,9 @@ public class MainWindow extends Application {
 
         guild.addToMainParty(new Adventurer(
                 "Baalkux",
-                110,
-                18,
-                8,
+                180,
+                35,
+                14,
                 20,
                 Faction.AATROX,
                 guild.getPlayerFaction(),
@@ -125,10 +124,10 @@ public class MainWindow extends Application {
 
         guild.addToMainParty(new Adventurer(
                 "Horazi",
-                90,
+                160,
+                38,
+                10,
                 20,
-                5,
-                25,
                 Faction.XOLAANI,
                 guild.getPlayerFaction(),
                 "A celestial marksman with high damage but lower defense."
@@ -136,9 +135,9 @@ public class MainWindow extends Application {
 
         guild.addToMainParty(new Adventurer(
                 "Zaahen",
-                105,
-                17,
-                9,
+                170,
+                34,
+                13,
                 20,
                 Faction.NEUTRAL,
                 guild.getPlayerFaction(),
@@ -146,6 +145,9 @@ public class MainWindow extends Application {
         ));
 
         Game game = new Game(guild, difficulty);
+
+        game.advanceToNextQuest(0);
+        game.advanceToNextQuest(1);
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/mainmenu.fxml"));
         Parent root = loader.load();
@@ -155,6 +157,92 @@ public class MainWindow extends Application {
 
         primaryStage.setScene(new Scene(root, 900, 600));
         primaryStage.setTitle("The Fall of Shurima — Debug Main Menu");
+        primaryStage.setResizable(true);
+        primaryStage.setFullScreen(false);
+        primaryStage.show();
+    }
+
+    private void startDebugQuest3(Stage primaryStage) throws IOException {
+        Difficulty difficulty = Difficulty.NORMAL;
+
+        Guild guild = new Guild(
+                "Debug Guild",
+                difficulty.getStartingGold(),
+                Faction.AATROX
+        );
+
+        guild.addToMainParty(new Adventurer(
+                "Baalkux",
+                180,
+                35,
+                14,
+                20,
+                Faction.AATROX,
+                guild.getPlayerFaction(),
+                "Debug tank warrior for Quest 3."
+        ));
+
+        guild.addToMainParty(new Adventurer(
+                "Horazi",
+                160,
+                38,
+                10,
+                20,
+                Faction.XOLAANI,
+                guild.getPlayerFaction(),
+                "Debug high damage warrior for Quest 3."
+        ));
+
+        guild.addToMainParty(new Adventurer(
+                "Zaahen",
+                170,
+                34,
+                13,
+                20,
+                Faction.NEUTRAL,
+                guild.getPlayerFaction(),
+                "Debug balanced warrior for Quest 3."
+        ));
+
+        guild.addToMainParty(new Adventurer(
+                "Naganeka",
+                155,
+                32,
+                12,
+                20,
+                Faction.AATROX,
+                guild.getPlayerFaction(),
+                "Debug extra warrior for Quest 3."
+        ));
+
+        guild.addToMainParty(new Adventurer(
+                "Valeeva",
+                150,
+                31,
+                11,
+                20,
+                Faction.XOLAANI,
+                guild.getPlayerFaction(),
+                "Debug support warrior for Quest 3."
+        ));
+
+        // Give many potions for testing.
+        for (int i = 0; i < 10; i++) {
+            guild.addSmallPotions(3);
+            guild.addPartyPotions(3);
+            guild.addFullRestores(2);
+        }
+
+        Game game = new Game(guild, difficulty);
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/quest3.fxml"));
+        Parent root = loader.load();
+
+        Quest3Controller controller = loader.getController();
+        controller.setGameData(game);
+
+        primaryStage.setScene(new Scene(root, 900, 600));
+        primaryStage.setTitle("The Fall of Shurima — Debug Quest 3");
         primaryStage.setResizable(true);
         primaryStage.setFullScreen(false);
         primaryStage.show();

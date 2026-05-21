@@ -12,6 +12,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import seng201.team0.models.Game;
 import seng201.team0.models.Guild;
+import javafx.application.Platform;
 
 /**
  * Map hub main menu.
@@ -78,9 +79,9 @@ public class MainMenuController implements GameDataReceiver {
         goldLabel.setText(String.valueOf(guild.getGold()));
         partyCountLabel.setText(guild.getMainParty().size() + " / 5");
 
-        smallPotionInventoryLabel.setText("Silver x" + guild.getSmallPotionCount());
-        partyPotionInventoryLabel.setText("Gold x" + guild.getPartyPotionCount());
-        fullRestoreInventoryLabel.setText("Purple x" + guild.getFullRestoreCount());
+        smallPotionInventoryLabel.setText("x" + guild.getSmallPotionCount());
+        partyPotionInventoryLabel.setText("x" + guild.getPartyPotionCount());
+        fullRestoreInventoryLabel.setText("x" + guild.getFullRestoreCount());
 
         if (game.getCurrentQuest() != null) {
             currentQuestLabel.setText("Current Quest: " + game.getCurrentQuest().getName());
@@ -149,6 +150,9 @@ public class MainMenuController implements GameDataReceiver {
     public void onFinalResult() {
         openEndScreen();
     }
+
+    @FXML
+    public void onQuitGame() { Platform.exit(); }
 
     private void openQuest(int questNumber) {
         int questIndex = questNumber - 1;
