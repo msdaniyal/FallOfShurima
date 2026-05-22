@@ -66,7 +66,7 @@ public class Quest6Controller implements GameDataReceiver {
 
         eventTitleLabel.setText("Twilight of Sleep");
         speakerLabel.setText("Narrator");
-        setBackground("/images/Quest6/quest6_twilight.png");
+        setBackground("/images/quest6_twilight.png");
         typeText(quest6.getFinalIntroText());
     }
 

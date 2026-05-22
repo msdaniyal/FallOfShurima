@@ -86,7 +86,7 @@ public class Quest3 extends Quest implements StoryDrivenQuest {
                         "The First Echo",
                         "Narrator",
                         "Deep below Icathia, the walls begin repeating your party's voices before anyone speaks.",
-                        "/images/Quest3/quest3_echo.png",
+                        "/images/quest3_echo.png",
                         Arrays.asList(
                                 new QuestStoryChoice(
                                         "Answer Back",
@@ -102,7 +102,7 @@ public class Quest3 extends Quest implements StoryDrivenQuest {
                         "The Split Passage",
                         "Scout",
                         "Two routes descend: one narrow and safe-looking, one wide and covered in claw marks.",
-                        "/images/Quest3/quest3_split_passage.png",
+                        "/images/quest3_split_passage.png",
                         Arrays.asList(
                                 new QuestStoryChoice(
                                         "Narrow Route",
@@ -118,7 +118,7 @@ public class Quest3 extends Quest implements StoryDrivenQuest {
                         "The Living Door",
                         "Narrator",
                         "A membrane of purple flesh blocks the final chamber. It opens and closes like an eye.",
-                        "/images/Quest3/quest3_living_door.png",
+                        "/images/quest3_living_door.png",
                         Arrays.asList(
                                 new QuestStoryChoice(
                                         "Cut It Open",

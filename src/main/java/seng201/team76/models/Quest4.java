@@ -54,14 +54,14 @@ public class Quest4 extends Quest implements StoryDrivenQuest {
                         "The Crimson Offer",
                         "Vladimir",
                         "{quest4Offer} {quest4BattleReason}",
-                        "/images/Quest4/quest4_blood_magic_offer.png",
+                        "/images/quest4_blood_magic_offer.png",
                         java.util.Collections.emptyList()
                 ),
                 new QuestStoryEvent(
                         "The Blood Gate",
                         "Narrator",
                         "The mansion gate opens without a hand touching it. Blood-red lanterns ignite one by one along the path.",
-                        "/images/Quest4/quest4_gate.png",
+                        "/images/quest4_gate.png",
                         Arrays.asList(
                                 new QuestStoryChoice(
                                         "Enter Boldly",
@@ -77,7 +77,7 @@ public class Quest4 extends Quest implements StoryDrivenQuest {
                         "The Portrait Hall",
                         "Narrator",
                         "Painted nobles turn their eyes toward the party. Some portraits whisper offers of wealth.",
-                        "/images/Quest4/quest4_portraits.png",
+                        "/images/quest4_portraits.png",
                         Arrays.asList(
                                 new QuestStoryChoice(
                                         "Burn Them",
@@ -93,7 +93,7 @@ public class Quest4 extends Quest implements StoryDrivenQuest {
                         "The Red Feast",
                         "Servant",
                         "A dining table waits, perfectly set. The food smells warm, but the cups are filled with something too dark to be wine.",
-                        "/images/Quest4/quest4_feast.png",
+                        "/images/quest4_feast.png",
                         Arrays.asList(
                                 new QuestStoryChoice(
                                         "Eat Carefully",
@@ -109,7 +109,7 @@ public class Quest4 extends Quest implements StoryDrivenQuest {
                         "The Crimson Treasury",
                         "Narrator",
                         "Gold and relics sit behind glass cases. Some are trophies. Some are warnings.",
-                        "/images/Quest4/quest4_treasury.png",
+                        "/images/quest4_treasury.png",
                         Arrays.asList(
                                 new QuestStoryChoice(
                                         "Loot Everything",
@@ -125,7 +125,7 @@ public class Quest4 extends Quest implements StoryDrivenQuest {
                         "The Hall of Cups",
                         "Vladimir",
                         "Vladimir's voice drifts from the hall ahead: 'Every empire spills. The wise learn to drink.'",
-                        "/images/Quest4/quest4_hall_of_cups.png",
+                        "/images/quest4_hall_of_cups.png",
                         Arrays.asList(
                                 new QuestStoryChoice(
                                         "Prepare Wards",

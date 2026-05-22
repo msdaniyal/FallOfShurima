@@ -244,7 +244,7 @@ public class CharacterSelectController implements GameDataReceiver {
         characterDescriptionLabel.setText(displayAdventurer.getDescription());
 
         try {
-            String imagePath = "/images/" + displayAdventurer.getName() + ".png";
+            String imagePath = "/images/" + displayAdventurer.getName().toLowerCase() + ".png";
             Image image = new Image(getClass().getResource(imagePath).toExternalForm());
             characterImage.setImage(image);
             normalizeCharacterImage(displayAdventurer.getName());

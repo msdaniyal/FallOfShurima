@@ -3,7 +3,6 @@ package seng201.team76.controller;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -18,7 +17,6 @@ import javafx.stage.Stage;
 import seng201.team76.models.Difficulty;
 import seng201.team76.models.Faction;
 import seng201.team76.models.Guild;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 

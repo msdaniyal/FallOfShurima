@@ -4,7 +4,6 @@ import javafx.animation.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
@@ -113,7 +112,7 @@ public class StartController {
         fadeToBlack.setOnFinished(e -> {
             try {
                 FXMLLoader loader = new FXMLLoader(
-                        getClass().getResource("/fxml/Lore1.fxml"));
+                        getClass().getResource("/fxml/lore1.fxml"));
                 Parent root = loader.load();
 
                 Stage stage = (Stage) startButton.getScene().getWindow();

@@ -100,50 +100,50 @@ public class ImperialCommandController implements GameDataReceiver {
         lines.add(new DialogueLine(
                 "Azir",
                 "Father, word has reached the capital. Icathia has risen against Shurima.",
-                "/images/ImperialCommand/imperial_court.png"
+                "/images/imperial_court.png"
         ));
 
         lines.add(new DialogueLine(
                 "Azir",
                 "Their nobles refuse tribute, their armies gather at the eastern gates, and the rebels whisper two names: Zilean and Jax.",
-                "/images/ImperialCommand/jax_and_zilean.png"
+                "/images/jax_and_zilean.png"
         ));
 
         lines.add(new DialogueLine(
                 "The Emperor",
                 "Then this rebellion must be broken before it teaches the other provinces to dream of freedom.",
-                "/images/ImperialCommand/azir_bowing.png"
+                "/images/azir_bowing.png"
         ));
 
         lines.add(new DialogueLine(
                 "The Emperor",
                 "Azir, call my champion to court. Shurima will answer Icathia with steel, sun, and obedience.",
-                "/images/ImperialCommand/azir_bowing.png"
+                "/images/azir_bowing.png"
         ));
 
         if (choseAatrox) {
             lines.add(new DialogueLine(
                     "The Emperor",
                     "Aatrox, blade of the empire, you were made for war. March to Icathia and break their rebellion before it becomes a plague.",
-                    "/images/ImperialCommand/imperial_command_aatrox.png"
+                    "/images/imperial_command_aatrox.png"
             ));
 
             lines.add(new DialogueLine(
                     "Aatrox",
                     "By your command. Icathia will kneel, or it will burn beneath the sun.",
-                    "/images/ImperialCommand/imperial_command_aatrox.png"
+                    "/images/imperial_command_aatrox.png"
             ));
         } else {
             lines.add(new DialogueLine(
                     "The Emperor",
                     "Xolaani, blood-weaver of Shurima, bind their resistance before it infects the rest of the empire.",
-                    "/images/ImperialCommand/imperial_command_xolaani.png"
+                    "/images/imperial_command_xolaani.png"
             ));
 
             lines.add(new DialogueLine(
                     "Xolaani",
                     "By your command. Their defiance will be silenced, and their will shall serve Shurima.",
-                    "/images/ImperialCommand/imperial_command_xolaani.png"
+                    "/images/imperial_command_xolaani.png"
             ));
         }
 

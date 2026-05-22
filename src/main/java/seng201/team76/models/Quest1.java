@@ -209,7 +209,7 @@ public class Quest1 extends Quest {
                 "The road to Icathia cuts through burning desert and abandoned villages. " +
                         "Your guild marches with the imperial column, but the soldiers are tired " +
                         "and the heat is breaking morale.",
-                "/images/Quest1/quest1_march.png",
+                "/images/quest1_march.png",
                 Arrays.asList(
                         new StoryChoice(
                                 "Force the March",
@@ -237,7 +237,7 @@ public class Quest1 extends Quest {
                 "Narrator",
                 "You pass a ruined Icathian village. The people claim the rebels took their food " +
                         "and weapons. Some imperial soldiers want to punish them for supporting the uprising.",
-                "/images/Quest1/quest1_village.png",
+                "/images/quest1_village.png",
                 Arrays.asList(
                         new StoryChoice(
                                 "Seize Supplies",
@@ -265,7 +265,7 @@ public class Quest1 extends Quest {
                 "Icathian Envoy",
                 "At sunset, an Icathian envoy enters your camp under a white banner. " +
                         "He says Zilean seeks time to negotiate, while Jax prepares the warriors for battle.",
-                "/images/Quest1/quest1_envoy.png",
+                "/images/quest1_envoy.png",
                 Arrays.asList(
                         new StoryChoice(
                                 "Reject Envoy",
@@ -293,7 +293,7 @@ public class Quest1 extends Quest {
                 "Scout",
                 "During the night, the ground beneath the camp trembles. Purple light flashes far beneath " +
                         "Icathia's walls. Some soldiers swear they heard something breathing under the earth.",
-                "/images/Quest1/quest1_tremor.png",
+                "/images/quest1_tremor.png",
                 Arrays.asList(
                         new StoryChoice(
                                 "Ignore the Omen",
@@ -321,7 +321,7 @@ public class Quest1 extends Quest {
                 "Narrator",
                 "At sunrise, Icathia's gates open. Jax stands among the warriors, ready for battle. " +
                         "Behind the walls, Zilean watches the sky as if he has already seen the ending.",
-                "/images/Quest1/quest1_gates.png",
+                "/images/quest1_gates.png",
                 Arrays.asList(
                         new StoryChoice(
                                 "Direct Challenge",

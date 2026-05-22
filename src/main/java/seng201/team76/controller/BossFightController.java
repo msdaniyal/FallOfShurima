@@ -263,14 +263,10 @@ public class BossFightController implements GameDataReceiver {
         if ("zilean".equals(bossName)) {
             setImageWithFallbacks(backgroundImage,
                     "/images/zilean_battlefield.png",
-                    "/images/ruins_of_a_mystical_arena.png",
-                    "/images/battlefield_zilean.png",
                     "/images/quest1_gates.png");
         } else if ("jax".equals(bossName)) {
             setImageWithFallbacks(backgroundImage,
                     "/images/jax_battlefield.png",
-                    "/images/ruins_of_a_forgotten_battle_arena.png",
-                    "/images/battlefield_jax.png",
                     "/images/quest1_gates.png");
         } else {
             setImageWithFallbacks(backgroundImage,
@@ -325,20 +321,15 @@ public class BossFightController implements GameDataReceiver {
 
         if ("zilean".equals(bossName)) {
             setImageWithFallbacks(bossImage,
-                    "/images/zilean_boss.png",
-                    "/images/majestic_wizard_with_arcane_energy.png",
-                    "/images/Zilean.png");
+                    "/images/zilean.png");
         } else if ("jax".equals(bossName)) {
             setImageWithFallbacks(bossImage,
-                    "/images/jax_boss.png",
-                    "/images/mystical_warrior_with_glowing_lamppost_staff.png",
-                    "/images/Jax.png");
+                    "/images/jax.png");
         } else {
             setImageWithFallbacks(bossImage,
                     "/images/boss_" + bossName + ".png",
                     "/images/" + bossName + "_boss.png",
-                    "/images/" + boss.getName() + ".png",
-                    "/images/boss.png");
+                    "/images/" + safeName(boss.getName()) + ".png");
         }
 
         roundLabel.setText("Round " + currentFight.getRoundNumber());
@@ -413,11 +404,9 @@ public class BossFightController implements GameDataReceiver {
         String name = safeName(currentAttacker.getName());
 
         setImageWithFallbacks(activeMemberImage,
-                "/images/" + currentAttacker.getName() + ".png",
                 "/images/" + name + ".png",
                 "/images/character_" + name + ".png",
                 "/images/" + currentAttacker.getFaction().name().toLowerCase() + ".png",
-                "/images/Aatrox.png",
                 "/images/aatrox.png");
 
         activeMemberImage.setFitWidth(245);
@@ -546,7 +535,7 @@ public class BossFightController implements GameDataReceiver {
 
     private void openMemoryGame() {
         try {
-            FXMLLoader loader = loadFirstAvailable("/fxml/MemoryGame.fxml", "/fxml/memorygame.fxml");
+            FXMLLoader loader = loadFirstAvailable("/fxml/memorygame.fxml", "/fxml/memorygame.fxml");
             Parent root = loader.load();
 
             MemoryGameController controller = loader.getController();

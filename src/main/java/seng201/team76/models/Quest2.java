@@ -324,14 +324,14 @@ public class Quest2 extends Quest implements StoryDrivenQuest {
                         "Azir's Command",
                         "Azir",
                         "A purple rift tears open beyond Icathia's broken roads. {mc} sends word to Azir. The emperor's command returns at once: investigate the rift in the empire's name and let no panic reach Shurima.",
-                        "/images/Quest2/quest2_azir_command.png",
+                        "/images/quest2_azir_command.png",
                         java.util.Collections.emptyList()
                 ),
                 new QuestStoryEvent(
                         "The Sealed Tunnel",
                         "Scout",
                         "A sealed tunnel offers a faster route deeper into the void, but the runes around it pulse with unstable energy.",
-                        "/images/Quest2/quest2_tunnel.png",
+                        "/images/quest2_tunnel.png",
                         Arrays.asList(
                                 new QuestStoryChoice(
                                         "Break the Seal",
@@ -347,7 +347,7 @@ public class Quest2 extends Quest implements StoryDrivenQuest {
                         "A Lost Companion",
                         "Narrator",
                         "Your scout has not returned. Sounds echo from a side passage — they are trapped, but alive.",
-                        "/images/Quest2/quest2_lost_companion.png",
+                        "/images/quest2_lost_companion.png",
                         Arrays.asList(
                                 new QuestStoryChoice(
                                         "Go Back",
@@ -363,7 +363,7 @@ public class Quest2 extends Quest implements StoryDrivenQuest {
                         "The Corrupted Member",
                         "Scout",
                         "One adventurer is losing their mind to the void. Their breath shakes, and they keep answering voices nobody else hears.",
-                        "/images/Quest2/quest2_corruption.png",
+                        "/images/quest2_corruption.png",
                         Arrays.asList(
                                 new QuestStoryChoice(
                                         "Restrain Them",
@@ -379,7 +379,7 @@ public class Quest2 extends Quest implements StoryDrivenQuest {
                         "The Supply Cache",
                         "Narrator",
                         "A supply cache sits untouched in the dust — food, torches, equipment, and coin.",
-                        "/images/Quest2/quest2_cache.png",
+                        "/images/quest2_cache.png",
                         Arrays.asList(
                                 new QuestStoryChoice(
                                         "Share It",
@@ -395,7 +395,7 @@ public class Quest2 extends Quest implements StoryDrivenQuest {
                         "The Scout's Warning",
                         "Scout",
                         "More voidlings than expected wait ahead, and the tunnel narrows before the nest.",
-                        "/images/Quest2/quest2_warning.png",
+                        "/images/quest2_warning.png",
                         Arrays.asList(
                                 new QuestStoryChoice(
                                         "Push Through",

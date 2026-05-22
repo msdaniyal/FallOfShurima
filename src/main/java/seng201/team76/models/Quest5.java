@@ -162,14 +162,14 @@ public class Quest5 extends Quest implements StoryDrivenQuest {
                         "The Darkin Rift",
                         "{enemyMc}",
                         "{bloodMagicConflict} The argument becomes a faction fracture, and the warriors who never joined your guild gather behind {enemyMc}.",
-                        "/images/Quest5/quest5_darkin_rift.png",
+                        "/images/quest5_darkin_rift.png",
                         java.util.Collections.emptyList()
                 ),
                 new QuestStoryEvent(
                         "The War Council",
                         "Commander",
                         "Your followers gather around the map. The rival faction is moving before sunrise.",
-                        "/images/Quest5/quest5_war_council.png",
+                        "/images/quest5_war_council.png",
                         Arrays.asList(
                                 new QuestStoryChoice(
                                         "Direct Assault",
@@ -185,7 +185,7 @@ public class Quest5 extends Quest implements StoryDrivenQuest {
                         "The Rival Envoy",
                         "Rival Envoy",
                         "A rival envoy offers terms: abandon your chosen warrior and the war ends tonight.",
-                        "/images/Quest5/quest5_envoy.png",
+                        "/images/quest5_envoy.png",
                         Arrays.asList(
                                 new QuestStoryChoice(
                                         "Reject Terms",
@@ -201,7 +201,7 @@ public class Quest5 extends Quest implements StoryDrivenQuest {
                         "Night Saboteurs",
                         "Scout",
                         "Saboteurs are spotted near the supply carts. You can chase them or protect the camp.",
-                        "/images/Quest5/quest5_saboteurs.png",
+                        "/images/quest5_saboteurs.png",
                         Arrays.asList(
                                 new QuestStoryChoice(
                                         "Chase Them",
@@ -217,7 +217,7 @@ public class Quest5 extends Quest implements StoryDrivenQuest {
                         "The Duel Challenge",
                         "Rival Captain",
                         "The rival captain challenges your champion to single combat before the armies clash.",
-                        "/images/Quest5/quest5_duel.png",
+                        "/images/quest5_duel.png",
                         Arrays.asList(
                                 new QuestStoryChoice(
                                         "Accept Duel",
@@ -233,7 +233,7 @@ public class Quest5 extends Quest implements StoryDrivenQuest {
                         "The Final Rally",
                         "Narrator",
                         "The field goes quiet. Every faction mark, every old resentment, every promise now stands in one line.",
-                        "/images/Quest5/quest5_final_rally.png",
+                        "/images/quest5_final_rally.png",
                         Arrays.asList(
                                 new QuestStoryChoice(
                                         "Mercy Speech",

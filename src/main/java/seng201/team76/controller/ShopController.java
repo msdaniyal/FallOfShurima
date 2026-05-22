@@ -15,7 +15,6 @@ import seng201.team76.models.Game;
 import seng201.team76.models.Guild;
 import seng201.team76.models.Item;
 import seng201.team76.models.ItemType;
-import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 

@@ -321,10 +321,6 @@ public class Quest1Controller implements GameDataReceiver {
             return;
         }
 
-        if (tryLoadBattlefield("/fxml/quest1battle.fxml")) {
-            return;
-        }
-
         speakerLabel.setText("System");
         nextArrowLabel.setVisible(false);
         continueButton.setVisible(false);
