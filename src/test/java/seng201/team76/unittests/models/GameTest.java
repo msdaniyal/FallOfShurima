@@ -75,7 +75,8 @@ public class GameTest {
         assertTrue(game.isGameOver());
         assertTrue(game.isPlayerWon());
         assertTrue(game.isCompleted());
-        assertEquals("Victory: Twilight Survived", game.getEndingTitle());
+        assertEquals("The End", game.getEndingTitle());
+        assertEquals("All Darkin are sealed until they return.", game.getEndingDescription());
     }
 
     @Test
@@ -91,6 +92,7 @@ public class GameTest {
         assertTrue(game.isGameOver());
         assertFalse(game.isPlayerWon());
         assertFalse(game.isCompleted());
-        assertEquals("Defeat: The Guild Falls", game.getEndingTitle());
+        assertEquals("The End", game.getEndingTitle());
+        assertEquals("All Darkin are sealed until they return.", game.getEndingDescription());
     }
 }
