@@ -14,12 +14,13 @@
 <AnchorPane fx:id="rootPane"
             prefWidth="900.0"
             prefHeight="600.0"
+            style="-fx-background-color: #070403;"
             xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="seng201.team0.controller.BossFightController">
+            fx:controller="seng201.team76.controller.BossFightController">
 
     <children>
-        <Pane fx:id="contentPane" prefWidth="900.0" prefHeight="600.0">
+        <Pane fx:id="contentPane" prefWidth="900.0" prefHeight="600.0" style="-fx-background-color: #070403;">
             <children>
                 <Rectangle layoutX="0" layoutY="0" width="900" height="600" fill="#070403" />
 

@@ -1,58 +1,114 @@
-# SENG201 Template Project Overview
-Welcome to the template project for SENG201 which you will transform into your own.
-This README file includes some useful information to help you get started.
-However, we expect that this README becomes your own.
+## The Fall of Shurima
+SENG201 Team 76
 
-## Notes
-Remember you are required to commit your code to the **main** branch of your repository before the deadline.
-
-This project contains default naming of `team0` throughout.
-If you are interested you can update this to reflect your team number, however it is **not required**.
-This can be done by renaming any instance of `team0` with `team<x>` (where x is your number).
-IntelliJ can help with this using `ctrl+shift+f` to find all instances of a string, and `ctrl+shift+r` to replace them, though make sure to change the package names as well.
-
-## Authors
-- SENG201 Teaching team
-
-## Prerequisites
-- JDK >= 21 [click here to get the latest stable OpenJDK release (as of writing this README)](https://jdk.java.net/21/)
-- *(optional)* Gradle [Download](https://gradle.org/releases/) and [Install](https://gradle.org/install/)
+## Team Members:
+- Mohammed Shoeb Daniyal - moh28
+- Xinyi Zhang - xzh250
 
 
-## What's Included
-This project comes with some basic examples of the following (including dependencies in the build.gradle file):
-- JavaFX
-- Junit 5
+## How to Run the Game:
 
-We have also included a basic setup of the Gradle project and Tasks required for the course including:
-- Required dependencies for the functionality above
-- Test Coverage with JaCoCo
-- Build plugins:
-    - JavaFX Gradle plugin for working with (and packaging) JavaFX applications easily
+1. Open the project in IntelliJ IDEA.
+2. Wait for Gradle to load the project.
+3. Run the main class:
 
-You are expected to understand the content provided and build your application on top of it. If there is anything you
-would like more information about please reach out to the tutors.
+   seng201.team76.App
 
-## Importing Project (Using IntelliJ)
-IntelliJ has built-in support for Gradle. To import your project:
+The game should open from the start screen.
 
-- Launch IntelliJ and choose `Open` from the start-up window.
-- Select the project and click open
-- At this point in the bottom right notifications you may be prompted to 'load gradle scripts', If so, click load
+## How to Run from Terminal:
 
-**Note:** *If you run into dependency issues when running the app or the Gradle pop up doesn't appear then open the Gradle sidebar and click the Refresh icon.*
+1. Linux / macOS: ./gradlew run
 
-## Run Project 
-1. Open a command line interface inside the project directory and run `./gradlew run` to run the app.
-2. The app should then open a new window, this may not be displayed over IntelliJ but can be easily selected from the taskbar
+2. Windows: .\gradlew.bat run
 
-## Build and Run Jar
-1. Open a command line interface inside the project directory and run `./gradlew jar` to create a packaged Jar. The Jar file is located at build/libs/seng201_team0-1.0-SNAPSHOT.jar
-2. Navigate to the build/libs/ directory (you can do this with `cd build/libs`)
-3. Run the command `java -jar seng201_team0-1.0-SNAPSHOT.jar` to open the application.
+## How to Run Tests:
 
-## Run Tests
-1. Open a command line interface inside the project directory and run `./gradlew test` to run the tests.
-2. Test results should be printed to the command line
+1. Linux / macOS: ./gradlew test
 
-**Note:** *This Jar is **NOT** cross-platform, so you **must** build the jar you submit on Linux.* 
+2. Windows: .\gradlew.bat test
+
+## Game Summary:
+
+The Fall of Shurima is a JavaFX strategy/RPG game. 
+The player chooses Aatrox or Xolaani as the main character, builds a guild, 
+makes quest decisions, manages loyalty and madness, buys potions, and fights bosses.
+
+The game includes:
+
+- Guild setup
+- Character selection
+- Quest map
+- Story events
+- Boss fights
+- Memory-game attack system
+- Potion healing
+- Permanent death and abandonment
+- Final victory or defeat screen
+
+
+## Basic Controls:
+
+The game is controlled with the mouse.
+
+- Click buttons to move between screens.
+- Click quest buttons to start quests.
+- Click story choices during events.
+- Click memory-game images in the correct order during battle.
+- Use Attack, Heal, Change Member, and Special Move during boss fights.
+
+
+## Testing:
+
+## Unit tests focus on the model classes because the models contain the main game rules.
+
+## Tests cover:
+
+- Adventurer loyalty and madness
+- Guild party rules
+- Gold and recruitment
+- Potion healing
+- Memory game logic
+- Boss fight mechanics
+- Quest progression
+- Final battle behaviour
+
+## JavaFX screens and controllers were tested manually by playing through the game.
+
+
+## Image and Resource Notes:
+
+All image files must be placed in: src/main/resources/images/
+
+FXML files must be placed in: src/main/resources/fxml/
+
+CSS files must be placed in: src/main/resources/css/
+
+
+## Known Issues:
+
+- The game depends on correct image names and resource paths.
+- Some artwork may be improved later.
+- GUI behaviour is manually tested rather than tested with automated JavaFX tests.
+
+
+## Riot Games Disclaimer:
+
+This is a non-commercial student project created for SENG201 coursework.
+The project is inspired by Riot Games' League of Legends / Runeterra universe.
+Riot Games does not endorse, sponsor, or approve this project.
+Riot Games, League of Legends, Runeterra, and related characters are trademarks or intellectual property of Riot Games.
+This project is for educational use only and is not intended for sale or public commercial release.
+
+
+## Submission Checklist:
+
+Before submitting, make sure:
+- The project runs from IntelliJ.
+- The tests pass.
+- The JAR builds successfully.
+- The JAR runs on the Linux Mint lab machines.
+- All required images are included.
+- The report is exported as PDF.
+- UML diagrams are included.
+- The final code is pushed to Eng-Git.

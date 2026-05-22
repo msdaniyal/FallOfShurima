@@ -14,7 +14,7 @@
             styleClass="imperial-root"
             xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="seng201.team0.controller.ImperialCommandController">
+            fx:controller="seng201.team76.controller.ImperialCommandController">
 
     <children>
         <Pane fx:id="contentPane"

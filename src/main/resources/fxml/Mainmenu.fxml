@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane fx:id="rootPane" prefHeight="600.0" prefWidth="900.0" style="-fx-background-color: black;" stylesheets="@../css/maphub.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng201.team0.controller.MainMenuController">
+<AnchorPane fx:id="rootPane" prefHeight="600.0" prefWidth="900.0" style="-fx-background-color: black;" stylesheets="@../css/maphub.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng201.team76.controller.MainMenuController">
 
     <Pane fx:id="contentPane" prefHeight="600" prefWidth="900">
 
@@ -38,65 +38,19 @@
 
             <Label fx:id="currentQuestLabel" layoutX="25" layoutY="36" prefHeight="16" prefWidth="330" styleClass="hud-small" text="Current Quest: Icathia" textFill="WHITE" />
 
-            <HBox alignment="CENTER_RIGHT" layoutX="455" layoutY="10" prefWidth="350" spacing="28">
-
-                <HBox alignment="CENTER" spacing="6">
-                    <ImageView fitHeight="26" fitWidth="26" preserveRatio="true">
-                        <image>
-                            <Image url="@../images/sword.png" />
-                        </image>
-                    </ImageView>
-                    <Label fx:id="partyCountLabel" styleClass="hud-stat" text="0 / 5" textFill="WHITE" />
-                </HBox>
-
-                <HBox alignment="CENTER" spacing="6">
-                    <ImageView fitHeight="26" fitWidth="26" preserveRatio="true">
-                        <image>
-                            <Image url="@../images/gold.png" />
-                        </image>
-                    </ImageView>
-                    <Label fx:id="goldLabel" styleClass="hud-stat" text="0" textFill="WHITE" />
-                </HBox>
-
+            <HBox alignment="CENTER_RIGHT" layoutX="455" layoutY="10" prefWidth="350" spacing="22">
+                <Label fx:id="partyCountLabel" styleClass="hud-stat" text="0 / 5" textFill="WHITE" />
+                <Label fx:id="goldLabel" styleClass="hud-stat" text="0" textFill="WHITE" />
             </HBox>
         </Pane>
 
         <!-- Potion strip -->
-        <!-- Potion strip -->
-        <HBox alignment="CENTER" layoutX="300" layoutY="525" prefHeight="42" prefWidth="300" spacing="18" styleClass="potion-strip">
-
-            <HBox alignment="CENTER" spacing="4">
-                <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
-                    <image>
-                        <Image url="@../images/silver_potion.png" />
-                    </image>
-                </ImageView>
-                <Label fx:id="smallPotionInventoryLabel" styleClass="potion-label" text="x0" textFill="WHITE" />
-            </HBox>
-
-            <HBox alignment="CENTER" spacing="4">
-                <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
-                    <image>
-                        <Image url="@../images/gold_potion.png" />
-                    </image>
-                </ImageView>
-                <Label fx:id="partyPotionInventoryLabel" styleClass="potion-label" text="x0" textFill="WHITE" />
-            </HBox>
-
-            <HBox alignment="CENTER" spacing="4">
-                <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
-                    <image>
-                        <Image url="@../images/purple_potion.png" />
-                    </image>
-                </ImageView>
-                <Label fx:id="fullRestoreInventoryLabel" styleClass="potion-label" text="x0" textFill="WHITE" />
-            </HBox>
-
+        <HBox alignment="CENTER" layoutX="300" layoutY="525" prefHeight="42" prefWidth="300" spacing="12" styleClass="potion-strip">
+            <Label fx:id="smallPotionInventoryLabel" styleClass="potion-label" text="Silver x0" textFill="WHITE" />
+            <Label fx:id="partyPotionInventoryLabel" styleClass="potion-label" text="Gold x0" textFill="WHITE" />
+            <Label fx:id="fullRestoreInventoryLabel" styleClass="potion-label" text="Purple x0" textFill="WHITE" />
         </HBox>
 
-        <Button layoutX="40" layoutY="525" onAction="#onQuitGame" prefHeight="42" prefWidth="135" styleClass="popup-back-button" text="Quit Game" />
-
-        <Button layoutX="725" layoutY="525" onAction="#onFinalResult" prefHeight="42" prefWidth="135" styleClass="popup-back-button" text="Final Result" />
 
         <!-- Message bar -->
         <Label fx:id="messageLabel" alignment="CENTER" layoutX="150" layoutY="480" prefHeight="32" prefWidth="600" styleClass="message-label" text="Click a map location." textFill="WHITE" />

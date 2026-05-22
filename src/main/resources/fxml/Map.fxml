@@ -12,7 +12,7 @@
             prefHeight="600.0"
             xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="seng201.team0.controller.MapController"
+            fx:controller="seng201.team76.controller.MapController"
             style="-fx-background-color: black;">
 
     <Pane fx:id="contentPane"
@@ -25,7 +25,7 @@
                    preserveRatio="false"
                    mouseTransparent="true">
             <image>
-                <Image url="@../images/map_bg.png" />
+                <Image url="@../images/map.png" />
             </image>
         </ImageView>
 

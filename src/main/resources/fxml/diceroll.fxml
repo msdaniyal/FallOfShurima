@@ -1,97 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.URL?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.shape.Rectangle?>
+<?import java.net.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
 
-<AnchorPane prefWidth="560.0"
-            prefHeight="400.0"
-            xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="seng201.team0.controller.DiceRollController">
+<AnchorPane prefHeight="400.0" prefWidth="560.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seng201.team76.controller.DiceRollController">
 
     <children>
-        <Rectangle layoutX="0" layoutY="0" width="560" height="400" fill="#090604" />
+        <Rectangle fill="#090604" height="400" layoutX="0" layoutY="0" width="560" />
 
-        <Label fx:id="titleLabel"
-               layoutX="80"
-               layoutY="22"
-               prefWidth="400"
-               alignment="CENTER"
-               text="BOSS ATTACK — ROLL DICE"
-               styleClass="title-label" />
+        <Label fx:id="titleLabel" alignment="CENTER" layoutX="80" layoutY="22" prefWidth="400" styleClass="title-label" text="BOSS ATTACK — ROLL DICE" />
 
-        <Label fx:id="playerNameLabel"
-               layoutX="60"
-               layoutY="82"
-               prefWidth="170"
-               alignment="CENTER"
-               text="YOU"
-               styleClass="side-label" />
+        <Label fx:id="playerNameLabel" alignment="CENTER" layoutX="60" layoutY="82" prefWidth="170" styleClass="side-label" text="YOU" />
 
-        <Label fx:id="bossNameLabel"
-               layoutX="330"
-               layoutY="82"
-               prefWidth="170"
-               alignment="CENTER"
-               text="BOSS"
-               styleClass="side-label" />
+        <Label fx:id="bossNameLabel" alignment="CENTER" layoutX="330" layoutY="82" prefWidth="170" styleClass="side-label" text="BOSS" />
 
-        <Label fx:id="playerDiceLabel"
-               layoutX="78"
-               layoutY="125"
-               prefWidth="135"
-               prefHeight="105"
-               alignment="CENTER"
-               text="-"
-               styleClass="dice-label player-dice" />
+        <Label fx:id="playerDiceLabel" alignment="CENTER" layoutX="78" layoutY="125" prefHeight="105" prefWidth="135" styleClass="dice-label player-dice" text="-" textFill="#e1da07">
+         <font>
+            <Font name="Comic Sans MS" size="43.0" />
+         </font></Label>
 
-        <Label layoutX="256"
-               layoutY="152"
-               prefWidth="48"
-               prefHeight="52"
-               alignment="CENTER"
-               text="VS"
-               styleClass="vs-label" />
+        <Label alignment="CENTER" layoutX="256" layoutY="152" prefHeight="52" prefWidth="48" styleClass="vs-label" text="VS" />
 
-        <Label fx:id="bossDiceLabel"
-               layoutX="348"
-               layoutY="125"
-               prefWidth="135"
-               prefHeight="105"
-               alignment="CENTER"
-               text="-"
-               styleClass="dice-label boss-dice" />
+        <Label fx:id="bossDiceLabel" alignment="CENTER" layoutX="348" layoutY="125" prefHeight="105" prefWidth="135" styleClass="dice-label boss-dice" text="-" textFill="#e1da47">
+         <font>
+            <Font name="System Bold" size="43.0" />
+         </font></Label>
 
-        <Label fx:id="resultLabel"
-               layoutX="65"
-               layoutY="255"
-               prefWidth="430"
-               prefHeight="46"
-               alignment="CENTER"
-               text="Click roll to defend."
-               wrapText="true"
-               styleClass="result-label" />
+        <Label fx:id="resultLabel" alignment="CENTER" layoutX="65" layoutY="255" prefHeight="46" prefWidth="430" styleClass="result-label" text="Click roll to defend." wrapText="true" />
 
-        <Button fx:id="rollButton"
-                layoutX="155"
-                layoutY="330"
-                prefWidth="115"
-                prefHeight="38"
-                text="ROLL"
-                onAction="#onRollDice"
-                styleClass="gold-button" />
+        <Button fx:id="rollButton" layoutX="155" layoutY="330" onAction="#onRollDice" prefHeight="38" prefWidth="115" styleClass="gold-button" text="ROLL" />
 
-        <Button fx:id="continueButton"
-                layoutX="290"
-                layoutY="330"
-                prefWidth="115"
-                prefHeight="38"
-                text="CONTINUE"
-                onAction="#onContinue"
-                styleClass="gold-button" />
+        <Button fx:id="continueButton" layoutX="290" layoutY="330" onAction="#onContinue" prefHeight="38" prefWidth="115" styleClass="gold-button" text="CONTINUE" />
     </children>
 
     <stylesheets>

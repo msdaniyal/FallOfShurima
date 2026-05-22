@@ -10,7 +10,7 @@
             prefHeight="430.0" prefWidth="520.0"
             xmlns="http://javafx.com/javafx/17.0.12"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="seng201.team0.controller.MemoryGameController">
+            fx:controller="seng201.team76.controller.MemoryGameController">
 
     <children>
         <Rectangle arcHeight="0" arcWidth="0" height="430.0" width="520.0">

@@ -13,7 +13,7 @@
             prefWidth="900.0"
             xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="seng201.team0.controller.StartController"
+            fx:controller="seng201.team76.controller.StartController"
             style="-fx-background-color: black;">
 
     <Pane fx:id="contentPane"

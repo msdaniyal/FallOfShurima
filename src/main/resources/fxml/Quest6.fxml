@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+
+<AnchorPane fx:id="rootPane"
+            prefWidth="900.0"
+            prefHeight="600.0"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="seng201.team76.controller.Quest6Controller"
+            styleClass="quest-root">
+    <children>
+        <Pane fx:id="contentPane" prefWidth="900" prefHeight="600" styleClass="quest-content">
+            <children>
+                <ImageView fx:id="backgroundImage"
+                           layoutX="0"
+                           layoutY="0"
+                           fitWidth="900"
+                           fitHeight="405"
+                           preserveRatio="false"
+                           smooth="true" />
+
+                <Label fx:id="eventTitleLabel"
+                       layoutX="32"
+                       layoutY="25"
+                       prefWidth="835"
+                       prefHeight="42"
+                       text="Twilight of Sleep"
+                       styleClass="event-title" />
+
+                <Pane layoutX="25" layoutY="392" prefWidth="850" prefHeight="185" styleClass="dialogue-panel">
+                    <children>
+                        <Label fx:id="speakerLabel"
+                               layoutX="22"
+                               layoutY="14"
+                               prefWidth="220"
+                               prefHeight="24"
+                               text="Narrator"
+                               styleClass="speaker-label" />
+
+                        <Label fx:id="dialogueLabel"
+                               layoutX="22"
+                               layoutY="44"
+                               prefWidth="620"
+                               prefHeight="100"
+                               wrapText="true"
+                               text="Dialogue"
+                               styleClass="dialogue-label" />
+
+                        <Button fx:id="continueButton"
+                                layoutX="685"
+                                layoutY="110"
+                                prefWidth="140"
+                                prefHeight="42"
+                                text="Face Zoe"
+                                onAction="#onContinue"
+                                styleClass="continue-button" />
+
+                        <Label fx:id="nextArrowLabel"
+                               layoutX="835"
+                               layoutY="122"
+                               text="▼"
+                               styleClass="next-arrow" />
+                    </children>
+                </Pane>
+            </children>
+        </Pane>
+    </children>
+    <stylesheets>
+        <URL value="@../css/quest1.css" />
+    </stylesheets>
+</AnchorPane>

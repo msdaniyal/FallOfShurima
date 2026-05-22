@@ -1,17 +1,24 @@
 .ending-title {
     -fx-text-fill: #ffd86a;
     -fx-font-family: Georgia;
-    -fx-font-size: 42px;
+    -fx-font-size: 48px;
     -fx-font-weight: bold;
-    -fx-effect: dropshadow(gaussian, black, 8, 0.85, 0, 0);
+    -fx-effect: dropshadow(gaussian, black, 10, 0.9, 0, 0);
 }
 
-.ending-description,
+.ending-description {
+    -fx-text-fill: #f8e7bc;
+    -fx-font-family: Georgia;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, black, 7, 0.8, 0, 0);
+}
+
 .ending-stats,
 .ending-party-label {
     -fx-text-fill: #f8e7bc;
     -fx-font-family: Georgia;
-    -fx-font-size: 16px;
+    -fx-font-size: 15px;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, black, 6, 0.75, 0, 0);
 }
@@ -20,8 +27,26 @@
     -fx-text-fill: #ffffff;
 }
 
+.ending-section-label {
+    -fx-text-fill: #ffd86a;
+    -fx-font-family: Georgia;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, black, 6, 0.85, 0, 0);
+}
+
+.ending-scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+
+.ending-scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
 .ending-party-box {
-    -fx-background-color: rgba(20, 12, 8, 0.86);
+    -fx-background-color: rgba(20, 12, 8, 0.88);
     -fx-border-color: #d6b35a;
     -fx-border-width: 2;
     -fx-border-radius: 14;
@@ -40,4 +65,9 @@
     -fx-border-radius: 10;
     -fx-background-radius: 10;
     -fx-cursor: hand;
+}
+
+.ending-button:hover {
+    -fx-background-color: linear-gradient(#ffe995, #d6a72c);
+    -fx-effect: dropshadow(gaussian, gold, 12, 0.5, 0, 0);
 }
