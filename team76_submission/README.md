@@ -18,7 +18,7 @@ The game should open from the start screen.
 
 ## How to run jar:
 
-use command: java -jar moh28_xhz50_fallofshurima.jar
+use command: java -jar moh28_xzhWS250_fallofshurima.jar
 
 ## How to Run from Terminal:
 
