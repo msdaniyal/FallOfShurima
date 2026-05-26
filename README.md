@@ -100,15 +100,3 @@ Riot Games does not endorse, sponsor, or approve this project.
 Riot Games, League of Legends, Runeterra, and related characters are trademarks or intellectual property of Riot Games.
 This project is for educational use only and is not intended for sale or public commercial release.
 
-
-## Submission Checklist:
-
-Before submitting, make sure:
-- The project runs from IntelliJ.
-- The tests pass.
-- The JAR builds successfully.
-- The JAR runs on the Linux Mint lab machines.
-- All required images are included.
-- The report is exported as PDF.
-- UML diagrams are included.
-- The final code is pushed to Eng-Git.
